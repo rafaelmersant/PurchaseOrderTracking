@@ -1,0 +1,91 @@
+﻿@{
+    ViewBag.Title = "Pagina de Inicio";
+}
+
+
+<div class="text-center">
+
+    <img src="~/Content/images/RCLogo.PNG" alt="logo" id="site_logo_id" style="width: 320px" class="mb-3" />
+
+    <span class="d-block" style="font-size: 2.5em; font-weight:bolder">Sistema de Seguimiento a Ordenes de Compra</span>
+
+</div>
+
+@*<script type="text/javascript">
+
+    $(document).ready(async function () {
+
+        const employeeId = @Session["employeeID"]
+
+        await getEmployeeDetail(employeeId)
+    })
+
+     const CorrespondingDays = async (employeeId) => {
+
+        $.ajax({
+            "url": `/Vacation/GetCorrespondingDays/?employeeId=${employeeId}`,
+            "type": "GET",
+            "success": async function (response) {
+                if (response.result === "200") {
+                    console.log('CorrespondingDays', response)
+
+                    const employeeDay = JSON.parse(response.message);
+                    $("#dueDate").val(new Date(employeeDay.DueDate).toLocaleDateString("es-DO"))
+
+                    $("#DiasCorrespondientes").html(`${employeeDay.TotalDays} días`)
+
+                    if (employeeDay.TakenDays === null)
+                        $("#DiasSolicitados").html(`0 días`)
+                    else
+                        $("#DiasSolicitados").html(`${employeeDay.TakenDays} días`)
+
+
+                    const daysAvailable = parseInt(employeeDay.TotalDays) - parseInt(employeeDay.TakenDays)
+                    if (employeeDay.TakenDays === null)
+                        $("#DiasDisponibles").html(`0 días`)
+                    else
+                        $("#DiasDisponibles").html(`${daysAvailable} días`)
+
+                } else {
+                    console(response.message)
+                }
+            }
+        })
+    }
+
+    async function getEmployeeDetail(employeeId) {
+        console.log('QUERYING EMPLOYEE', employeeId)
+        $("waitingIndicator").show();
+
+        $.ajax({
+            "url": `/Vacation/GetEmployee?employeeId=${employeeId}`,
+            "type": "POST",
+            "success": async function (response) {
+                console.log('RESULT:', response)
+                if (response.result === "200") {
+                    const employee = JSON.parse(response.message);
+                    $("#employeeName").html(employee.EmployeeName)
+
+                    await CorrespondingDays(employeeId);
+
+                    $("#headerVacation").show()
+                    $("#detailVacation").show()
+                }
+                else if (response.result === "404") {
+                    $("#headerVacation").hide()
+                    $("#detailVacation").hide()
+                }
+                else {
+                    console.log(response.message);
+                    if (response.message.includes('(403)')) {
+                        alert(response.message);
+                        //await getEmployeeDetail(@Session["employeeID"])
+                    }
+                }
+
+                $("waitingIndicator").hide();
+            }
+        });
+    }
+
+</script>*@

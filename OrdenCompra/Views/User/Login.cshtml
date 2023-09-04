@@ -1,0 +1,63 @@
+﻿
+@{
+    ViewBag.Title = "Login";
+}
+
+<div class="container shadow p-3 mb-5 bg-white rounded" style="width: 450px">
+    <h4 class="bg-dark text-light pl-2 pr-2 pt-2 pb-2 border rounded text-center">Entrar al Sistema</h4>
+    <div class="col-12 pb-3 pt-3 bg-light text-center">
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+            <div class="mb-3">
+                @*<label for="username">Usuario</label>*@
+                <div class="input-group w-75 mx-auto">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="inputGroupPrepend2">@@</span>
+                    </div>
+                    <input type="text" class="form-control" id="username" name="username"
+                           placeholder="Código de empleado" aria-describedby="inputGroupPrepend2" value="@ViewBag.EmployeeId" required autocomplete="off">
+                </div>
+            </div>
+
+            <div class="mb-3">
+                @*<label for="password">Contraseña</label>*@
+                <div class="input-group w-75 mx-auto">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="inputGroupPrepend2"><span class="fa fa-file-text"></span> </span>
+                    </div>
+                    <input type="password" class="form-control" id="password" name="password" placeholder="Contraseña" aria-describedby="inputGroupPrepend2"value="12345678" required>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-danger w-75">
+                Entrar
+            </button>
+
+            <span class="d-block bg-light text-danger pl-2 pr-2 pb-1 pt-1 mt-3 mb-0 text-center">@ViewBag.Message</span>
+
+            <a href="/user/RecoverPassword" class="d-block bg-light text-info pl-2 pr-2 pb-1 pt-1 mt-3 mb-0 text-center">Recuperar Contraseña</a>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        $(".numericOnly").keypress(function (e) {
+            if (String.fromCharCode(e.keyCode).match(/[^0-9]/g))  return false;
+        });
+
+        $("#username").keypress(function () {
+            if (this.value.length >= 20)
+                return false;
+        });
+    });
+
+
+</script>
