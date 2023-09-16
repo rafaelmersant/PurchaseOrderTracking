@@ -5,28 +5,31 @@
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
       <Diagram DiagramId="2afc38ab5f584694af32c51948987463" Name="Diagram1" >
-        <EntityTypeShape EntityType="OrdenCompraRCModel.Article" Width="1.5" PointX="7.75" PointY="0.75" />
         <EntityTypeShape EntityType="OrdenCompraRCModel.InventoryHistory" Width="1.5" PointX="7.75" PointY="5.75" />
         <EntityTypeShape EntityType="OrdenCompraRCModel.LoginHistory" Width="1.5" PointX="5.75" PointY="8.75" />
         <EntityTypeShape EntityType="OrdenCompraRCModel.NotificationCenter" Width="1.5" PointX="7.75" PointY="8.75" />
         <EntityTypeShape EntityType="OrdenCompraRCModel.NotificationGroup" Width="1.5" PointX="9.75" PointY="0.75" />
-        <EntityTypeShape EntityType="OrdenCompraRCModel.OrderPurchase" Width="1.5" PointX="0.75" PointY="4.625" />
         <EntityTypeShape EntityType="OrdenCompraRCModel.OrderPurchaseArticlesContainer" Width="1.5" PointX="5.25" PointY="3" />
-        <EntityTypeShape EntityType="OrdenCompraRCModel.OrderPurchaseContainer" Width="1.5" PointX="3" PointY="1.75" />
-        <EntityTypeShape EntityType="OrdenCompraRCModel.OrderPurchaseDeliver" Width="1.5" PointX="3" PointY="5.625" />
         <EntityTypeShape EntityType="OrdenCompraRCModel.OrderPurchaseDoc" Width="1.5" PointX="9.75" PointY="3.75" />
         <EntityTypeShape EntityType="OrdenCompraRCModel.OrderPurchaseHistory" Width="1.5" PointX="3" PointY="9" />
         <EntityTypeShape EntityType="OrdenCompraRCModel.Provider" Width="1.5" PointX="9.75" PointY="6.75" />
         <EntityTypeShape EntityType="OrdenCompraRCModel.ShippingCompany" Width="1.5" PointX="9.75" PointY="9.75" />
         <EntityTypeShape EntityType="OrdenCompraRCModel.StatusContainer" Width="1.5" PointX="11.75" PointY="0.75" />
-        <EntityTypeShape EntityType="OrdenCompraRCModel.StatusOrderPurchase" Width="1.5" PointX="11.75" PointY="3.75" />
         <EntityTypeShape EntityType="OrdenCompraRCModel.User" Width="1.5" PointX="5.75" PointY="11.75" />
+        <EntityTypeShape EntityType="OrdenCompraRCModel.StatusOrderPurchase" Width="1.5" PointX="12.375" PointY="3.75" />
+        <EntityTypeShape EntityType="OrdenCompraRCModel.OrderPurchaseArticlesContainerTmp" Width="1.5" PointX="12.375" PointY="6.75" />
+        <EntityTypeShape EntityType="OrdenCompraRCModel.Mark" Width="1.5" PointX="8.375" PointY="14.125" />
+        <EntityTypeShape EntityType="OrdenCompraRCModel.Article" Width="1.5" PointX="10.625" PointY="13" />
+        <AssociationConnector Association="OrdenCompraRCModel.FK_Mark" />
+        <EntityTypeShape EntityType="OrdenCompraRCModel.OrderPurchaseContainer" Width="1.5" PointX="3" PointY="1.375" />
+        <AssociationConnector Association="OrdenCompraRCModel.FK_OrderPurchase_C" />
+        <EntityTypeShape EntityType="OrdenCompraRCModel.OrderPurchase" Width="1.5" PointX="0.75" PointY="4.5" />
+        <EntityTypeShape EntityType="OrdenCompraRCModel.OrderPurchaseDeliver" Width="1.5" PointX="3" PointY="12" />
         <AssociationConnector Association="OrdenCompraRCModel.FK_OrderPurchase" />
         <AssociationConnector Association="OrdenCompraRCModel.FK_OrderPurchase_AC" />
         <AssociationConnector Association="OrdenCompraRCModel.FK_OrderPurchase_D" />
         <AssociationConnector Association="OrdenCompraRCModel.FK_OrderPurchase_H" />
-        <AssociationConnector Association="OrdenCompraRCModel.FK_OrderPurchase_C" />
-      </Diagram>
+        </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>
 </edmx:Edmx>

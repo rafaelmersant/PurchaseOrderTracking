@@ -15,11 +15,10 @@ namespace OrdenCompra.Models
     public partial class Article
     {
         public int Id { get; set; }
-        public string Ascode { get; set; }
         public string Description { get; set; }
         public string Size { get; set; }
         public string Model { get; set; }
-        public Nullable<int> Mark { get; set; }
+        public Nullable<int> MarkId { get; set; }
         public Nullable<decimal> InventoryStock { get; set; }
         public Nullable<decimal> QuantityTraffic { get; set; }
         public Nullable<decimal> QuantityFactory { get; set; }
@@ -28,5 +27,7 @@ namespace OrdenCompra.Models
         public Nullable<decimal> QuantityMinStock { get; set; }
         public System.DateTime AddedDate { get; set; }
         public int AddedBy { get; set; }
+    
+        public virtual Mark Mark { get; set; }
     }
 }

@@ -12,7 +12,7 @@ namespace OrdenCompra.Models
     using System;
     using System.Collections.Generic;
     
-    public partial class OrderPurchaseArticlesContainer
+    public partial class OrderPurchaseArticlesContainerTmp
     {
         public int Id { get; set; }
         public int OrderPurchaseId { get; set; }
@@ -27,8 +27,6 @@ namespace OrdenCompra.Models
         public decimal Price { get; set; }
         public string MeasureUnit { get; set; }
         public Nullable<System.DateTime> ManufacturingDate { get; set; }
-    
-        public virtual OrderPurchaseContainer OrderPurchaseContainer { get; set; }
-        public virtual OrderPurchase OrderPurchase { get; set; }
+        public Nullable<decimal> QuantityTmp { get; set; }
     }
 }

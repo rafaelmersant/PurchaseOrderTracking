@@ -1,37 +1,30 @@
-﻿@model IEnumerable<OrdenCompra.Models.User>
+﻿@model IEnumerable<OrdenCompra.Models.StatusContainer>
 
 @{
-    ViewBag.Title = "Listado de Usuarios";
+    ViewBag.Title = "Estatus de Contenedores";
 }
 
 <div class="container-fluid">
     <section class="text-dark border-custom border">
         <div class="bg-secondary text-light panel-custom border">
             <h6 class="panel-title">
-                Listado de Usuarios
-                <span class="btn-group pull-right">
-                    <a href="@Url.Action("RegisterUser")" class="btn btn-danger btn-sm" style="margin-top: -7px">Nuevo Usuario</a>
-                </span>
+                Estatus de Contenedores
+                @*<span class="btn-group pull-right">
+                        <a href="@Url.Action("RegisterUser")" class="btn btn-danger btn-sm" style="margin-top: -7px">Nuevo Estatus</a>
+                    </span>*@
             </h6>
         </div>
 
         <div class="mt-3 ml-2 mr-2">
-            <table id="usersTable" class="table table-striped table-bordered table-condensed table-sm mt-4">
+            <table id="statusTable" class="table table-striped table-bordered table-condensed table-sm mt-4">
                 <thead>
                     <tr>
                         <th>
-                            Usuario
+                            Id
                         </th>
                         <th>
-                            Correo
+                            Descripción
                         </th>
-                        <th>
-                            Rol
-                        </th>
-                        <th>
-                            Creado
-                        </th>
-
                         <th></th>
                     </tr>
                 </thead>
@@ -39,17 +32,15 @@
                     @foreach (var item in Model)
                     {
                         <tr>
-                            <td>@item.EmployeeID</td>
-                            <td>@item.Email</td>
-                            <td>@item.Role</td>
-                            <td>@item.CreatedDate</td>
+                            <td>@item.Id</td>
+                            <td>@item.Description</td>
 
                             <td align="center">
-                                <a class="btn btn-sm btn-success" href="@Url.Action("Edit",new { idHash = @item.IdHash })" title="Editar">
+                                <a class="btn btn-sm btn-success" href="#" title="Editar">
                                     <i class="fa fa-edit"></i>
 
                                 </a>
-                                <a class="btn btn-sm btn-danger" href="javascript:void(0)" onclick="deleteUser(@item.EmployeeID,@item.Id)" title="Eliminar">
+                                <a class="btn btn-sm btn-danger" href="javascript:void(0)" onclick="deleteNaviera(@item.Id,@item.Id)" title="Eliminar">
                                     <i class="fa fa-remove"></i>
                                 </a>
                             </td>
@@ -71,25 +62,8 @@
 }
 <script type="text/javascript">
 
-    const deleteUser = (codigo, id) => {
-        if (confirm(`Seguro que desea eliminar al Empleado de código ${codigo} ?`)) {
-            $.ajax({
-                "url": "/User/Delete?id=" + id,
-                "type": "POST",
-                "success": function (response) {
-                    if (response.result === "200") {
-                        window.location.reload();
-                    } else {
-                        console.log(response.message);
-                        alert('Hubo un error tratando de eliminar el usuario (Contacte al administrador del sistema).');
-                    }
-                }
-            });
-        }
-    }
-
     $(document).ready(function () {
-        $("#usersTable").DataTable();
+        $("#statusTable").DataTable();
 
         //Replace Previous -> Anterior
         $('body :not(script)').contents().filter(function () {

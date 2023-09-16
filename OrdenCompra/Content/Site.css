@@ -43,7 +43,7 @@ p {
 }
 
 .panel-custom {
-    height: 45px;
+    height: 37px;
     border: 1px solid #ededed;
     border-radius: 3px 3px 0 0;
     padding: 10px 10px;
@@ -58,8 +58,16 @@ p {
     background-color: #b20000;
 }
 
+.bg-light-gray {
+    background-color: #e7e7e7;
+}
+
 .text-custom {
     color: #b20000;
+}
+
+.orden-compra input[type=text] {
+    max-height: 26px;
 }
 
 a,

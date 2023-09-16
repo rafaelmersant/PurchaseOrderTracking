@@ -12,27 +12,18 @@ namespace OrdenCompra.Models
     using System;
     using System.Collections.Generic;
     
-    public partial class OrderPurchaseContainer
+    public partial class Mark
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-        public OrderPurchaseContainer()
+        public Mark()
         {
-            this.OrderPurchaseArticlesContainers = new HashSet<OrderPurchaseArticlesContainer>();
+            this.Articles = new HashSet<Article>();
         }
     
         public int Id { get; set; }
-        public int OrderPurchaseId { get; set; }
-        public Nullable<System.DateTime> ManufacturingDate { get; set; }
-        public int StatusId { get; set; }
-        public decimal MaxCapacityQuantity { get; set; }
-        public System.DateTime CreatedDate { get; set; }
-        public Nullable<int> ShippingCompanyId { get; set; }
-        public string BL { get; set; }
-        public Nullable<System.DateTime> DueDate { get; set; }
-        public int SortIndex { get; set; }
+        public string Description { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<OrderPurchaseArticlesContainer> OrderPurchaseArticlesContainers { get; set; }
-        public virtual OrderPurchase OrderPurchase { get; set; }
+        public virtual ICollection<Article> Articles { get; set; }
     }
 }

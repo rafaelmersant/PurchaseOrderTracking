@@ -143,259 +143,63 @@ namespace OrdenCompra.App_Start
             }
         }
 
-        //public static bool UpdateWithAllEmployeesFromAS400()
-        //{
-        //    try
-        //    {
-        //        string environmentVACACIONES = ConfigurationManager.AppSettings["EnvironmentVacaciones"];
+        public static void AddNewArticle(DataRow article)
+        {
+            try
+            {
+                using (var db = new OrdenCompraRCEntities())
+                {
+                    decimal _inventoryStock = string.IsNullOrEmpty(article.ItemArray[5].ToString()) ? 0M : decimal.Parse(article.ItemArray[5].ToString());
+                    decimal _maxPerContainer = string.IsNullOrEmpty(article.ItemArray[6].ToString()) ? 0M : decimal.Parse(article.ItemArray[6].ToString());
 
-        //        if (environmentVACACIONES != "DEV")
-        //        {
-        //            string cycle = ""; // HelperPayroll.GetPayrollPeriodByAdmissionDate(DateTime.Today.AddDays(-15), DateTime.Today.AddDays(-15).Year);
+                    db.Articles.Add(new Article()
+                    {
+                        Id = int.Parse(article.ItemArray[0].ToString()),
+                        Description = article.ItemArray[1].ToString(),
+                        MarkId = int.Parse(article.ItemArray[3].ToString()),
+                        Model = article.ItemArray[4].ToString(),
+                        InventoryStock = _inventoryStock,
+                        QuantityMaxPerContainer = _maxPerContainer,
+                        AddedBy = 1,
+                        AddedDate = DateTime.Now
+                    });
+                    db.SaveChanges();
+                }
+            }
+            catch (Exception ex)
+            {
+                Helper.SendException(ex);
+            }
+        }
 
-        //            Helper.SendRawEmail("rafaelmersant@yahoo.com", "Employee Massive Upload Starts " + DateTime.Now.ToString(), "EmployeesToUpdate ciclo:" + cycle);
+        //GET Article by Id
+        public static DataSet GetArticleById(int id)
+        {
+            try
+            {
+                string sQuery = $"SELECT MPNARTICUL, MPDESCRIPC, MPUMAYMED, MPNUMMARCA, MPMODELO, MPSTOCKCRI, MPSTOCKMAX FROM [QS36F.RCFAMP00] WHERE MPNARTICUL = {id}";
 
-        //            var data = GetAllEmployeesFromAS400(cycle);
+                if (ConfigurationManager.AppSettings["EnvironmentOrdenCompra"] != "DEV")
+                    sQuery = sQuery.Replace("[", "").Replace("]", "");
 
-        //            Helper.SendRawEmail("rafaelmersant@yahoo.com", "Employee Massive Upload " + DateTime.Now.ToString(), "EmployeesToUpdate:" + data.Tables[0].Rows.Count + " Ciclo:" + cycle);
+                return ExecuteDataSetODBC(sQuery, null);
+            }
+            catch (Exception ex)
+            {
+                Helper.SendException(ex);
+            }
 
-        //            if (data.Tables.Count > 0 && data.Tables[0].Rows.Count > 0)
-        //            {
-        //                foreach (DataRow emp in data.Tables[0].Rows)
-        //                {
-        //                    int _employeeId = 0;
-
-        //                    try
-        //                    {
-        //                        _employeeId = int.Parse(emp.ItemArray[0].ToString());
-        //                        var _employee;//Helper.GetEmployee(_employeeId);
-
-        //                        if (_employee == null)
-        //                        {
-        //                            DateTime? admissionDate = null;
-        //                            if (emp.ItemArray[4].ToString().Length >= 8)
-        //                            {
-        //                                int year = int.Parse(emp.ItemArray[4].ToString().Substring(0, 4));
-        //                                int month = int.Parse(emp.ItemArray[4].ToString().Substring(4, 2));
-        //                                int day = int.Parse(emp.ItemArray[4].ToString().Substring(6, 2));
-
-        //                                admissionDate = new DateTime(year, month, day);
-        //                            }
-
-        //                            DateTime? terminateDate = null;
-        //                            if (emp.ItemArray[5].ToString().Length >= 8)
-        //                            {
-        //                                int year = int.Parse(emp.ItemArray[5].ToString().Substring(0, 4));
-        //                                int month = int.Parse(emp.ItemArray[5].ToString().Substring(4, 2));
-        //                                int day = int.Parse(emp.ItemArray[5].ToString().Substring(6, 2));
-
-        //                                terminateDate = new DateTime(year, month, day);
-        //                            }
-
-        //                            //if (terminateDate != null) continue; // do not add people cancelled
-
-        //                            //Employee employee = new Employee
-        //                            //{
-        //                            //    EmployeeId = _employee.EmployeeId,
-        //                            //    EmployeeName = emp.ItemArray[1].ToString(),
-        //                            //    EmployeePosition = emp.ItemArray[2].ToString(),
-        //                            //    EmployeeDepto = emp.ItemArray[13].ToString(),
-        //                            //    EmployeeDeptoId = int.Parse(emp.ItemArray[12].ToString()),
-        //                            //    Email = emp.ItemArray[7].ToString(),
-        //                            //    Salary = decimal.Parse(emp.ItemArray[8].ToString()),
-        //                            //    Location = emp.ItemArray[9].ToString(),
-        //                            //    BankAccount = emp.ItemArray[10].ToString(),
-        //                            //    Identification = emp.ItemArray[11].ToString(),
-        //                            //    AdmissionDate = admissionDate,
-        //                            //    TerminateDate = terminateDate,
-        //                            //    Type = "I",
-        //                            //    CreatedDate = DateTime.Now
-        //                            //};
-
-        //                            //using (var db = new VacacionesRCEntities())
-        //                            //{
-        //                            //    db.Employees.Add(employee);
-        //                            //    db.SaveChanges();
-        //                            //}
-        //                        }
-        //                        else
-        //                        {
-        //                            using (var db = new OrdenCompraRCEntities())
-        //                            {
-        //                                //var employee = db.Employees.FirstOrDefault(e => e.EmployeeId == _employee.EmployeeId);
-
-        //                                //DateTime? terminateDate = null;
-        //                                //if (emp.ItemArray[5].ToString().Length >= 8)
-        //                                //{
-        //                                //    int year = int.Parse(emp.ItemArray[5].ToString().Substring(0, 4));
-        //                                //    int month = int.Parse(emp.ItemArray[5].ToString().Substring(4, 2));
-        //                                //    int day = int.Parse(emp.ItemArray[5].ToString().Substring(6, 2));
-
-        //                                //    terminateDate = new DateTime(year, month, day);
-        //                                //}
-
-        //                                //employee.EmployeePosition = emp.ItemArray[2].ToString();
-        //                                //employee.EmployeeDepto = emp.ItemArray[13].ToString();
-        //                                //employee.EmployeeDeptoId = int.Parse(emp.ItemArray[12].ToString());
-        //                                //employee.Email = emp.ItemArray[7].ToString();
-        //                                //employee.Salary = decimal.Parse(emp.ItemArray[8].ToString()) * 2;
-        //                                //employee.Location = emp.ItemArray[9].ToString();
-        //                                //employee.BankAccount = emp.ItemArray[10].ToString();
-        //                                //employee.TerminateDate = terminateDate;
-
-        //                                db.SaveChanges();
-        //                            }
-        //                        }
-        //                    }
-        //                    catch (Exception exEmp)
-        //                    {
-        //                        Helper.SendException(exEmp, "EmployeeID:" + _employeeId);
-        //                    }
-        //                }
-        //            }
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Helper.SendException(ex);
-
-        //        return false;
-        //    }
-
-        //    Helper.SendRawEmail("rafaelmersant@yahoo.com", "Employee Massive Upload Ends " + DateTime.Now.ToString(), "EmployeesToUpdate ends");
-
-        //    return true;
-        //}
-
-        //public static Employee GetEmployee(int employeeId, bool onlyLocal = false)
-        //{
-        //    Employee employee = GetEmployeeFromDB(employeeId);
-
-        //    try
-        //    {
-        //        if (employee == null)
-        //        {
-        //            var data = GetEmployeeFromAS400(employeeId.ToString());
-        //            if (data != null && data.Tables.Count > 0 && data.Tables[0].Rows.Count > 0)
-        //            {
-        //                DateTime? admissionDate = null;
-        //                if (data.Tables[0].Rows[0].ItemArray[4].ToString().Length >= 8)
-        //                {
-        //                    int year = int.Parse(data.Tables[0].Rows[0].ItemArray[4].ToString().Substring(0, 4));
-        //                    int month = int.Parse(data.Tables[0].Rows[0].ItemArray[4].ToString().Substring(4, 2));
-        //                    int day = int.Parse(data.Tables[0].Rows[0].ItemArray[4].ToString().Substring(6, 2));
-
-        //                    admissionDate = new DateTime(year, month, day);
-        //                }
-
-        //                DateTime? terminateDate = null;
-        //                if (data.Tables[0].Rows[0].ItemArray[5].ToString().Length >= 8)
-        //                {
-        //                    int year = int.Parse(data.Tables[0].Rows[0].ItemArray[5].ToString().Substring(0, 4));
-        //                    int month = int.Parse(data.Tables[0].Rows[0].ItemArray[5].ToString().Substring(4, 2));
-        //                    int day = int.Parse(data.Tables[0].Rows[0].ItemArray[5].ToString().Substring(6, 2));
-
-        //                    terminateDate = new DateTime(year, month, day);
-        //                }
-
-        //                employee = new Employee
-        //                {
-        //                    EmployeeId = employeeId,
-        //                    EmployeeName = data.Tables[0].Rows[0].ItemArray[1].ToString(),
-        //                    EmployeePosition = data.Tables[0].Rows[0].ItemArray[2].ToString(),
-        //                    EmployeeDepto = data.Tables[0].Rows[0].ItemArray[13].ToString(),
-        //                    EmployeeDeptoId = int.Parse(data.Tables[0].Rows[0].ItemArray[12].ToString()),
-        //                    Email = data.Tables[0].Rows[0].ItemArray[7].ToString(),
-        //                    Salary = decimal.Parse(data.Tables[0].Rows[0].ItemArray[8].ToString()) * 2,
-        //                    Location = data.Tables[0].Rows[0].ItemArray[9].ToString(),
-        //                    BankAccount = data.Tables[0].Rows[0].ItemArray[10].ToString(),
-        //                    Identification = data.Tables[0].Rows[0].ItemArray[11].ToString(),
-        //                    AdmissionDate = admissionDate,
-        //                    TerminateDate = terminateDate,
-        //                    Type = "I",
-        //                    CreatedDate = DateTime.Now
-        //                };
-
-        //                using (var db = new VacacionesRCEntities())
-        //                {
-        //                    db.Employees.Add(employee);
-        //                    db.SaveChanges();
-        //                }
-        //            }
-        //        }
-        //        else if (!onlyLocal)
-        //        {
-        //            string environmentVACACIONES = ConfigurationManager.AppSettings["EnvironmentVacaciones"];
-
-        //            if (environmentVACACIONES != "DEV")
-        //            {
-        //                using (var db = new VacacionesRCEntities())
-        //                {
-        //                    employee = db.Employees.FirstOrDefault(e => e.EmployeeId == employee.EmployeeId);
-
-        //                    var data = GetEmployeeFromAS400(employeeId.ToString());
-        //                    if (data.Tables.Count > 0 && data.Tables[0].Rows.Count > 0)
-        //                    {
-        //                        DateTime? terminateDate = null;
-        //                        if (data.Tables[0].Rows[0].ItemArray[5].ToString().Length >= 8)
-        //                        {
-        //                            int year = int.Parse(data.Tables[0].Rows[0].ItemArray[5].ToString().Substring(0, 4));
-        //                            int month = int.Parse(data.Tables[0].Rows[0].ItemArray[5].ToString().Substring(4, 2));
-        //                            int day = int.Parse(data.Tables[0].Rows[0].ItemArray[5].ToString().Substring(6, 2));
-
-        //                            terminateDate = new DateTime(year, month, day);
-        //                        }
-
-        //                        employee.EmployeePosition = data.Tables[0].Rows[0].ItemArray[2].ToString();
-        //                        employee.EmployeeDepto = data.Tables[0].Rows[0].ItemArray[13].ToString();
-        //                        employee.EmployeeDeptoId = int.Parse(data.Tables[0].Rows[0].ItemArray[12].ToString());
-        //                        employee.Email = data.Tables[0].Rows[0].ItemArray[7].ToString();
-        //                        employee.Salary = decimal.Parse(data.Tables[0].Rows[0].ItemArray[8].ToString()) * 2;
-        //                        employee.Location = data.Tables[0].Rows[0].ItemArray[9].ToString();
-        //                        employee.BankAccount = data.Tables[0].Rows[0].ItemArray[10].ToString();
-        //                        employee.TerminateDate = terminateDate;
-
-        //                        db.SaveChanges();
-        //                    }
-        //                }
-        //            }
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Helper.SendException(ex, "employeeId:" + employeeId);
-        //    }
-
-        //    return employee;
-        //}
-
-        //public static Employee GetEmployeeFromDB(int employeeId)
-        //{
-        //    try
-        //    {
-        //        string environmentID = ConfigurationManager.AppSettings["EnvironmentVacaciones"];
-
-        //        using (var db = new VacacionesRCEntities())
-        //        {
-        //            return db.Employees.FirstOrDefault(e => e.EmployeeId == employeeId);
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Helper.SendException(ex, "employeeId:" + employeeId);
-        //    }
-
-        //    return null;
-        //}
+            return null;
+        }
 
         //GET Purchase Order Header
-        public static DataSet GetPurchaseOrderHeader(string purchaseOrderId)
+        public static DataSet GetOrderPurchaseHeader(int purchaseOrderId)
         {
             try
             {
                 string sQuery = $"SELECT PDADNUMPED, PDADFECPED, PDADCOSUP1, PDADOBSER1, PDADFAPERT, PDADHAPERT FROM [QS36F.RCADPD00] WHERE PDADNUMPED= {purchaseOrderId}";
 
-                if (ConfigurationManager.AppSettings["EnvironmentVacaciones"] != "DEV")
+                if (ConfigurationManager.AppSettings["EnvironmentOrdenCompra"] != "DEV")
                     sQuery = sQuery.Replace("[", "").Replace("]", "");
 
                 return ExecuteDataSetODBC(sQuery, null);
@@ -409,14 +213,14 @@ namespace OrdenCompra.App_Start
         }
 
         //GET Purchase Order Detail Requested
-        public static DataSet GetPurchaseOrderDetail(string purchaseOrderId)
+        public static DataSet GetOrderPurchaseDetail(int purchaseOrderId)
         {
             try
             {
                 string sQuery = $"SELECT DPADNUMPED, DPADNUMART, DPADFECPED, DPADFECREC, DPCANTIDAD, DPCANTFABR, " +
                                 $"DPCANTTRAN, DPCANTPEND, DPCANTADUA, DPADPRECV1 FROM [QS36F.RCADDP00] WHERE DPADTIPTRA='P' AND DPADNUMPED = {purchaseOrderId}";
 
-                if (ConfigurationManager.AppSettings["EnvironmentVacaciones"] != "DEV")
+                if (ConfigurationManager.AppSettings["EnvironmentOrdenCompra"] != "DEV")
                     sQuery = sQuery.Replace("[", "").Replace("]", "");
 
                 return ExecuteDataSetODBC(sQuery, null);
@@ -430,14 +234,14 @@ namespace OrdenCompra.App_Start
         }
 
         //GET Purchase Order Detail Received
-        public static DataSet GetPurchaseOrderDetailReceived(string purchaseOrderId)
+        public static DataSet GetOrderPurchaseDetailReceived(int purchaseOrderId)
         {
             try
             {
                 string sQuery = $"SELECT DPADNUMPED, DPADNUMART, DPADFECPED, DPADFECREC, DPCANTIDAD, DPCANTFABR, " +
                                 $"DPCANTTRAN, DPCANTPEND, DPCANTADUA, DPADPRECV1 FROM [QS36F.RCADDP00] WHERE DPADTIPTRA='R' AND DPADNUMPED = {purchaseOrderId}";
 
-                if (ConfigurationManager.AppSettings["EnvironmentVacaciones"] != "DEV")
+                if (ConfigurationManager.AppSettings["EnvironmentOrdenCompra"] != "DEV")
                     sQuery = sQuery.Replace("[", "").Replace("]", "");
 
                 return ExecuteDataSetODBC(sQuery, null);

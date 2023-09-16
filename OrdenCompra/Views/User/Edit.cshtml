@@ -1,4 +1,4 @@
-﻿@model  VacacionesRC.Models.User
+﻿@model  OrdenCompra.Models.User
 
 @{
     ViewBag.Title = "Editar usuario";
@@ -47,7 +47,7 @@
                         <label for="validationDefault02">Contraseña</label>
                         @Html.HiddenFor(model => model.PasswordHash)
                         @*@Html.EditorFor(model => model.PasswordHash, new { htmlAttributes = new { @class = "form-control col-12", @type = "password", @disabled = "disabled" } })
-                        @Html.ValidationMessageFor(model => model.PasswordHash, "", new { @class = "text-danger" })*@
+                            @Html.ValidationMessageFor(model => model.PasswordHash, "", new { @class = "text-danger" })*@
                     </div>
 
                     <div class="col-3 mb-2">
@@ -77,7 +77,7 @@
     $(document).ready(function () {
 
         $(".numericOnly").keypress(function (e) {
-            if (String.fromCharCode(e.keyCode).match(/[^0-9]/g))  return false;
+            if (String.fromCharCode(e.keyCode).match(/[^0-9]/g)) return false;
         });
 
         $("#EmployeeID").keypress(function () {

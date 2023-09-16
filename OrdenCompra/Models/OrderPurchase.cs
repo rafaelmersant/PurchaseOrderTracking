@@ -28,7 +28,7 @@ namespace OrdenCompra.Models
         public int ProviderId { get; set; }
         public Nullable<System.DateTime> DateDMA { get; set; }
         public Nullable<System.DateTime> DateRequest { get; set; }
-        public Nullable<int> Status { get; set; }
+        public Nullable<int> StatusId { get; set; }
         public string Observation { get; set; }
         public System.DateTime CreatedDate { get; set; }
         public int CreatedBy { get; set; }

@@ -1,0 +1,633 @@
+﻿@{
+    ViewBag.Title = "Orden de Compra";
+}
+
+<style>
+    .disable-button {
+        cursor: not-allowed;
+    }
+
+    .field-updated {
+        background-color: lightyellow;
+    }
+
+    .field-will-be-removed {
+        background-color: lightcoral;
+    }
+</style>
+
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<link href="~/Content/toastr.css" rel="stylesheet" type="text/css" />
+
+<div class="text-center mb-1" style="position: relative">
+
+    <div class="text-right" id="formHeaderInfo" style="right: 20px; top:10px; position: absolute">
+        @*<span class="text-light">Fecha Creación: <span id="requestedDate" class="font-weight-bold"></span> </span>*@
+        @*<span class="ml-3 text-light">Estatus: <span id="requestStatus" class="font-weight-bold"></span></span>*@
+    </div>
+
+</div>
+
+<div class="container-fluid orden-compra">
+    <section class="bg-light text-dark border-custom mb-2">
+        <div class="bg-secondary text-light panel-custom border">
+            <h6 class="panel-title">
+                Orden de Compra: Información de Cabecera
+                @*<span class="btn-group pull-right">
+                        @if (Session["role"] != null && Session["role"].ToString() != "AdminConsulta")
+                        {
+                            <a href="@Url.Action("Index","Orden", new { id = ""})" class="btn btn-danger btn-sm" style="margin-top: -3px">Nueva Orden</a>
+                        }
+                    </span>*@
+            </h6>
+        </div>
+
+        <form class="mt-1 ml-2 mr-2">
+            <div class="form-row">
+
+                <div class="form-group col-lg-3 col-md-2 col-sm-12">
+                    <div class="row">
+                        <div class="col-4 mb-1">
+                            <label for="validationDefault01">Orden No.</label>
+                            <input type="text" id="orderId" name="orderId" value="" class="form-control form-control-sm numericOnly" autocomplete="off" style="min-width: 65px !important" />
+                        </div>
+
+                        <div class="col-2">
+                            <a class="btn btn-sm btn-info" href="javascript:void(0)" id="btnSearchOrder" title="Buscar" style="margin-top: 24px">
+                                <i class="fa fa-search"></i>
+                            </a>
+                            <span id="waitingIndicator" class="spinner-border text-danger" style="margin-top: 27px; margin-right: 5px; display: none"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group col-lg-2 col-md-2 col-sm-12">
+                    <label for="orderDate">Estatus</label>
+                    @Html.DropDownList("OrderStatusId", new SelectList(ViewBag.OrderStatus, "Value", "Text"), new
+                     {
+                         @class = "form-control-sm",
+                         @style = "border: 1px solid lightgray; color: gray"
+                     })
+                </div>
+
+                <div class="form-group col-lg-2 col-md-2 col-sm-12">
+                    <label for="orderDate">Fecha de Orden</label>
+                    <input type="text" id="orderDate" name="orderDate" value="" class="form-control form-control-sm col-12 datepicker" />
+                </div>
+
+                @*<div class="form-group col-lg-2 col-md-2 col-sm-12">
+                        <label for="orderDateOpen">Fecha de Apertura</label>
+                        <input type="text" id="orderDateOpen" name="orderDateOpen" value="" class="form-control form-control-sm col-12 datepicker" />
+                    </div>*@
+
+                <div class="form-group col-lg-5 col-md-5 col-sm-12">
+                    <label for="validationDefault01">Proveedor</label>
+                    <input type="text" id="provider" name="provider" value="" class="form-control form-control-sm col-12" readonly />
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group col">
+                    <label for="validationDefault01">Observación</label>
+                    <input type="text" id="observation" name="observation" value="" class="form-control form-control-sm col-12" />
+                </div>
+            </div>
+
+        </form>
+    </section>
+
+    <a href="javascript:void(0);" id="btnToggleContainers" onclick="toggleContainers()" class="text-info">Reducir todos los contenedores</a>
+    <section style="overflow-y:scroll; overflow-x: hidden; max-height:500px">
+        <div id="containers"></div>
+    </section>
+</div>
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+
+    <script src="~/Scripts/jquery.dataTables.min.js"></script>
+    <script src="~/Scripts/dataTables.bootstrap4.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="~/Scripts/toastr.js"></script>
+
+}
+
+<script type="text/javascript">
+
+    $(document).ready(async function () {
+        $("#btnSearchOrder").removeClass("disabled")
+        $("#btnToggleContainers").hide();
+
+        const url = window.location.pathname
+        const id = url.substring(url.lastIndexOf('/') + 1);
+        const orderId = $("#orderId").val();
+
+        if (parseInt(orderId) > 0 && (!id || id == "Formulario")) {
+            await getEmployeeDetail(orderId)
+            $("#btnSearchOrder").addClass("disabled")
+        }
+
+        $(".datepicker").datepicker(
+            {
+                dateFormat: 'dd/mm/yy',
+                //beforeShowDay: $.datepicker.noWeekends
+            }
+        );
+
+        $(".numericOnly").keypress(function (e) {
+            if (String.fromCharCode(e.keyCode).match(/[^0-9]/g)) return false;
+        });
+
+        $("#orderId").keypress(function (evt) {
+            if (evt.charCode === 13 && this.value.length >= 1) {
+                $("#btnSearchOrder").click();
+            }
+
+            if (this.value.length >= 5)
+                return false;
+        });
+
+        $("#observation").keypress(function (evt) {
+            if (this.value.length > 200)
+                return false;
+        });
+
+        $("#btnSearchOrder").click(async function (e) {
+            e.preventDefault();
+
+            const orderId = $("#orderId").val();
+
+            if (orderId) {
+                await getPurchaseOrderDetail(orderId)
+            }
+        });
+
+        //$("#endDate").on("change", function (evt) {
+        //    console.log("Cambiando fecha fin")
+        //    validateDate()
+        //});
+    });
+
+    function getPurchaseOrderDetail(orderId) {
+        console.log('SEARCH ORDER ID:', orderId);
+        var orderDetails;
+
+        $("#provider").val("");
+        $("#requestedDate").html("");
+        $("#requestStatus").html("");
+        $("#observation").val("");
+        $("#containers").html("");
+        $("#OrderStatusId").val("");
+
+        $("#waitingIndicator").show();
+        $("#btnSearchOrder").hide();
+        $("#btnToggleContainers").hide();
+
+         $.ajax({
+            "url": `/Orden/GetPurchaseOrder?orderId=${orderId}`,
+            "type": "POST",
+            "success": async function (response) {
+                if (response.result === "200") {
+                    console.log('ORDER CREATED!')
+                    console.log(response);
+                    orderDetails = response;
+
+                    $("#provider").val(`${response.message.Header.ProviderId}-${response.message.Header.ProviderName}`);
+                    //$("#requestedDate").html(`${response.message.Header.CreatedDate}`);
+                    $("#orderDate").val(`${GetSpanishDate(response.message.Header.DateDMA)}`);
+                    $("#orderDateOpen").val(`${GetSpanishDate(response.message.Header.DateDMA)}`);
+                    $("#OrderStatusId").val(`${response.message.Header.StatusId}`);
+                    $("#observation").val(`${response.message.Header.Observation}`);
+
+                    if (response.message.Containers.length > 1)
+                        $("#btnToggleContainers").show();
+
+                    let views = [];
+                    for (const container of response.message.Containers) {
+                        views.push(renderContainer(container));
+                    }
+
+                    $("#containers").html(views);
+
+                    $('.quantityField').blur(function () {
+                        
+                        const newValue = $(this).val();
+                        const previousValue = $(this)[0].defaultValue;
+
+                        //if (!newValue) {
+                        //    $(this).addClass('field-will-be-removed');
+                        //    return false;
+                        //}
+
+                        if (newValue !== previousValue) {
+                            $(this).addClass('field-updated');
+                        }
+                    });
+
+                    $(".datepicker").datepicker(
+                        {
+                            dateFormat: 'dd/mm/yy'
+                        }
+                    );
+
+                    $(".container-save").on('click', function (evt) {
+                        evt.preventDefault();
+                        evt.stopPropagation();
+
+                        const containerId = $(this)[0].id.split('-')[2];
+                        const container = orderDetails.message.Containers.filter(c => c.container.Id == containerId);
+
+                        for (const item of container[0].Details) {
+                            if ($(`#article-quantity-${item.Id}`).hasClass("field-updated")) {
+                                const newQuantity = $(`#article-quantity-${item.Id}`).val();
+                                $.ajax({
+                                    "url": `/Orden/UpdateQuantityField?detailId=${item.Id}&newQuantity=${newQuantity}`,
+                                    "type": "POST",
+                                    "success": async function (response) {
+                                        if (response.result === "200") {
+                                            $(`#article-quantity-${item.Id}`).removeClass("field-updated");
+                                            toastr.success(`La cantidad fue actualizada para el articulo: ${item.Description}`);
+                                        }
+                                        else
+                                            toastr.error(`Hubo un error al tratar de actualizar la cantidad para el articulo: ${item.Description}`);
+                                    }
+                                });
+                            }
+                        }
+                    });
+
+                    $("#orderDate").on("change", function (evt) {
+                        evt.preventDefault();
+                        evt.stopPropagation();
+
+                        const orderId = $("#orderId").val();
+                        const previousDate = GetSpanishDate(orderDetails.message.Header.DateDMA);
+
+                        if ($(this).val() === previousDate) return false;
+
+                        if (confirm(`Esta seguro que desea cambiar la fecha de para esta orden?`)) {
+                            $.ajax({
+                                "url": `/Orden/UpdateOrderField?orderId=${orderId}&type=orderDate&value=${$(`#orderDate`).val()}`,
+                                "type": "POST",
+                                "success": async function (response) {
+                                    if (response.result === "200")
+                                        toastr.success(`Fecha actualizada para la orden #${orderId}`);
+                                    else
+                                        toastr.error("Hubo un error al tratar de actualizar la fecha para esta orden.");
+                                }
+                            });
+                        } else {
+                            $(`#orderDate`).val($(this)[0].defaultValue);
+                        }
+                    });
+
+                    $("#OrderStatusId").on("change", function (evt) {
+                        evt.preventDefault();
+                        evt.stopPropagation();
+
+                        const orderId = $("#orderId").val();
+
+                        if (confirm(`Esta seguro que desea cambiar el estatus para esta orden?`)) {
+                            $.ajax({
+                                "url": `/Orden/UpdateOrderField?orderId=${orderId}&type=status&value=${$(`#OrderStatusId`).val()}`,
+                                "type": "POST",
+                                "success": async function (response) {
+                                    if (response.result === "200")
+                                        toastr.success(`Estatus actualizado para la orden #${orderId}`);
+                                    else
+                                        toastr.error("Hubo un error al tratar de actualizar el estatus para esta orden.");
+                                }
+                            });
+                        } else {
+                            $(`#OrderStatusId`).val(orderDetails.message.Header.StatusId);
+                        }
+                    });
+
+                    $(".containerDueDate").on("change", function (evt) {
+                        evt.preventDefault();
+                        evt.stopPropagation();
+
+                        const containerId = evt.currentTarget.id.split("-")[1];
+                        const container = orderDetails.message.Containers.filter(c => c.container.Id == containerId);
+
+                        if (confirm(`Esta seguro que desea cambiar la fecha de compromiso para el contenedor #${container[0].container.SortIndex}?`)) {
+                            $.ajax({
+                                "url": `/Orden/UpdateContainerField?containerId=${containerId}&type=DueDate&value=${$(`#${evt.currentTarget.id}`).val()}`,
+                                "type": "POST",
+                                "success": async function (response) {
+                                    if (response.result === "200")
+                                        toastr.success(`Fecha de compromiso actualizada para el contenedor #${container[0].container.SortIndex}`);
+                                    else
+                                        toastr.error("Hubo un error al tratar de actualizar la fecha de compromiso para este contenedor.");
+                                }
+                            });
+                        } else {
+                            $(`#${evt.currentTarget.id}`).val($(this)[0].defaultValue);
+                        }
+                    });
+
+                    $(".containerStatus").on("change", function (evt) {
+                        evt.preventDefault();
+                        evt.stopPropagation();
+
+                        const containerId = evt.currentTarget.id.split("-")[2];
+                        const container = orderDetails.message.Containers.filter(c => c.container.Id == containerId);
+
+                        if (confirm(`Esta seguro que desea cambiar el estatus para el contenedor #${container[0].container.SortIndex}?`)) {
+                            $.ajax({
+                                "url": `/Orden/UpdateContainerField?containerId=${containerId}&type=Status&value=${$(`#${evt.currentTarget.id}`).val()}`,
+                                "type": "POST",
+                                "success": async function (response) {
+                                    if (response.result === "200")
+                                        toastr.success(`Estatus actualizado para el contenedor #${container[0].container.SortIndex}`);
+                                    else
+                                        toastr.error("Hubo un error al tratar de actualizar el estatus para este contenedor.");
+                                }
+                            });
+                        }
+                        else {
+                            $(`#${evt.currentTarget.id}`).val(container[0].container.StatusId);
+                        }
+                    });
+
+                    $(".containerNaviera").on("change", function (evt) {
+                        evt.preventDefault();
+                        evt.stopPropagation();
+
+                        const containerId = evt.currentTarget.id.split("-")[2];
+                        const container = orderDetails.message.Containers.filter(c => c.container.Id == containerId);
+
+                        if (confirm(`Esta seguro que desea cambiar la naviera para el contenedor #${container[0].container.SortIndex}?`)) {
+                            $.ajax({
+                                "url": `/Orden/UpdateContainerField?containerId=${containerId}&type=Naviera&value=${$(`#${evt.currentTarget.id}`).val()}`,
+                                "type": "POST",
+                                "success": async function (response) {
+                                    if (response.result === "200")
+                                        toastr.success(`Naviera actualizada para el contenedor #${container[0].container.SortIndex}`);
+                                    else
+                                        toastr.error("Hubo un error al tratar de actualizar la naviera para este contenedor.");
+                                }
+                            });
+                        } else {
+                            $(`#${evt.currentTarget.id}`).val(container[0].container.ShippingCompanyId);
+                        }
+                    });
+                }
+                else {
+                    console.log(response.message);
+                    if (response.message.includes('(403)') || response.result === '404') {
+                        toastr.error(response.message);
+                    }
+                    else
+                        toastr.error(`Hubo un error tratando de encontrar la orden de compra #${orderId}`);
+                }
+
+                $("#waitingIndicator").hide();
+                $("#btnSearchOrder").show();
+            }
+        });
+    }
+
+    function renderContainer(container) {
+        let dueDate = "";
+
+        if (container.container.DueDate && container.container.DueDate.length === 10) {
+            dueDate = GetSpanishDate(container.container.DueDate);
+        }
+
+        //Navieras
+        let _navieras = @Html.Raw(Json.Encode(ViewBag.Navieras));
+        let navieras = [];
+        navieras.push(`<option value=""></option>`);
+
+        for (const naviera of _navieras) {
+            navieras.push(`<option value="${naviera.Id}" ${container.container.ShippingCompanyId === parseInt(naviera.Id) ? "selected" : ""}>${naviera.Description}</option>`)
+        }
+
+        //Container Status
+        let _containerStatus = @Html.Raw(Json.Encode(ViewBag.ContainerStatus));
+        let containerStatus = [];
+        containerStatus.push(`<option value=""></option>`);
+
+        for (const status of _containerStatus) {
+            containerStatus.push(`<option value="${status.Id}" ${container.container.StatusId === parseInt(status.Id) ? "selected" : ""}>${status.Description}</option>`)
+        }
+
+        let view =
+           `<panel id="containerId" class="bg-light text-dark border-custom panel-container">
+            <div class="bg-secondary text-light panel-custom border">
+                <div class="d-flex justify-content-between">
+
+                    <div class="d-flex align-items-center" style="margin-top: -8px; margin-left: -6px">
+                        <a href="javascript:void(0)" id="toggleContainer-${container.container.SortIndex}" onclick="toggleContainer(${container.container.SortIndex});" class="border p-2 pl-2 pr-2 mr-2 fa fa-minus"></a>
+                        <h6 class="panel-title mb-0" id="container-title">Contenedor #${container.container.SortIndex} - Articulos</h6>
+                    </div>
+
+                    <div class="d-flex align-items-center" style="margin-top: -8px;">
+                        <label for="dueDate" class="h6 mb-0 d-inline mr-2">Estatus:</label>
+                        <select class="form-control form-control-sm d-inline bg-secondary text-light containerStatus" id="container-estatus-${container.container.Id}">
+                           ${containerStatus}
+                        </select>
+                    </div>
+
+                    <div class="d-flex align-items-center" style="margin-top: -8px;">
+                        <label for="dueDate" class="h6 mb-0 d-inline mr-2">Naviera:</label>
+                        <select class="form-control form-control-sm d-inline bg-secondary text-light containerNaviera" id="container-naviera-${container.container.Id}">
+                            ${navieras}
+                        </select>
+                    </div>
+
+                    <div class="d-flex align-items-center" style="margin-top: -8px; margin-right: -30px">
+                        <label class="h6 mb-0 d-inline" title="Cantidad">Capacidad máxima: <span id="container-max-capacity"><b>${container.container.MaxCapacityQuantity}</b></span></label>
+                    </div>
+
+                    <div class="d-flex align-items-center" style="margin-top: -8px; margin-right: -25px">
+                        <label for="dueDate" class="h6 mb-0 d-inline mr-2">Fecha Compromiso:</label>
+                        <input type="text" id="dueDate-${container.container.Id}" name="dueDate" value="${dueDate}" class="form-control form-control-sm col-6 d-inline bg-light-gray datepicker containerDueDate" autocomplete="off"/>
+                    </div>
+                </div>
+            </div>
+
+            <section>
+                <table id="container-articles-table-${container.container.SortIndex}" class="table table-striped table-bordered table-condensed table-sm containersTable">
+                    <thead class="bg-dark text-light">
+                        <tr>
+                            <th style='width:50px;' class='text-center'>
+                                #
+                            </th>
+                            <th style='width:80px;'>
+                                Cant.
+                            </th>
+                            <th style='width:85px;'>
+                                Código
+                            </th>
+                            <th>
+                                Descripción
+                            </th>
+
+                            <th>
+                                Marca
+                            </th>
+                            <th>
+                                Modelo
+                            </th>
+                            <th class='text-right'>
+                                Precio
+                            </th>
+                            <th class='text-right'>
+                                Total
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+
+        let quantityTotal = 0;
+        let total = 0;
+        let counter = 0;
+
+        for (const item of container.Details) {
+            quantityTotal += item.QuantityRequested;
+            total += item.QuantityRequested * item.Price;
+            counter++;
+
+            view += `
+             <tr>
+                <td style='width:50px;' class='text-center'>
+                    ${counter}
+                </td>
+                <td style='width:80px;'>
+                    <input type="text" id="article-quantity-${item.Id}" name="article-quantity-${item.Id}" value="${item.QuantityRequested}" class="form-control form-control-sm numericOnly quantityField" style="max-width: 100px" autocomplete="off" />
+                </td>
+                <td style='width:85px;'>
+                    ${item.ArticleId}
+                </td>
+                <td>
+                    ${item.Description}
+                </td>
+                <td>
+                    ${item.Mark}
+                </td>
+                <td>
+                    ${item.Model}
+                </td>
+                <td class='text-right'>
+                    ${formatNumber(item.Price)}
+                </td>
+                <td class='text-right'>
+                    ${formatNumber(item.QuantityRequested * item.Price)}
+                </td>
+            </tr>`
+        }
+         view +=
+                `</tbody>
+                <tfoot class="bg-warning">
+                    <tr>
+                        <td>
+                         <b>Total<b>
+                        </td>
+                        <td>
+                            <span id="article-quantity-total"><b>${formatNumber(quantityTotal)}</b></span>
+                        </td>
+                        <td>
+                        </td>
+                        <td>
+                        </td>
+                        <td>
+                        </td>
+                        <td>
+                        </td>
+                        <td>
+                        </td>
+                        <td class='text-right'>
+                            <span id="article-price-total"><b>${formatNumber(total)}</b></span>
+                        </td>
+                    </tr>
+                    <tr class="bg-light">
+                        <td colspan="8">
+                            <a href="javascript:void(0);" id="container-save-${container.container.Id}" class="btn btn-danger btn-sm container-save">Guardar cambios para Contener #${container.container.SortIndex}</a>
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </section>
+        </panel>`
+
+        return view;
+    }
+
+    function toggleContainer(containerIndex) {
+        if ($(`#toggleContainer-${containerIndex}`).hasClass("fa-minus")) {
+            $(`#container-articles-table-${containerIndex}`).fadeOut();
+            $(`#toggleContainer-${containerIndex}`).removeClass("fa-minus");
+            $(`#toggleContainer-${containerIndex}`).addClass("fa-plus");
+        } else {
+            $(`#container-articles-table-${containerIndex}`).fadeIn();
+            $(`#toggleContainer-${containerIndex}`).removeClass("fa-plus");
+            $(`#toggleContainer-${containerIndex}`).addClass("fa-minus");
+        }
+    }
+
+    function toggleContainers() {
+        if ($("#btnToggleContainers").html().includes("Expandir")) {
+            $(".fa-plus").addClass("fa-minus");
+            $(".fa-plus").removeClass("fa-plus");
+            $(`.containersTable`).show();
+            $("#btnToggleContainers").html('Reducir todos los contenedores');
+        } else {
+            $(".fa-minus").addClass("fa-plus");
+            $(".fa-minus").removeClass("fa-minus");
+            $(`.containersTable`).hide();
+            $("#btnToggleContainers").html('Expandir todos los contenedores');
+        }
+    }
+
+    function GetDateFormat(date) {
+        if (navigator.languages != null && navigator.languages[0].includes("es")) {
+            const parts = date.split("/");
+            const dt = new Date(parseInt(parts[2], 10),
+                parseInt(parts[1], 10) - 1,
+                parseInt(parts[0], 10));
+
+            return dt.toLocaleString("en-US")
+        } else {
+            const parts = date.split("/");
+            const dt = new Date(parseInt(parts[2], 10),
+                parseInt(parts[1], 10) - 1,
+                parseInt(parts[0], 10));
+
+            return dt.toLocaleDateString();
+        }
+    }
+
+    function GetSpanishDate(date) {
+        if (date && date !== null) {
+            const dateArray = date.split("-");
+            return `${dateArray[2]}/${dateArray[1]}/${dateArray[0]}`;
+        }
+
+        return "";
+    }
+
+    function GetEnglishDate(date) {
+        if (date && date !== null) {
+            const dateArray = date.split("/");
+            return `${dateArray[2]}-${dateArray[0]}-${dateArray[1]}`;
+        }
+
+        return "";
+    }
+
+    function addDays(date, days) {
+        var result = new Date(date);
+        result.setDate(result.getDate() + days);
+        return result;
+    }
+
+    function formatNumber(amount) {
+        return parseFloat(amount)
+            .toFixed(2)
+            .replace(/\d(?=(\d{3})+\.)/g, "$&,");
+    }
+
+</script>

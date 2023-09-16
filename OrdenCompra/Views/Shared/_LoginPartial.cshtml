@@ -1,1 +1,27 @@
-﻿
+﻿@if (Session["email"] != null)
+{
+    using (Html.BeginForm("Logout", "User", FormMethod.Post, new { id = "logoutForm", @class = "navbar-right" }))
+    {
+        @Html.AntiForgeryToken()
+
+        <ul class="nav navbar-nav navbar-right">
+            <li>
+                @if (Session["hasEmail"] == "Yes")
+                {
+                    @Html.ActionLink("Hola " + Session["email"] + "!", "ChangePassword", "User", routeValues: null, htmlAttributes: new { title = "Cambiar Contraseña" })
+                }
+                else
+                {
+                    <a href="javascript:void(0);">Saludos: @Session["employeeID"]</a>
+                }
+            </li>
+            <li><a href="javascript:document.getElementById('logoutForm').submit()">Log off</a></li>
+        </ul>
+    }
+}
+else
+{
+    <ul class="nav navbar-nav navbar-right">
+        <li>@Html.ActionLink("Entrar al sistema", "Login", "User", routeValues: null, htmlAttributes: new { id = "loginLink" })</li>
+    </ul>
+}

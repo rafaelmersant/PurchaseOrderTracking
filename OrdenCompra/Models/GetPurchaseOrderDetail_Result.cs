@@ -10,25 +10,28 @@
 namespace OrdenCompra.Models
 {
     using System;
-    using System.Collections.Generic;
     
-    public partial class OrderPurchaseArticlesContainer
+    public partial class GetPurchaseOrderDetail_Result
     {
         public int Id { get; set; }
-        public int OrderPurchaseId { get; set; }
-        public int ContainerId { get; set; }
+        public int containerId { get; set; }
+        public int SortIndex { get; set; }
+        public decimal MaxCapacityQuantity { get; set; }
+        public Nullable<int> ShippingCompanyId { get; set; }
+        public string BL { get; set; }
+        public string DueDate { get; set; }
+        public int StatusId { get; set; }
+        public string ManufacturingDate { get; set; }
         public int ArticleId { get; set; }
-        public System.DateTime AddedDate { get; set; }
+        public string Description { get; set; }
+        public string Model { get; set; }
+        public string Mark { get; set; }
+        public Nullable<int> MarkId { get; set; }
         public decimal QuantityRequested { get; set; }
         public decimal QuantityLeft { get; set; }
         public decimal QuantityFactory { get; set; }
         public decimal QuantityTraffic { get; set; }
         public decimal QuantityAduana { get; set; }
         public decimal Price { get; set; }
-        public string MeasureUnit { get; set; }
-        public Nullable<System.DateTime> ManufacturingDate { get; set; }
-    
-        public virtual OrderPurchaseContainer OrderPurchaseContainer { get; set; }
-        public virtual OrderPurchase OrderPurchase { get; set; }
     }
 }
