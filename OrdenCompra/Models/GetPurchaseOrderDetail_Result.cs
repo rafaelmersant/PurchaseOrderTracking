@@ -33,5 +33,6 @@ namespace OrdenCompra.Models
         public decimal QuantityTraffic { get; set; }
         public decimal QuantityAduana { get; set; }
         public decimal Price { get; set; }
+        public Nullable<decimal> InventoryStock { get; set; }
     }
 }

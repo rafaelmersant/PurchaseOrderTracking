@@ -30,33 +30,31 @@
         </div>*@
     <div class="wrapper">
         <!-- Sidebar  -->
+
         <nav id="sidebar">
 
             <div class="sidebar-header">
                 <a href="/"><img src="~/Content/images/RCLogo.PNG" alt="logo" id="site_logo_id" style="width: 220px" /></a>
-                @*<strong>BS</strong>*@
+
             </div>
             <ul class="list-unstyled components">
-                <li><a href="/Orden/"><i class="fa fa-newspaper-o"></i>Consultar Orden</a></li>
-                @*<li><a href="/Orden/"><i class="fa fa-list"></i>Listado de Ordenes</a></li>*@
-                <li><a href="/Articulos/"><i class="fa fa-list-alt"></i>Articulos</a></li>
-                <li><a href="/Naviera/"><i class="fa fa-ship"></i>Navieras</a></li>
-                <li><a href="/Suplidores/"><i class="fa fa-industry"></i>Suplidores</a></li>
-                <li><a href="/ContenedorEstatus/"><i class="fa fa-inbox"></i>Estatus de Contenedores</a></li>
-                <li><a href="/OrdenEstatus/"><i class="fa fa-inbox"></i>Estatus de Ordenes</a></li>
-                <li><a href="/Notificacion/"><i class="fa fa-inbox"></i>Notificaciones</a></li>
-                <li><a href="/User/UsersList"><i class="fa fa-group"></i>Usuarios</a></li>
+                @if (Session["role"] != null)
+                {
+                    <li><a href="/Orden/"><i class="fa fa-newspaper-o"></i>Consultar Orden</a></li>
+                    <li><a href="/Orden/Listado"><i class="fa fa-list"></i>Listado de Ordenes</a></li>
+                    <li><a href="/Articulos/"><i class="fa fa-list-alt"></i>Articulos </a></li>
+                    <li><a href="/Naviera/"><i class="fa fa-ship"></i>Navieras</a></li>
+                    <li><a href="/Suplidores/"><i class="fa fa-industry"></i>Suplidores</a></li>
+                    <li><a href="/ContenedorEstatus/"><i class="fa fa-comment"></i>Estatus de Contenedores</a></li>
+                    <li><a href="/OrdenEstatus/"><i class="fa fa-comment"></i>Estatus de Ordenes</a></li>
+                    <li><a href="/Notificacion/"><i class="fa fa-inbox"></i>Notificaciones</a></li>
+                    <li><a href="/User/UsersList"><i class="fa fa-group"></i>Usuarios</a></li>
+                }
 
-                @*@if (Session["role"] != null && Session["role"].ToString() != "AdminConsulta")
-                    {
-                        <li><a href="/Ordenes/Formulario"><i class="fa fa-newspaper-o"></i>Orden</a></li>
-                    }
-
-                    @if (Session["role"] != null && Session["role"].ToString() == "Admin")
-                    {
-                        <li><a href="/Notification"><i class="fa fa-inbox"></i>Enviar Notificaciones</a></li>
-                        <li><a href="/Reportes"><i class="fa fa-folder"></i>Reportes</a></li>
-                    }*@
+                @if (Session["role"] != null && Session["role"].ToString() == "Admin")
+                {
+                    <li><a href="/Notification"><i class="fa fa-bars"></i>Menu Admin</a></li>
+                }
             </ul>
         </nav>
 
@@ -65,21 +63,21 @@
         <!-- Page Content  -->
         <div id="content">
             <nav class="navbar navbar-expand-lg navbar-light mb-4" style="padding: 0 !important; height: 50px;">
-                <div class="container-fluid">
-                    <button type="button" id="sidebarCollapse" class="btn">
-                        <span class="fa fa-bars text-custom" style="font-size: 1.5em"></span>
-                    </button>
-                    <button class="btn btn-dark d-inline-block d-lg-none ml-auto" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                        <i class="fas fa-align-justify"></i>
-                    </button>
-                    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                        <ul class="nav navbar-nav" style="position: absolute; right: 0">
-                            <li class="nav-item">
-                                @Html.Partial("_LoginPartial")
-                            </li>
-                        </ul>
-                    </div>
+            <div class="container-fluid">
+                <button type="button" id="sidebarCollapse" class="btn">
+                    <span class="fa fa-bars text-custom" style="font-size: 1.5em"></span>
+                </button>
+                <button class="btn btn-dark d-inline-block d-lg-none ml-auto" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <i class="fas fa-align-justify"></i>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="nav navbar-nav" style="position: absolute; right: 0">
+                        <li class="nav-item">
+                            @Html.Partial("_LoginPartial")
+                        </li>
+                    </ul>
                 </div>
+            </div>
             </nav>
             @RenderBody()
         </div>
@@ -94,14 +92,14 @@
 
     @RenderSection("scripts", required: false)
 
-    <!-- jQuery CDN - Slim version (=without AJAX) -->
+    <!-- jQuery CDN - Slim version(=without AJAX) -->
     @*<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>*@
     <!-- Popper.JS -->
     @*<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js" integrity="sha384-cs/chFZiN24E4KMATLdqdvsezGxaGsi4hLGOzlXwp5UZB1LY//20VyM2taTB4QvJ" crossorigin="anonymous"></script>*@
     <!-- Bootstrap JS -->
     @*<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js" integrity="sha384-uefMccjFJAIv6A+rW+L4AHf99KvxDjWSu1z9VI8SKNVmz4sk7buKt/6v9KI65qnm" crossorigin="anonymous"></script>*@
 
-    
+
     <script type="text/javascript">
         $(document).ready(function () {
             $('#sidebarCollapse').on('click', function () {

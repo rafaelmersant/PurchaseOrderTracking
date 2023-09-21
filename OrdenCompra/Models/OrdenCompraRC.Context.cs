@@ -34,8 +34,6 @@ namespace OrdenCompra.Models
         public virtual DbSet<OrderPurchaseArticlesContainer> OrderPurchaseArticlesContainers { get; set; }
         public virtual DbSet<OrderPurchaseDoc> OrderPurchaseDocs { get; set; }
         public virtual DbSet<OrderPurchaseHistory> OrderPurchaseHistories { get; set; }
-        public virtual DbSet<Provider> Providers { get; set; }
-        public virtual DbSet<ShippingCompany> ShippingCompanies { get; set; }
         public virtual DbSet<StatusContainer> StatusContainers { get; set; }
         public virtual DbSet<User> Users { get; set; }
         public virtual DbSet<StatusOrderPurchase> StatusOrderPurchases { get; set; }
@@ -45,6 +43,8 @@ namespace OrdenCompra.Models
         public virtual DbSet<OrderPurchaseContainer> OrderPurchaseContainers { get; set; }
         public virtual DbSet<OrderPurchase> OrderPurchases { get; set; }
         public virtual DbSet<OrderPurchaseDeliver> OrderPurchaseDelivers { get; set; }
+        public virtual DbSet<Provider> Providers { get; set; }
+        public virtual DbSet<ShippingCompany> ShippingCompanies { get; set; }
     
         public virtual ObjectResult<GetPurchaseOrderHeader_Result> GetPurchaseOrderHeader(Nullable<int> orderID)
         {

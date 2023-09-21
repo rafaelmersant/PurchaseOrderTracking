@@ -173,7 +173,6 @@
           <Key>
             <PropertyRef Name="ProviderCode" />
           </Key>
-          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="ProviderCode" Type="int" Nullable="false" />
           <Property Name="ProviderName" Type="varchar" MaxLength="50" Nullable="false" />
           <Property Name="CreatedDate" Type="datetime" Nullable="false" />
@@ -184,6 +183,7 @@
           </Key>
           <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="Description" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="Port" Type="varchar" MaxLength="50" />
           <Property Name="Days" Type="int" Nullable="false" />
         </EntityType>
         <EntityType Name="StatusContainer">
@@ -356,8 +356,6 @@
           <EntitySet Name="OrderPurchaseArticlesContainers" EntityType="OrdenCompraRCModel.OrderPurchaseArticlesContainer" />
           <EntitySet Name="OrderPurchaseDocs" EntityType="OrdenCompraRCModel.OrderPurchaseDoc" />
           <EntitySet Name="OrderPurchaseHistories" EntityType="OrdenCompraRCModel.OrderPurchaseHistory" />
-          <EntitySet Name="Providers" EntityType="OrdenCompraRCModel.Provider" />
-          <EntitySet Name="ShippingCompanies" EntityType="OrdenCompraRCModel.ShippingCompany" />
           <EntitySet Name="StatusContainers" EntityType="OrdenCompraRCModel.StatusContainer" />
           <EntitySet Name="Users" EntityType="OrdenCompraRCModel.User" />
           <EntitySet Name="StatusOrderPurchases" EntityType="OrdenCompraRCModel.StatusOrderPurchase" />
@@ -379,9 +377,6 @@
             <End Role="OrderPurchaseContainer" EntitySet="OrderPurchaseContainers" />
             <End Role="OrderPurchaseArticlesContainer" EntitySet="OrderPurchaseArticlesContainers" />
           </AssociationSet>
-          <FunctionImport Name="GetPurchaseOrderDetail" ReturnType="Collection(OrdenCompraRCModel.GetPurchaseOrderDetail_Result)">
-          <Parameter Name="orderID" Mode="In" Type="Int32" />
-          </FunctionImport>
           <EntitySet Name="OrderPurchases" EntityType="OrdenCompraRCModel.OrderPurchase" />
           <EntitySet Name="OrderPurchaseDelivers" EntityType="OrdenCompraRCModel.OrderPurchaseDeliver" />
           <AssociationSet Name="FK_OrderPurchase" Association="OrdenCompraRCModel.FK_OrderPurchase">
@@ -400,6 +395,11 @@
             <End Role="OrderPurchase" EntitySet="OrderPurchases" />
             <End Role="OrderPurchaseHistory" EntitySet="OrderPurchaseHistories" />
           </AssociationSet>
+          <EntitySet Name="Providers" EntityType="OrdenCompraRCModel.Provider" />
+          <EntitySet Name="ShippingCompanies" EntityType="OrdenCompraRCModel.ShippingCompany" />
+          <FunctionImport Name="GetPurchaseOrderDetail" ReturnType="Collection(OrdenCompraRCModel.GetPurchaseOrderDetail_Result)">
+            <Parameter Name="orderID" Mode="In" Type="Int32" />
+          </FunctionImport>
           </EntityContainer>
         <EntityType Name="InventoryHistory">
           <Key>
@@ -482,23 +482,6 @@
           <Property Name="Quantity" Type="Decimal" Nullable="false" Precision="18" Scale="2" />
           <Property Name="Status" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
           <NavigationProperty Name="OrderPurchase" Relationship="OrdenCompraRCModel.FK_OrderPurchase_H" FromRole="OrderPurchaseHistory" ToRole="OrderPurchase" />
-        </EntityType>
-        <EntityType Name="Provider">
-          <Key>
-            <PropertyRef Name="ProviderCode" />
-          </Key>
-          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="ProviderCode" Type="Int32" Nullable="false" />
-          <Property Name="ProviderName" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="CreatedDate" Type="DateTime" Nullable="false" Precision="3" />
-        </EntityType>
-        <EntityType Name="ShippingCompany">
-          <Key>
-            <PropertyRef Name="Id" />
-          </Key>
-          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="Description" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
-          <Property Name="Days" Type="Int32" Nullable="false" />
         </EntityType>
         <EntityType Name="StatusContainer">
           <Key>
@@ -640,28 +623,6 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <ComplexType Name="GetPurchaseOrderDetail_Result">
-          <Property Type="Int32" Name="Id" Nullable="false" />
-          <Property Type="Int32" Name="containerId" Nullable="false" />
-          <Property Type="Int32" Name="SortIndex" Nullable="false" />
-          <Property Type="Decimal" Name="MaxCapacityQuantity" Nullable="false" Precision="18" Scale="2" />
-          <Property Type="Int32" Name="ShippingCompanyId" Nullable="true" />
-          <Property Type="String" Name="BL" Nullable="true" MaxLength="25" />
-          <Property Type="String" Name="DueDate" Nullable="true" MaxLength="10" />
-          <Property Type="Int32" Name="StatusId" Nullable="false" />
-          <Property Type="String" Name="ManufacturingDate" Nullable="true" MaxLength="10" />
-          <Property Type="Int32" Name="ArticleId" Nullable="false" />
-          <Property Type="String" Name="Description" Nullable="false" MaxLength="100" />
-          <Property Type="String" Name="Model" Nullable="true" MaxLength="20" />
-          <Property Type="String" Name="Mark" Nullable="false" MaxLength="50" />
-          <Property Type="Int32" Name="MarkId" Nullable="true" />
-          <Property Type="Decimal" Name="QuantityRequested" Nullable="false" Precision="18" Scale="2" />
-          <Property Type="Decimal" Name="QuantityLeft" Nullable="false" Precision="18" Scale="2" />
-          <Property Type="Decimal" Name="QuantityFactory" Nullable="false" Precision="18" Scale="2" />
-          <Property Type="Decimal" Name="QuantityTraffic" Nullable="false" Precision="18" Scale="2" />
-          <Property Type="Decimal" Name="QuantityAduana" Nullable="false" Precision="18" Scale="2" />
-          <Property Type="Decimal" Name="Price" Nullable="false" Precision="18" Scale="2" />
-        </ComplexType>
         <EntityType Name="OrderPurchase">
           <Key>
             <PropertyRef Name="OrderPurchaseId" />
@@ -745,6 +706,46 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <EntityType Name="Provider">
+          <Key>
+            <PropertyRef Name="ProviderCode" />
+          </Key>
+          <Property Name="ProviderCode" Type="Int32" Nullable="false" />
+          <Property Name="ProviderName" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="CreatedDate" Type="DateTime" Nullable="false" Precision="3" />
+        </EntityType>
+        <EntityType Name="ShippingCompany">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Description" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="Port" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="Days" Type="Int32" Nullable="false" />
+        </EntityType>
+        <ComplexType Name="GetPurchaseOrderDetail_Result">
+          <Property Type="Int32" Name="Id" Nullable="false" />
+          <Property Type="Int32" Name="containerId" Nullable="false" />
+          <Property Type="Int32" Name="SortIndex" Nullable="false" />
+          <Property Type="Decimal" Name="MaxCapacityQuantity" Nullable="false" Precision="18" Scale="2" />
+          <Property Type="Int32" Name="ShippingCompanyId" Nullable="true" />
+          <Property Type="String" Name="BL" Nullable="true" MaxLength="25" />
+          <Property Type="String" Name="DueDate" Nullable="true" MaxLength="10" />
+          <Property Type="Int32" Name="StatusId" Nullable="false" />
+          <Property Type="String" Name="ManufacturingDate" Nullable="true" MaxLength="10" />
+          <Property Type="Int32" Name="ArticleId" Nullable="false" />
+          <Property Type="String" Name="Description" Nullable="false" MaxLength="100" />
+          <Property Type="String" Name="Model" Nullable="true" MaxLength="20" />
+          <Property Type="String" Name="Mark" Nullable="false" MaxLength="50" />
+          <Property Type="Int32" Name="MarkId" Nullable="true" />
+          <Property Type="Decimal" Name="QuantityRequested" Nullable="false" Precision="18" Scale="2" />
+          <Property Type="Decimal" Name="QuantityLeft" Nullable="false" Precision="18" Scale="2" />
+          <Property Type="Decimal" Name="QuantityFactory" Nullable="false" Precision="18" Scale="2" />
+          <Property Type="Decimal" Name="QuantityTraffic" Nullable="false" Precision="18" Scale="2" />
+          <Property Type="Decimal" Name="QuantityAduana" Nullable="false" Precision="18" Scale="2" />
+          <Property Type="Decimal" Name="Price" Nullable="false" Precision="18" Scale="2" />
+          <Property Type="Decimal" Name="InventoryStock" Nullable="true" Precision="18" Scale="2" />
+        </ComplexType>
         </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -830,25 +831,6 @@
                 <ScalarProperty Name="Quantity" ColumnName="Quantity" />
                 <ScalarProperty Name="OrderPurchaseId" ColumnName="OrderPurchaseId" />
                 <ScalarProperty Name="ArticleId" ColumnName="ArticleId" />
-                <ScalarProperty Name="Id" ColumnName="Id" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="Providers">
-            <EntityTypeMapping TypeName="OrdenCompraRCModel.Provider">
-              <MappingFragment StoreEntitySet="Provider">
-                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
-                <ScalarProperty Name="ProviderName" ColumnName="ProviderName" />
-                <ScalarProperty Name="ProviderCode" ColumnName="ProviderCode" />
-                <ScalarProperty Name="Id" ColumnName="Id" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="ShippingCompanies">
-            <EntityTypeMapping TypeName="OrdenCompraRCModel.ShippingCompany">
-              <MappingFragment StoreEntitySet="ShippingCompany">
-                <ScalarProperty Name="Days" ColumnName="Days" />
-                <ScalarProperty Name="Description" ColumnName="Description" />
                 <ScalarProperty Name="Id" ColumnName="Id" />
               </MappingFragment>
             </EntityTypeMapping>
@@ -979,32 +961,6 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <FunctionImportMapping FunctionImportName="GetPurchaseOrderDetail" FunctionName="OrdenCompraRCModel.Store.GetPurchaseOrderDetail">
-            <ResultMapping>
-              <ComplexTypeMapping TypeName="OrdenCompraRCModel.GetPurchaseOrderDetail_Result">
-                <ScalarProperty Name="Id" ColumnName="Id" />
-                <ScalarProperty Name="containerId" ColumnName="containerId" />
-                <ScalarProperty Name="SortIndex" ColumnName="SortIndex" />
-                <ScalarProperty Name="MaxCapacityQuantity" ColumnName="MaxCapacityQuantity" />
-                <ScalarProperty Name="ShippingCompanyId" ColumnName="ShippingCompanyId" />
-                <ScalarProperty Name="BL" ColumnName="BL" />
-                <ScalarProperty Name="DueDate" ColumnName="DueDate" />
-                <ScalarProperty Name="StatusId" ColumnName="StatusId" />
-                <ScalarProperty Name="ManufacturingDate" ColumnName="ManufacturingDate" />
-                <ScalarProperty Name="ArticleId" ColumnName="ArticleId" />
-                <ScalarProperty Name="Description" ColumnName="Description" />
-                <ScalarProperty Name="Model" ColumnName="Model" />
-                <ScalarProperty Name="Mark" ColumnName="Mark" />
-                <ScalarProperty Name="MarkId" ColumnName="MarkId" />
-                <ScalarProperty Name="QuantityRequested" ColumnName="QuantityRequested" />
-                <ScalarProperty Name="QuantityLeft" ColumnName="QuantityLeft" />
-                <ScalarProperty Name="QuantityFactory" ColumnName="QuantityFactory" />
-                <ScalarProperty Name="QuantityTraffic" ColumnName="QuantityTraffic" />
-                <ScalarProperty Name="QuantityAduana" ColumnName="QuantityAduana" />
-                <ScalarProperty Name="Price" ColumnName="Price" />
-              </ComplexTypeMapping>
-            </ResultMapping>
-          </FunctionImportMapping>
           <EntitySetMapping Name="OrderPurchases">
             <EntityTypeMapping TypeName="OrdenCompraRCModel.OrderPurchase">
               <MappingFragment StoreEntitySet="OrderPurchase">
@@ -1033,6 +989,52 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
+          <EntitySetMapping Name="Providers">
+            <EntityTypeMapping TypeName="OrdenCompraRCModel.Provider">
+              <MappingFragment StoreEntitySet="Provider">
+                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
+                <ScalarProperty Name="ProviderName" ColumnName="ProviderName" />
+                <ScalarProperty Name="ProviderCode" ColumnName="ProviderCode" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="ShippingCompanies">
+            <EntityTypeMapping TypeName="OrdenCompraRCModel.ShippingCompany">
+              <MappingFragment StoreEntitySet="ShippingCompany">
+                <ScalarProperty Name="Days" ColumnName="Days" />
+                <ScalarProperty Name="Port" ColumnName="Port" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <FunctionImportMapping FunctionImportName="GetPurchaseOrderDetail" FunctionName="OrdenCompraRCModel.Store.GetPurchaseOrderDetail">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="OrdenCompraRCModel.GetPurchaseOrderDetail_Result">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="containerId" ColumnName="containerId" />
+                <ScalarProperty Name="SortIndex" ColumnName="SortIndex" />
+                <ScalarProperty Name="MaxCapacityQuantity" ColumnName="MaxCapacityQuantity" />
+                <ScalarProperty Name="ShippingCompanyId" ColumnName="ShippingCompanyId" />
+                <ScalarProperty Name="BL" ColumnName="BL" />
+                <ScalarProperty Name="DueDate" ColumnName="DueDate" />
+                <ScalarProperty Name="StatusId" ColumnName="StatusId" />
+                <ScalarProperty Name="ManufacturingDate" ColumnName="ManufacturingDate" />
+                <ScalarProperty Name="ArticleId" ColumnName="ArticleId" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="Model" ColumnName="Model" />
+                <ScalarProperty Name="Mark" ColumnName="Mark" />
+                <ScalarProperty Name="MarkId" ColumnName="MarkId" />
+                <ScalarProperty Name="QuantityRequested" ColumnName="QuantityRequested" />
+                <ScalarProperty Name="QuantityLeft" ColumnName="QuantityLeft" />
+                <ScalarProperty Name="QuantityFactory" ColumnName="QuantityFactory" />
+                <ScalarProperty Name="QuantityTraffic" ColumnName="QuantityTraffic" />
+                <ScalarProperty Name="QuantityAduana" ColumnName="QuantityAduana" />
+                <ScalarProperty Name="Price" ColumnName="Price" />
+                <ScalarProperty Name="InventoryStock" ColumnName="InventoryStock" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
         </EntityContainerMapping>
       </Mapping>
     </edmx:Mappings>

@@ -16,6 +16,7 @@ namespace OrdenCompra.Models
     {
         public int Id { get; set; }
         public string Description { get; set; }
+        public string Port { get; set; }
         public int Days { get; set; }
     }
 }

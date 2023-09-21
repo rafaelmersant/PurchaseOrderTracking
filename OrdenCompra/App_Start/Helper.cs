@@ -254,6 +254,46 @@ namespace OrdenCompra.App_Start
             return null;
         }
 
+        //GET Providers
+        public static DataSet GetProviders()
+        {
+            try
+            {
+                string sQuery = $"SELECT OCMCODI, OCMNOMB FROM [IFUENTELIB.OCMPROV00] WHERE OCMCODI >= 20000 AND OCMCODI <= 59999";
+
+                if (ConfigurationManager.AppSettings["EnvironmentOrdenCompra"] != "DEV")
+                    sQuery = sQuery.Replace("[", "").Replace("]", "");
+
+                return ExecuteDataSetODBC(sQuery, null);
+            }
+            catch (Exception ex)
+            {
+                Helper.SendException(ex);
+            }
+
+            return null;
+        }
+
+        //GET Articles
+        public static DataSet GetArticles()
+        {
+            try
+            {
+                string sQuery = $"SELECT MPNARTICUL, MPDESCRIPC, MPNUMMARCA, MPMODELO, MPSTOCKCRI, MPSTOCKMAX FROM [QS36F.RCFAMP00] WHERE MPCOREGIST != 9";
+
+                if (ConfigurationManager.AppSettings["EnvironmentOrdenCompra"] != "DEV")
+                    sQuery = sQuery.Replace("[", "").Replace("]", "");
+
+                return ExecuteDataSetODBC(sQuery, null);
+            }
+            catch (Exception ex)
+            {
+                Helper.SendException(ex);
+            }
+
+            return null;
+        }
+
         public static DataSet ExecuteDataSetODBC(string query, OdbcParameter[] parameters = null)
         {
             string sConn = ConfigurationManager.AppSettings["sConnSQLODBC"];

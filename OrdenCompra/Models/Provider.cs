@@ -14,7 +14,6 @@ namespace OrdenCompra.Models
     
     public partial class Provider
     {
-        public int Id { get; set; }
         public int ProviderCode { get; set; }
         public string ProviderName { get; set; }
         public System.DateTime CreatedDate { get; set; }

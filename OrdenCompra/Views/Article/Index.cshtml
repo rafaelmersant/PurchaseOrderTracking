@@ -4,14 +4,21 @@
     ViewBag.Title = "Listado de Articulos";
 }
 
+<link href="~/Content/dataTables.bootstrap4.min.css" rel="stylesheet" />
+<link href="~/Content/toastr.css" rel="stylesheet" type="text/css" />
+
+
+
+
 <div class="container-fluid">
     <section class="text-dark border-custom border">
         <div class="bg-secondary text-light panel-custom border">
             <h6 class="panel-title">
                 Listado de Articulos
-                @*<span class="btn-group pull-right">
-                    <a href="@Url.Action("RegisterUser")" class="btn btn-danger btn-sm" style="margin-top: -7px">Nuevo Usuario</a>
-                </span>*@
+                <span class="btn-group pull-right">
+                    <a href="javascript:void(0);" class="btn btn-danger btn-sm update-articles" style="margin-top: -7px">Actualizar Articulos</a>
+                    <span id="waitingIndicator" class="spinner-border text-white ml-2" style="margin-top: -10px; display:none"></span>
+                </span>
             </h6>
         </div>
 
@@ -32,6 +39,9 @@
                             Modelo
                         </th>
                         <th>
+                            Tamaño
+                        </th>
+                        <th>
                             Inventario
                         </th>
                         <th>
@@ -46,25 +56,26 @@
                 <tbody>
                     @foreach (var item in Model)
                     {
-                    <tr>
-                        <td>@item.Id</td>
-                        <td>@item.Description</td>
-                        <td>@item.Mark.Description</td>
-                        <td>@item.Model</td>
-                        <td>@item.InventoryStock</td>
-                        <td>@item.QuantityMinStock</td>
-                        <td>@item.QuantityMaxPerContainer</td>
+                        <tr>
+                            <td>@item.Id</td>
+                            <td>@item.Description</td>
+                            <td>@item.Mark.Description</td>
+                            <td>@item.Model</td>
+                            <td>@item.Size</td>
+                            <td>@item.InventoryStock</td>
+                            <td>@item.QuantityMinStock</td>
+                            <td>@item.QuantityMaxPerContainer</td>
 
-                        <td align="center">
-                            <a class="btn btn-sm btn-success" href="@Url.Action("Edit",new { idHash = @item.Id })" title="Editar">
-                                <i class="fa fa-edit"></i>
+                            <td align="center">
+                                <a class="btn btn-sm btn-success" href="@Url.Action("Edit",new { id = @item.Id })" title="Editar">
+                                    <i class="fa fa-edit"></i>
 
-                            </a>
-                            @*<a class="btn btn-sm btn-danger" href="javascript:void(0)" onclick="deleteArticle(@item.Id,@item.Id)" title="Eliminar">
+                                </a>
+                                @*<a class="btn btn-sm btn-danger" href="javascript:void(0)" onclick="deleteArticle(@item.Id,@item.Id)" title="Eliminar">
                 <i class="fa fa-remove"></i>
             </a>*@
-                        </td>
-                    </tr>
+                            </td>
+                        </tr>
                     }
                 </tbody>
             </table>
@@ -72,18 +83,16 @@
     </section>
 </div>
 
-
-<link href="~/Content/dataTables.bootstrap4.min.css" rel="stylesheet" />
-
 @section scripts {
     <script src="~/Scripts/jquery.dataTables.min.js"></script>
     <script src="~/Scripts/dataTables.bootstrap4.min.js"></script>
-
+    <script src="~/Scripts/toastr.js"></script>
 }
 <script type="text/javascript">
 
     $(document).ready(function () {
         $("#articlesTable").DataTable();
+        $("#waitingIndicator").hide();
 
         //Replace Previous -> Anterior
         $('body :not(script)').contents().filter(function () {
@@ -125,6 +134,38 @@
             return this.nodeType === 3;
         }).replaceWith(function () {
             return this.nodeValue.replace('Search', 'Buscar');
+        });
+
+        $(".update-articles").on('click', function (evt) {
+            evt.preventDefault();
+            evt.stopPropagation();
+
+            $("#waitingIndicator").show();
+            $(".update-articles").text('Actualizando articulos...');
+            $(".update-articles").addClass('disabled-button');
+
+            $.ajax({
+                "url": `/Article/UpdateArticles`,
+                "type": "POST",
+                "success": async function (response) {
+                    if (response.result === "200") {
+                        console.log(response);
+                        toastr.success(`${response.message}`);
+
+                        setTimeout(() => {
+                            window.location.reload(true);
+                        }, 3000)
+                    }
+                    else {
+                        console.log(response.message);
+                        toastr.error(response.message);
+                    }
+
+                    $("#waitingIndicator").hide();
+                    $(".update-articles").text('Actualizar Articulos');
+                    $(".update-articles").removeClass('disabled-button');
+                }
+            });
         });
     });
 

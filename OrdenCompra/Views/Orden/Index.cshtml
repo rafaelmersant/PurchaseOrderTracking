@@ -45,14 +45,14 @@
         <form class="mt-1 ml-2 mr-2">
             <div class="form-row">
 
-                <div class="form-group col-lg-3 col-md-2 col-sm-12">
+                <div class="form-group col-lg-3 col-md-4 col-sm-12">
                     <div class="row">
-                        <div class="col-4 mb-1">
+                        <div class="col-6 mb-1">
                             <label for="validationDefault01">Orden No.</label>
                             <input type="text" id="orderId" name="orderId" value="" class="form-control form-control-sm numericOnly" autocomplete="off" style="min-width: 65px !important" />
                         </div>
 
-                        <div class="col-2">
+                        <div class="col-6">
                             <a class="btn btn-sm btn-info" href="javascript:void(0)" id="btnSearchOrder" title="Buscar" style="margin-top: 24px">
                                 <i class="fa fa-search"></i>
                             </a>
@@ -61,12 +61,12 @@
                     </div>
                 </div>
 
-                <div class="form-group col-lg-2 col-md-2 col-sm-12">
+                <div class="form-group col-lg-2 col-md-3 col-sm-12">
                     <label for="orderDate">Estatus</label>
                     @Html.DropDownList("OrderStatusId", new SelectList(ViewBag.OrderStatus, "Value", "Text"), new
                      {
-                         @class = "form-control-sm",
-                         @style = "border: 1px solid lightgray; color: gray"
+                         @class = "form-control form-control-sm small-box",
+                         @style = "border: 1px solid lightgray; color: gray;"
                      })
                 </div>
 
@@ -80,8 +80,8 @@
                         <input type="text" id="orderDateOpen" name="orderDateOpen" value="" class="form-control form-control-sm col-12 datepicker" />
                     </div>*@
 
-                <div class="form-group col-lg-5 col-md-5 col-sm-12">
-                    <label for="validationDefault01">Proveedor</label>
+                <div class="form-group col-lg-5 col-md-4 col-sm-12">
+                    <label for="validationDefault01">Suplidor</label>
                     <input type="text" id="provider" name="provider" value="" class="form-control form-control-sm col-12" readonly />
                 </div>
             </div>
@@ -179,7 +179,8 @@
         $("#observation").val("");
         $("#containers").html("");
         $("#OrderStatusId").val("");
-
+        $("#orderDate").val("");
+        
         $("#waitingIndicator").show();
         $("#btnSearchOrder").hide();
         $("#btnToggleContainers").hide();
@@ -215,11 +216,6 @@
                         const newValue = $(this).val();
                         const previousValue = $(this)[0].defaultValue;
 
-                        //if (!newValue) {
-                        //    $(this).addClass('field-will-be-removed');
-                        //    return false;
-                        //}
-
                         if (newValue !== previousValue) {
                             $(this).addClass('field-updated');
                         }
@@ -234,23 +230,39 @@
                     $(".container-save").on('click', function (evt) {
                         evt.preventDefault();
                         evt.stopPropagation();
-
+                        
                         const containerId = $(this)[0].id.split('-')[2];
                         const container = orderDetails.message.Containers.filter(c => c.container.Id == containerId);
+                        const BL = $(`#BL-${containerId}`).val();
 
                         for (const item of container[0].Details) {
-                            if ($(`#article-quantity-${item.Id}`).hasClass("field-updated")) {
+                            if ($(`#article-quantity-${item.Id}`).hasClass("field-updated")
+                                || $(`#article-traffic-${item.Id}`).hasClass("field-updated")
+                                || $(`#article-factory-${item.Id}`).hasClass("field-updated")
+                                || $(`#BL-${containerId}`).hasClass("field-updated")) {
+
                                 const newQuantity = $(`#article-quantity-${item.Id}`).val();
+                                const trafficQuantity = $(`#article-traffic-${item.Id}`).val();
+                                const factoryQuantity = $(`#article-factory-${item.Id}`).val();
+
                                 $.ajax({
-                                    "url": `/Orden/UpdateQuantityField?detailId=${item.Id}&newQuantity=${newQuantity}`,
+                                    "url": `/Orden/UpdateQuantityField?detailId=${item.Id}&newQuantity=${newQuantity}&traffic=${trafficQuantity}&factory=${factoryQuantity}&BL=${BL}`,
                                     "type": "POST",
                                     "success": async function (response) {
-                                        if (response.result === "200") {
+                                        if (response.result === "200" || response.result === "201") {
                                             $(`#article-quantity-${item.Id}`).removeClass("field-updated");
-                                            toastr.success(`La cantidad fue actualizada para el articulo: ${item.Description}`);
+                                            $(`#BL-${containerId}`).removeClass("field-updated");
+
+                                            toastr.success(`Los datos fueron actualizados para el contenedor #: ${container[0].container.SortIndex}`);
+
+                                            setTimeout(() => {
+                                                if (response.result === "201") {
+                                                    $("#btnSearchOrder").click();
+                                                }
+                                            }, 2500);
                                         }
                                         else
-                                            toastr.error(`Hubo un error al tratar de actualizar la cantidad para el articulo: ${item.Description}`);
+                                            toastr.error(`Hubo un error al tratar de actualizar los datos para el contenedor: ${container[0].container.SortIndex}`);
                                     }
                                 });
                             }
@@ -304,6 +316,29 @@
                         }
                     });
 
+                    $(".containerManufacturingDate").on("change", function (evt) {
+                        evt.preventDefault();
+                        evt.stopPropagation();
+
+                        const containerId = evt.currentTarget.id.split("-")[1];
+                        const container = orderDetails.message.Containers.filter(c => c.container.Id == containerId);
+
+                        if (confirm(`Esta seguro que desea cambiar la fecha de fabricación para el contenedor #${container[0].container.SortIndex}?`)) {
+                            $.ajax({
+                                "url": `/Orden/UpdateContainerField?containerId=${containerId}&type=ManufacturingDate&value=${$(`#${evt.currentTarget.id}`).val()}`,
+                                "type": "POST",
+                                "success": async function (response) {
+                                    if (response.result === "200")
+                                        toastr.success(`Fecha de fabricación actualizada para el contenedor #${container[0].container.SortIndex}`);
+                                    else
+                                        toastr.error("Hubo un error al tratar de actualizar la fecha de fabricación para este contenedor.");
+                                }
+                            });
+                        } else {
+                            $(`#${evt.currentTarget.id}`).val($(this)[0].defaultValue);
+                        }
+                    });
+
                     $(".containerDueDate").on("change", function (evt) {
                         evt.preventDefault();
                         evt.stopPropagation();
@@ -311,15 +346,15 @@
                         const containerId = evt.currentTarget.id.split("-")[1];
                         const container = orderDetails.message.Containers.filter(c => c.container.Id == containerId);
 
-                        if (confirm(`Esta seguro que desea cambiar la fecha de compromiso para el contenedor #${container[0].container.SortIndex}?`)) {
+                        if (confirm(`Esta seguro que desea cambiar la fecha de entrega para el contenedor #${container[0].container.SortIndex}?`)) {
                             $.ajax({
                                 "url": `/Orden/UpdateContainerField?containerId=${containerId}&type=DueDate&value=${$(`#${evt.currentTarget.id}`).val()}`,
                                 "type": "POST",
                                 "success": async function (response) {
                                     if (response.result === "200")
-                                        toastr.success(`Fecha de compromiso actualizada para el contenedor #${container[0].container.SortIndex}`);
+                                        toastr.success(`Fecha de entrega actualizada para el contenedor #${container[0].container.SortIndex}`);
                                     else
-                                        toastr.error("Hubo un error al tratar de actualizar la fecha de compromiso para este contenedor.");
+                                        toastr.error("Hubo un error al tratar de actualizar la fecha de entrega para este contenedor.");
                                 }
                             });
                         } else {
@@ -391,9 +426,14 @@
 
     function renderContainer(container) {
         let dueDate = "";
+        let manufacturingDate = "";
 
         if (container.container.DueDate && container.container.DueDate.length === 10) {
             dueDate = GetSpanishDate(container.container.DueDate);
+        }
+
+        if (container.container.ManufacturingDate && container.container.ManufacturingDate.length === 10) {
+            manufacturingDate = GetSpanishDate(container.container.ManufacturingDate);
         }
 
         //Navieras
@@ -402,7 +442,7 @@
         navieras.push(`<option value=""></option>`);
 
         for (const naviera of _navieras) {
-            navieras.push(`<option value="${naviera.Id}" ${container.container.ShippingCompanyId === parseInt(naviera.Id) ? "selected" : ""}>${naviera.Description}</option>`)
+            navieras.push(`<option value="${naviera.Id}" ${container.container.ShippingCompanyId === parseInt(naviera.Id) ? "selected" : ""}>${naviera.Description}->${naviera.Port}</option>`)
         }
 
         //Container Status
@@ -416,35 +456,41 @@
 
         let view =
            `<panel id="containerId" class="bg-light text-dark border-custom panel-container">
-            <div class="bg-secondary text-light panel-custom border">
-                <div class="d-flex justify-content-between">
+            <div class="bg-secondary text-light border">
+                <div class="form-row">
 
-                    <div class="d-flex align-items-center" style="margin-top: -8px; margin-left: -6px">
+                    <div class="form-group pl-2 pt-3 col-lg-2 col-md-2 col-sm-12">
                         <a href="javascript:void(0)" id="toggleContainer-${container.container.SortIndex}" onclick="toggleContainer(${container.container.SortIndex});" class="border p-2 pl-2 pr-2 mr-2 fa fa-minus"></a>
-                        <h6 class="panel-title mb-0" id="container-title">Contenedor #${container.container.SortIndex} - Articulos</h6>
+                        <span class="panel-title" id="container-title"><b>Contenedor #${container.container.SortIndex}</b></span>
                     </div>
 
-                    <div class="d-flex align-items-center" style="margin-top: -8px;">
-                        <label for="dueDate" class="h6 mb-0 d-inline mr-2">Estatus:</label>
-                        <select class="form-control form-control-sm d-inline bg-secondary text-light containerStatus" id="container-estatus-${container.container.Id}">
+                    <div class="form-group mt-1 ml-2 col-lg-1 col-md-1 col-sm-12">
+                        <label for="dueDate">Estatus</label>
+                        <select class="form-control form-control-sm small-box bg-secondary text-light containerStatus" id="container-estatus-${container.container.Id}">
                            ${containerStatus}
                         </select>
                     </div>
 
-                    <div class="d-flex align-items-center" style="margin-top: -8px;">
-                        <label for="dueDate" class="h6 mb-0 d-inline mr-2">Naviera:</label>
-                        <select class="form-control form-control-sm d-inline bg-secondary text-light containerNaviera" id="container-naviera-${container.container.Id}">
+                    <div class="form-group mt-1 ml-2 col-lg-2 col-md-2 col-sm-12">
+                        <label for="dueDate">Puerto</label>
+                        <select class="form-control form-control-sm small-box bg-secondary text-light containerNaviera" id="container-naviera-${container.container.Id}">
                             ${navieras}
                         </select>
                     </div>
-
-                    <div class="d-flex align-items-center" style="margin-top: -8px; margin-right: -30px">
-                        <label class="h6 mb-0 d-inline" title="Cantidad">Capacidad máxima: <span id="container-max-capacity"><b>${container.container.MaxCapacityQuantity}</b></span></label>
+                    
+                    <div class="form-group mt-1 ml-2 col-lg-2 col-md-2 col-sm-12">
+                        <label for="bl">BL</label>
+                        <input type="text" id="BL-${container.container.Id}" name="BL" value="${container.container.BL}" class="form-control form-control-sm bg-light-gray quantityField containerBL" autocomplete="off"/>
                     </div>
 
-                    <div class="d-flex align-items-center" style="margin-top: -8px; margin-right: -25px">
-                        <label for="dueDate" class="h6 mb-0 d-inline mr-2">Fecha Compromiso:</label>
-                        <input type="text" id="dueDate-${container.container.Id}" name="dueDate" value="${dueDate}" class="form-control form-control-sm col-6 d-inline bg-light-gray datepicker containerDueDate" autocomplete="off"/>
+                    <div class="form-group mt-1 ml-2 col-lg-2 col-md-2 col-sm-12">
+                        <label for="manufacturingDate">Fecha Fabricación:</label>
+                        <input type="text" id="manufacturingDate-${container.container.Id}" name="manufacturingDate" value="${manufacturingDate}" class="form-control form-control-sm bg-light-gray datepicker containerManufacturingDate" autocomplete="off"/>
+                    </div>
+
+                    <div class="form-group mt-1 ml-2 col-lg-2 col-md-2 col-sm-12">
+                        <label for="dueDate">Fecha Entrega:</label>
+                        <input type="text" id="dueDate-${container.container.Id}" name="dueDate" value="${dueDate}" class="form-control form-control-sm bg-light-gray datepicker containerDueDate" autocomplete="off"/>
                     </div>
                 </div>
             </div>
@@ -472,11 +518,14 @@
                             <th>
                                 Modelo
                             </th>
-                            <th class='text-right'>
-                                Precio
+                            <th class='text-center'>
+                                Inventario
                             </th>
-                            <th class='text-right'>
-                                Total
+                            <th class='text-center'>
+                                Transito
+                            </th>
+                            <th class='text-center'>
+                                Fabrica
                             </th>
                         </tr>
                     </thead>
@@ -511,45 +560,48 @@
                 <td>
                     ${item.Model}
                 </td>
-                <td class='text-right'>
-                    ${formatNumber(item.Price)}
+                <td class="text-center" style='width:80px;'>
+                    ${item.InventoryStock}
                 </td>
-                <td class='text-right'>
-                    ${formatNumber(item.QuantityRequested * item.Price)}
+                <td class="text-center" style='width:80px;'>
+                    <input type="text" id="article-traffic-${item.Id}" name="article-traffic-${item.Id}" value="${item.QuantityTraffic}" class="form-control form-control-sm numericOnly quantityField" style="max-width: 100px" autocomplete="off" />
+                </td>
+                <td class="text-center" style='width:80px;'>
+                    <input type="text" id="article-factory-${item.Id}" name="article-factory-${item.Id}" value="${item.QuantityFactory}" class="form-control form-control-sm numericOnly quantityField" style="max-width: 100px" autocomplete="off" />
                 </td>
             </tr>`
         }
-         view +=
-                `</tbody>
-                <tfoot class="bg-warning">
-                    <tr>
-                        <td>
-                         <b>Total<b>
-                        </td>
-                        <td>
-                            <span id="article-quantity-total"><b>${formatNumber(quantityTotal)}</b></span>
-                        </td>
-                        <td>
-                        </td>
-                        <td>
-                        </td>
-                        <td>
-                        </td>
-                        <td>
-                        </td>
-                        <td>
-                        </td>
-                        <td class='text-right'>
-                            <span id="article-price-total"><b>${formatNumber(total)}</b></span>
-                        </td>
-                    </tr>
-                    <tr class="bg-light">
-                        <td colspan="8">
+        view += `</tbody>`;
+        view += `<tfoot class="bg-warning">`;
+        //view += `<tr>
+        //                <td>
+        //                 <b>Total<b>
+        //                </td>
+        //                <td>
+        //                    <span id="article-quantity-total"><b>${formatNumber(quantityTotal)}</b></span>
+        //                </td>
+        //                <td>
+        //                </td>
+        //                <td>
+        //                </td>
+        //                <td>
+        //                </td>
+        //                <td>
+        //                </td>
+        //                <td>
+        //                </td>
+        //                <td class='text-right'>
+        //                    <span id="article-price-total"><b>${formatNumber(total)}</b></span>
+        //                </td>
+        //            </tr>`;
+        view +=     `<tr class="bg-light">
+                        <td colspan="9">
                             <a href="javascript:void(0);" id="container-save-${container.container.Id}" class="btn btn-danger btn-sm container-save">Guardar cambios para Contener #${container.container.SortIndex}</a>
                         </td>
                     </tr>
-                </tfoot>
-            </table>
+                </tfoot>`;
+
+        view += `</table>
         </section>
         </panel>`
 

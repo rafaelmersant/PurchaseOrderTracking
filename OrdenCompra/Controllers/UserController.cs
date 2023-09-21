@@ -72,6 +72,7 @@ namespace OrdenCompra.Controllers
                     {
                         Session["employeeID"] = username;
                         Session["role"] = _user.Role;
+                        Session["userID"] = _user.Id;
 
                         Session["hasEmail"] = !string.IsNullOrEmpty(_user.Email) && _user.Email.Contains("@") ? "Yes" : "No";
 
