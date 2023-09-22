@@ -102,7 +102,6 @@
     </section>
 </div>
 
-
 @section Scripts {
     @Scripts.Render("~/bundles/jqueryval")
 
@@ -110,7 +109,6 @@
     <script src="~/Scripts/dataTables.bootstrap4.min.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <script src="~/Scripts/toastr.js"></script>
-
 }
 
 <script type="text/javascript">
@@ -180,7 +178,7 @@
         $("#containers").html("");
         $("#OrderStatusId").val("");
         $("#orderDate").val("");
-        
+
         $("#waitingIndicator").show();
         $("#btnSearchOrder").hide();
         $("#btnToggleContainers").hide();
@@ -194,6 +192,18 @@
                     console.log(response);
                     orderDetails = response;
 
+                    //Get unique articles from this order
+                    const articles = response.message.Containers.map(item => (
+                        {
+                            "Id": item.Details[0].ArticleId,
+                            "Description": item.Details[0].Description
+                        }
+                    ));
+
+                    const unique_articles = articles.filter((item, index) => {
+                        return index === articles.findIndex(o => item.Id === o.Id);
+                    });
+
                     $("#provider").val(`${response.message.Header.ProviderId}-${response.message.Header.ProviderName}`);
                     //$("#requestedDate").html(`${response.message.Header.CreatedDate}`);
                     $("#orderDate").val(`${GetSpanishDate(response.message.Header.DateDMA)}`);
@@ -206,13 +216,13 @@
 
                     let views = [];
                     for (const container of response.message.Containers) {
-                        views.push(renderContainer(container));
+                        views.push(renderContainer(container, unique_articles));
                     }
 
                     $("#containers").html(views);
 
                     $('.quantityField').blur(function () {
-                        
+
                         const newValue = $(this).val();
                         const previousValue = $(this)[0].defaultValue;
 
@@ -230,7 +240,7 @@
                     $(".container-save").on('click', function (evt) {
                         evt.preventDefault();
                         evt.stopPropagation();
-                        
+
                         const containerId = $(this)[0].id.split('-')[2];
                         const container = orderDetails.message.Containers.filter(c => c.container.Id == containerId);
                         const BL = $(`#BL-${containerId}`).val();
@@ -266,6 +276,58 @@
                                     }
                                 });
                             }
+                        }
+                    });
+
+                    $(".add-article").on('click', function (evt) {
+                        evt.preventDefault();
+                        evt.stopPropagation();
+
+                        const containerId = $(this)[0].id.split('-')[2];
+                        $(`#panel-add-article-${containerId}`).fadeIn();
+                    });
+
+                    $(".add-article-cancel").on('click', function (evt) {
+                        evt.preventDefault();
+                        evt.stopPropagation();
+
+                        const containerId = $(this)[0].id.split('-')[3];
+                        $(`#panel-add-article-${containerId}`).fadeOut();
+                        $(`#add-article-quantity-${containerId}`).val('');
+                    });
+
+                    $(".add-article-save").on('click', function (evt) {
+                        evt.preventDefault();
+                        evt.stopPropagation();
+
+                        const containerId = $(this)[0].id.split('-')[3];
+                        const articleId = $(`#add-article-data-${containerId}`).val();
+                        const quantity = $(`#add-article-quantity-${containerId}`).val();
+
+                        const container = orderDetails.message.Containers.filter(c => c.container.Id == containerId);
+
+                        if (quantity <= 0) {
+                            toastr.error("Favor digitar una cantidad valida para el articulo que esta tratando de agregar.");
+                            return false;
+                        }
+                        
+                        if (confirm(`Esta seguro que desea agregar el articulo para el contenedor #${container[0].container.SortIndex}?`)) {
+                            $.ajax({
+                                "url": `/Orden/AddNewArticleToContainer?containerId=${containerId}&articleId=${articleId}&quantity=${quantity}`,
+                                "type": "POST",
+                                "success": async function (response) {
+                                    if (response.result === "200") {
+                                        toastr.success(`Articulo agregado para el contenedor #${container[0].container.SortIndex}`);
+                                        setTimeout(() => {
+                                            $("#btnSearchOrder").click();
+                                        }, 2000)
+                                    }
+                                    else
+                                        toastr.error("Hubo un error al tratar de agregar el articulo.");
+                                }
+                            });
+                        } else {
+                            $(`#${evt.currentTarget.id}`).val(container[0].container.ShippingCompanyId);
                         }
                     });
 
@@ -411,7 +473,7 @@
                 }
                 else {
                     console.log(response.message);
-                    if (response.message.includes('(403)') || response.result === '404') {
+                    if (response.message.includes('(403)') || response.result === '404' || response.message.includes("505")) {
                         toastr.error(response.message);
                     }
                     else
@@ -424,7 +486,7 @@
         });
     }
 
-    function renderContainer(container) {
+    function renderContainer(container, _articles) {
         let dueDate = "";
         let manufacturingDate = "";
 
@@ -454,6 +516,14 @@
             containerStatus.push(`<option value="${status.Id}" ${container.container.StatusId === parseInt(status.Id) ? "selected" : ""}>${status.Description}</option>`)
         }
 
+        //Articles
+        let articles  = [];
+        //navieras.push(`<option value=""></option>`);
+
+        for (const article of _articles) {
+            articles.push(`<option value="${article.Id}">${article.Id} - ${article.Description}</option>`)
+        }
+
         let view =
            `<panel id="containerId" class="bg-light text-dark border-custom panel-container">
             <div class="bg-secondary text-light border">
@@ -477,7 +547,7 @@
                             ${navieras}
                         </select>
                     </div>
-                    
+
                     <div class="form-group mt-1 ml-2 col-lg-2 col-md-2 col-sm-12">
                         <label for="bl">BL</label>
                         <input type="text" id="BL-${container.container.Id}" name="BL" value="${container.container.BL}" class="form-control form-control-sm bg-light-gray quantityField containerBL" autocomplete="off"/>
@@ -572,7 +642,7 @@
             </tr>`
         }
         view += `</tbody>`;
-        view += `<tfoot class="bg-warning">`;
+        view += `<tfoot class="bg-light">`;
         //view += `<tr>
         //                <td>
         //                 <b>Total<b>
@@ -594,9 +664,26 @@
         //                    <span id="article-price-total"><b>${formatNumber(total)}</b></span>
         //                </td>
         //            </tr>`;
+        view += `
+             <tr id="panel-add-article-${container.container.Id}" style="display:none">
+                <td colspan="2" style='width:80px;'>
+                    <input type="text" id="add-article-quantity-${container.container.Id}" name="add-article-quantity-${container.container.Id}" value="" placeholder="Cantidad" class="form-control form-control-sm numericOnly" style="width: 100%" autocomplete="off" />
+                </td>
+                <td colspan="2">
+                    <select class="form-control form-control-sm small-box" style="max-width: 100%" id="add-article-data-${container.container.Id}">
+                     ${articles}
+                    </select>
+                </td>
+                <td colspan="6">
+                    <a href="javascript:void(0);" id="add-article-save-${container.container.Id}" class="btn btn-danger btn-sm add-article-save">Agregar</a>
+                    <a href="javascript:void(0);" id="add-article-cancel-${container.container.Id}" class="btn btn-dark btn-sm add-article-cancel">Cancelar</a>
+                </td>
+            </tr>`;
+
         view +=     `<tr class="bg-light">
                         <td colspan="9">
                             <a href="javascript:void(0);" id="container-save-${container.container.Id}" class="btn btn-danger btn-sm container-save">Guardar cambios para Contener #${container.container.SortIndex}</a>
+                            <a href="javascript:void(0);" id="add-article-${container.container.Id}" class="btn btn-info btn-sm add-article">Agregar articulo al contenedor #${container.container.SortIndex}</a>
                         </td>
                     </tr>
                 </tfoot>`;

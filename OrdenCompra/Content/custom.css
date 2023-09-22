@@ -5211,6 +5211,10 @@ label {
     margin-bottom: 0.2rem !important;
 }
 
+tfoot input {
+    margin: 0 !important;
+}
+
 label.error {
     color: #a94442;
 }

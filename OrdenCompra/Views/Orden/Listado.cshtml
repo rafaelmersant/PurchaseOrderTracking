@@ -20,13 +20,13 @@
                 <thead>
                     <tr>
                         <th>
-                            No.
+                            Orden No.
                         </th>
                         <th>
                             Suplidor
                         </th>
                         <th>
-                            Fecha
+                            Fecha de Orden
                         </th>
                         <th></th>
                     </tr>
@@ -37,11 +37,11 @@
                         <tr>
                             <td>@item.OrderPurchaseId</td>
                             <td>@item.ProviderId</td>
-                            <td>@item.DateDMA</td>
+                            <td>@string.Format("{0:dd/MM/yyyy}", item.DateDMA)</td>
                             
                             <td align="center">
                                 <a class="btn btn-sm btn-success" href="@Url.Action("Edit",new { id = @item.Id })" title="Editar">
-                                    <i class="fa fa-search"></i>
+                                    <i class="fa fa-eye"></i>
 
                                 </a>
                             </td>

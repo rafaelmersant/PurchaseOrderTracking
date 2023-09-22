@@ -88,7 +88,7 @@ namespace OrdenCompra.Controllers
             return null;
         }
 
-        private void PopulateOrderPurchaseHeader(DataSet orderHeader)
+        private void PopulateOrderPurchaseHeader(DataSet orderHeader, int orderId)
         {
             try
             {
@@ -118,11 +118,11 @@ namespace OrdenCompra.Controllers
             }
             catch (Exception ex)
             {
-                Helper.SendException(ex);
+                Helper.SendException(ex, $"orderID: {orderId}");
             }
         }
 
-        private void PopulateOrderPurchaseDetailRequest(DataSet orderDetail)
+        private void PopulateOrderPurchaseDetailRequest(DataSet orderDetail, int orderId)
         {
             try
             {
@@ -133,7 +133,7 @@ namespace OrdenCompra.Controllers
                     OrderPurchaseContainer orderPurchaseContainer = new OrderPurchaseContainer()
                     {
                         CreatedDate = DateTime.Now,
-                        OrderPurchaseId = int.Parse(orderDetail.Tables[0].Rows[0].ItemArray[0].ToString()),
+                        OrderPurchaseId = orderId,
                         StatusId = 1,
                         SortIndex = 1
                     };
@@ -177,7 +177,7 @@ namespace OrdenCompra.Controllers
             }
             catch (Exception ex)
             {
-                Helper.SendException(ex);
+                Helper.SendException(ex, $"OrderID: {orderId}");
             }
         }
 
@@ -486,7 +486,7 @@ namespace OrdenCompra.Controllers
             }
             catch (Exception ex)
             {
-                Helper.SendException(ex);
+                Helper.SendException(ex, $"orderID: {orderId}");
             }
         }
 
@@ -505,18 +505,18 @@ namespace OrdenCompra.Controllers
                 {
                     //Take order header from AS400
                     var __orderHeader = Helper.GetOrderPurchaseHeader(orderId);
-                    PopulateOrderPurchaseHeader(__orderHeader);
+                    PopulateOrderPurchaseHeader(__orderHeader, orderId);
 
                     //Take order detail from AS400
                     var __orderDetail = Helper.GetOrderPurchaseDetail(orderId);
-                    PopulateOrderPurchaseDetailRequest(__orderDetail);
+                    PopulateOrderPurchaseDetailRequest(__orderDetail, orderId);
 
                     //Create other containers if apply
                     CreateRequiredContainersForOrder(orderId);
 
                     //Take order detail received from AS400
-                    var __orderDetailReceived = Helper.GetOrderPurchaseDetailReceived(orderId);
-                    PopulateOrderPurchaseDetailReceived(__orderDetailReceived);
+                    //var __orderDetailReceived = Helper.GetOrderPurchaseDetailReceived(orderId);
+                    //PopulateOrderPurchaseDetailReceived(__orderDetailReceived);
 
                 }
 
@@ -551,7 +551,7 @@ namespace OrdenCompra.Controllers
             }
             catch (Exception ex)
             {
-                Helper.SendException(ex, "orderID:" + orderId);
+                Helper.SendException(ex, $"orderID: {orderId}");
 
                 return Json(new { result = "500", message = ex.Message });
             }
@@ -601,7 +601,7 @@ namespace OrdenCompra.Controllers
             }
             catch (Exception ex)
             {
-                Helper.SendException(ex);
+                Helper.SendException(ex, $"containerId: {containerId} | type: {type} | value: {value}");
 
                 return Json(new { result = "500", message = ex.Message });
             }
@@ -638,7 +638,7 @@ namespace OrdenCompra.Controllers
             }
             catch (Exception ex)
             {
-                Helper.SendException(ex);
+                Helper.SendException(ex, $"orderId: {orderId} | type: {type} | value: {value}");
 
                 return Json(new { result = "500", message = ex.Message });
             }
@@ -683,7 +683,7 @@ namespace OrdenCompra.Controllers
             }
             catch (Exception ex)
             {
-                Helper.SendException(ex);
+                Helper.SendException(ex, $"orderId: {detail.OrderPurchaseId} | containerId: {detail.ContainerId} | articleId: {detail.ArticleId}");
             }
 
             return false;
@@ -733,6 +733,48 @@ namespace OrdenCompra.Controllers
             catch (Exception ex)
             {
                 Helper.SendException(ex);
+
+                return Json(new { result = "500", message = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult AddNewArticleToContainer(int containerId, int articleId, decimal quantity)
+        {
+            try
+            {
+                if (Session["userID"] == null) throw new Exception("505: Por favor intente logearse de nuevo en el sistema. (La Sesión expiró)");
+
+                using (var db = new OrdenCompraRCEntities())
+                {
+                    var container = db.OrderPurchaseContainers.FirstOrDefault(c => c.Id == containerId);
+                    if (container == null) return Json(new { result = "404", message = "Contenedor no encontrado." });
+
+                    var article = db.OrderPurchaseArticlesContainers.FirstOrDefault(a => a.ArticleId == articleId);
+                    if (article == null) return Json(new { result = "404", message = "Articulo no encontrado." });
+
+                    db.OrderPurchaseArticlesContainers.Add(new OrderPurchaseArticlesContainer
+                    {
+                        ContainerId = containerId,
+                        ArticleId = articleId,
+                        OrderPurchaseId = container.OrderPurchaseId,
+                        AddedDate = DateTime.Now,
+                        QuantityRequested = quantity,
+                        QuantityFactory = 0,
+                        QuantityTraffic = 0,
+                        QuantityLeft = 0,
+                        QuantityAduana = 0,
+                        Price = article != null ? article.Price : 0,
+                    });
+
+                    db.SaveChanges();
+                }
+
+                return Json(new { result = "200", message = "success" });
+            }
+            catch (Exception ex)
+            {
+                Helper.SendException(ex, $"containerId: {containerId} | articleId: {articleId} | quantity: {quantity}");
 
                 return Json(new { result = "500", message = ex.Message });
             }
