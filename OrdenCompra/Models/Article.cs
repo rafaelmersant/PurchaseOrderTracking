@@ -14,6 +14,12 @@ namespace OrdenCompra.Models
     
     public partial class Article
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
+        public Article()
+        {
+            this.NotificationCenters = new HashSet<NotificationCenter>();
+        }
+    
         public int Id { get; set; }
         public string Description { get; set; }
         public string Size { get; set; }
@@ -29,5 +35,7 @@ namespace OrdenCompra.Models
         public int AddedBy { get; set; }
     
         public virtual Mark Mark { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<NotificationCenter> NotificationCenters { get; set; }
     }
 }

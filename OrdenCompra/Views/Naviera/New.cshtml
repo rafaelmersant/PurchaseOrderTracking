@@ -4,12 +4,6 @@
     ViewBag.Title = "Crear nuevo registro para naviera";
 }
 
-<style>
-    .disable-button {
-        cursor: not-allowed;
-    }
-</style>
-
 <div class="container-fluid">
     <section class="bg-light text-dark border-custom">
         <div class="bg-secondary text-light panel-custom border">
@@ -35,7 +29,7 @@
                 </div>
                 <div class="col-3 mb-2">
                     <label for="validationDefaultDias">Días</label>
-                    @Html.EditorFor(model => model.Days, new { htmlAttributes = new { @class = "form-control" } })
+                    @Html.EditorFor(model => model.Days, new { htmlAttributes = new { @class = "form-control numericOnly" } })
                     @Html.ValidationMessageFor(model => model.Days, "", new { @class = "text-danger" })
                 </div>
             </div>
@@ -56,6 +50,7 @@
 <script type="text/javascript">
 
     $(document).ready(function () {
+        $("#Navieras").addClass("menu-active");
 
         $(".numericOnly").keypress(function (e) {
             if (String.fromCharCode(e.keyCode).match(/[^0-9]/g)) return false;

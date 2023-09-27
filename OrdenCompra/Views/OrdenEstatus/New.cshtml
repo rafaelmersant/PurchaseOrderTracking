@@ -1,0 +1,47 @@
+﻿@model OrdenCompra.Models.StatusOrderPurchase
+
+@{
+    ViewBag.Title = "Crear nuevo estatus para órdenes";
+}
+
+<div class="container-fluid">
+    <section class="bg-light text-dark border-custom">
+        <div class="bg-secondary text-light panel-custom border">
+            <h6 class="panel-title">
+                Nuevo estatus para órdenes
+            </h6>
+        </div>
+
+        <div class="mt-3 ml-2 mr-2">
+            @using (Html.BeginForm())
+            {
+                @Html.AntiForgeryToken()
+                <div class="form-row">
+                    <div class="col-3 mb-2">
+                        <label for="validationDefaultDescription">Descripción</label>
+                        @Html.EditorFor(model => model.Description, new { htmlAttributes = new { @class = "form-control" } })
+                        @Html.ValidationMessageFor(model => model.Description, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <button id="createStatus" class="btn btn-danger" type="submit">
+                    Guardar
+                </button>
+
+                <span id="message" class="d-block text-@ViewBag.Result pl-2 pr-2 pb-1 pt-1 mt-3 mb-0">@ViewBag.Message</span>
+            }
+        </div>
+    </section>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $("#OrderStatus").addClass("menu-active");
+    });
+
+</script>
+

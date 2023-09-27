@@ -313,6 +313,8 @@
     <Content Include="Scripts\jquery.validate.unobtrusive.min.js" />
     <Content Include="Scripts\modernizr-2.8.3.js" />
     <Content Include="Scripts\toastr.js" />
+    <Content Include="Templates\ProviderNotification.html" />
+    <Content Include="Templates\ArticleNotification.html" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
@@ -345,6 +347,11 @@
     <Content Include="Views\Naviera\Edit.cshtml" />
     <Content Include="Views\Article\Edit.cshtml" />
     <Content Include="Views\Orden\Listado.cshtml" />
+    <Content Include="Views\Notificacion\Grupos.cshtml" />
+    <Content Include="Views\OrdenEstatus\New.cshtml" />
+    <Content Include="Views\OrdenEstatus\Edit.cshtml" />
+    <Content Include="Views\ContainerStatus\New.cshtml" />
+    <Content Include="Views\ContainerStatus\Edit.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

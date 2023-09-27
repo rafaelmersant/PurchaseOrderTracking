@@ -1,7 +1,175 @@
-﻿
+﻿@model IEnumerable<OrdenCompra.Models.NotificationCenter>
+
 @{
-    ViewBag.Title = "Index";
+    ViewBag.Title = "Listado de Notificaciones";
 }
 
-<h2>Notificaciones (Suplidores/Articulos)</h2>
+<link href="~/Content/dataTables.bootstrap4.min.css" rel="stylesheet" />
+<link href="~/Content/toastr.css" rel="stylesheet" type="text/css" />
 
+<div class="container-fluid">
+    <section class="text-dark border-custom border">
+
+        <div class="bg-secondary text-light panel-custom border">
+            <h6 class="panel-title">
+                Listado de Notificaciones
+                <span class="btn-group pull-right">
+                    <a href="@Url.Action("Grupos")" class="btn btn-danger btn-sm update-articles" style="margin-top: -7px">Grupos de Usuarios a Notificar</a>
+                </span>
+            </h6>
+        </div>
+
+        <div class="mt-3 ml-2 mr-2">
+            <table id="notificationsTable" class="table table-striped table-bordered table-condensed table-sm mt-4">
+                <thead>
+                    <tr>
+                        <th>
+                            Id
+                        </th>
+                        <th>
+                            Tipo
+                        </th>
+                        <th>
+                            Articulo/Orden No.
+                        </th>
+                        <th>
+                            Descripción
+                        </th>
+                        <th>
+                            Condición
+                        </th>
+                        <th>
+                            Fecha
+                        </th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.Id</td>
+                            <td>@item.Type</td>
+                            <td>
+                                @if (item.Type == "Articulo")
+                                {
+                                    <span>@item.ArticleId</span>
+                                }
+                                else
+                                {
+                                    <span>@item.OrderPurchaseId</span>
+                                }
+                            </td>
+                            <td>
+                                @if (item.Type == "Articulo" && item.Article != null)
+                                {
+                                    <span>@item.Article.Description</span>
+                                }
+                                else if (item.Type == "Suplidor" && item.OrderPurchase != null)
+                                {
+                                    <span>@item.OrderPurchase.Provider.ProviderName</span>
+                                }
+                            </td>
+                            <td>
+                                @item.Condition
+                            </td>
+                            <td>@string.Format("{0:dd/MM/yyyy}", item.SentDate)</td>
+
+                            <td align="center">
+                                <a class="btn btn-sm btn-success" href="javascript:void(0);" onclick="updateNotificationStatus(@item.Id);" title="Marcar como completada">
+                                    <i class="fa fa-check"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
+
+@section scripts {
+    <script src="~/Scripts/jquery.dataTables.min.js"></script>
+    <script src="~/Scripts/dataTables.bootstrap4.min.js"></script>
+    <script src="~/Scripts/toastr.js"></script>
+}
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $("#Notifications").addClass("menu-active");
+        $("#notificationsTable").DataTable({order: [[0, 'desc']]});
+
+        //Replace Previous -> Anterior
+        $('body :not(script)').contents().filter(function () {
+            return this.nodeType === 3;
+        }).replaceWith(function () {
+            return this.nodeValue.replace('Previous', 'Anterior');
+        });
+
+        //Replace Next -> Próximo
+        $('body :not(script)').contents().filter(function () {
+            return this.nodeType === 3;
+        }).replaceWith(function () {
+            return this.nodeValue.replace('Next', 'Próximo');
+        });
+
+        //Replace Showing -> Mostrando
+        $('body :not(script)').contents().filter(function () {
+            return this.nodeType === 3;
+        }).replaceWith(function () {
+            return this.nodeValue.replace('Showing', 'Mostrando');
+        });
+
+        //Replace Show -> Mostrar
+        $('body :not(script)').contents().filter(function () {
+            return this.nodeType === 3;
+        }).replaceWith(function () {
+            return this.nodeValue.replace('Show', 'Mostrar');
+        });
+
+        //Replace Entries -> Registros
+        $('body :not(script)').contents().filter(function () {
+            return this.nodeType === 3;
+        }).replaceWith(function () {
+            return this.nodeValue.replace('entries', 'registros');
+        });
+
+        //Replace Search -> Buscar
+        $('body :not(script)').contents().filter(function () {
+            return this.nodeType === 3;
+        }).replaceWith(function () {
+            return this.nodeValue.replace('Search', 'Buscar');
+        });
+    });
+
+    const updateNotificationStatus = (id) => {
+        console.log('Marcar como completada Id:', id)
+
+        if (confirm(`Esta seguro que desea marcar como completada la notificación #${id}?`)) {
+            $.ajax({
+                "url": `/Notificacion/UpdateNotificationStatus?id=${id}`,
+                "type": "POST",
+                "success": async function (response) {
+                    if (response.result === "200") {
+                        console.log(response);
+                        toastr.success(`Notificación #${id} marcada como completada.`);
+
+                        setTimeout(() => {
+                            window.location.reload(true);
+                        }, 2500)
+                    }
+                    else {
+                        console.log(response.message);
+                        toastr.error(response.message);
+
+                        setTimeout(() => {
+                            if (response.message.includes("505"))
+                                window.location.reload(true);
+                        }, 2000);
+                    }
+                }
+            });
+        }
+    }
+
+</script>

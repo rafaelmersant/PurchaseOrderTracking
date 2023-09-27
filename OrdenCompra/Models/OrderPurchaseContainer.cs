@@ -31,8 +31,8 @@ namespace OrdenCompra.Models
         public Nullable<System.DateTime> DueDate { get; set; }
         public int SortIndex { get; set; }
     
+        public virtual OrderPurchase OrderPurchase { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<OrderPurchaseArticlesContainer> OrderPurchaseArticlesContainers { get; set; }
-        public virtual OrderPurchase OrderPurchase { get; set; }
     }
 }

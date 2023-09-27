@@ -18,6 +18,13 @@ namespace OrdenCompra.Models
         public string Type { get; set; }
         public System.DateTime SentDate { get; set; }
         public bool Active { get; set; }
-        public int OrderPurchaseId { get; set; }
+        public Nullable<int> OrderPurchaseId { get; set; }
+        public Nullable<int> ArticleId { get; set; }
+        public string Condition { get; set; }
+        public Nullable<System.DateTime> DeactivatedDate { get; set; }
+        public Nullable<int> DeactivatedBy { get; set; }
+    
+        public virtual Article Article { get; set; }
+        public virtual OrderPurchase OrderPurchase { get; set; }
     }
 }

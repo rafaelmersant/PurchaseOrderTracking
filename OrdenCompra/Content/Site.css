@@ -66,6 +66,11 @@ p {
     color: #b20000;
 }
 
+.menu-active {
+    background-color: white !important;
+    color: darkred !important;
+}
+
 .orden-compra input[type=text] {
     max-height: 26px;
 }

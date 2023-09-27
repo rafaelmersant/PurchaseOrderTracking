@@ -53,10 +53,10 @@
                         </div>
 
                         <div class="col-6">
-                            <a class="btn btn-sm btn-info" href="javascript:void(0)" id="btnSearchOrder" title="Buscar" style="margin-top: 24px">
+                            <a class="btn btn-sm btn-info" href="javascript:void(0)" id="btnSearchOrder" title="Buscar" style="margin-top: 20px">
                                 <i class="fa fa-search"></i>
                             </a>
-                            <span id="waitingIndicator" class="spinner-border text-danger" style="margin-top: 27px; margin-right: 5px; display: none"></span>
+                            <span id="waitingIndicator" class="spinner-border text-danger" style="margin-top: 23px; margin-right: 5px; display: none"></span>
                         </div>
                     </div>
                 </div>
@@ -114,7 +114,8 @@
 <script type="text/javascript">
 
     $(document).ready(async function () {
-        $("#btnSearchOrder").removeClass("disabled")
+        $("#QueryOrder").addClass("menu-active");
+        $("#btnSearchOrder").removeClass("disabled");
         $("#btnToggleContainers").hide();
 
         const url = window.location.pathname
@@ -475,6 +476,9 @@
                     console.log(response.message);
                     if (response.message.includes('(403)') || response.result === '404' || response.message.includes("505")) {
                         toastr.error(response.message);
+                        setTimeout(() => {
+                            window.location.reload(true);
+                        }, 2500);
                     }
                     else
                         toastr.error(`Hubo un error tratando de encontrar la orden de compra #${orderId}`);
@@ -482,7 +486,7 @@
 
                 $("#waitingIndicator").hide();
                 $("#btnSearchOrder").show();
-            }
+             }
         });
     }
 
@@ -665,9 +669,10 @@
         //                </td>
         //            </tr>`;
         view += `
-             <tr id="panel-add-article-${container.container.Id}" style="display:none">
-                <td colspan="2" style='width:80px;'>
-                    <input type="text" id="add-article-quantity-${container.container.Id}" name="add-article-quantity-${container.container.Id}" value="" placeholder="Cantidad" class="form-control form-control-sm numericOnly" style="width: 100%" autocomplete="off" />
+             <tr id="panel-add-article-${container.container.Id}" style="display:none" class="bg-warning">
+                <td> </td>
+                <td style='width:80px;'>
+                    <input type="text" id="add-article-quantity-${container.container.Id}" name="add-article-quantity-${container.container.Id}" value="" placeholder="Cant." class="form-control form-control-sm numericOnly" style="width: 100%" autocomplete="off" />
                 </td>
                 <td colspan="2">
                     <select class="form-control form-control-sm small-box" style="max-width: 100%" id="add-article-data-${container.container.Id}">

@@ -39,7 +39,7 @@ namespace OrdenCompra.Controllers
         {
             try
             {
-                if (Session["userID"] == null) throw new Exception("Por favor intente logearse de nuevo en el sistema. (La Sesión expiró)");
+                if (Session["userID"] == null) throw new Exception("505: Por favor intente logearse de nuevo en el sistema. (La Sesión expiró)");
 
                 var providers = Helper.GetProviders();
                 if (providers != null && providers.Tables.Count > 0 && providers.Tables[0].Rows.Count > 0)

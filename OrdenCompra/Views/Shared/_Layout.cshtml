@@ -40,21 +40,21 @@
             <ul class="list-unstyled components">
                 @if (Session["role"] != null)
                 {
-                    <li><a href="/Orden/"><i class="fa fa-newspaper-o"></i>Consultar Orden</a></li>
-                    <li><a href="/Orden/Listado"><i class="fa fa-list"></i>Listado de Ordenes</a></li>
-                    <li><a href="/Articulos/"><i class="fa fa-list-alt"></i>Articulos </a></li>
-                    <li><a href="/Naviera/"><i class="fa fa-ship"></i>Navieras</a></li>
-                    <li><a href="/Suplidores/"><i class="fa fa-industry"></i>Suplidores</a></li>
-                    <li><a href="/ContenedorEstatus/"><i class="fa fa-comment"></i>Estatus de Contenedores</a></li>
-                    <li><a href="/OrdenEstatus/"><i class="fa fa-comment"></i>Estatus de Ordenes</a></li>
-                    <li><a href="/Notificacion/"><i class="fa fa-inbox"></i>Notificaciones</a></li>
-                    <li><a href="/User/UsersList"><i class="fa fa-group"></i>Usuarios</a></li>
+                    <li><a id="QueryOrder" href="/Orden/"><i class="fa fa-newspaper-o"></i>Consultar Orden</a></li>
+                    <li><a id="ListOrders" href="/Orden/Listado"><i class="fa fa-list"></i>Listado de Ordenes</a></li>
+                    <li><a id="Articles" href="/Articulos/"><i class="fa fa-list-alt"></i>Articulos </a></li>
+                    <li><a id="Navieras" href="/Naviera/"><i class="fa fa-ship"></i>Navieras</a></li>
+                    <li><a id="Providers" href="/Suplidores/"><i class="fa fa-industry"></i>Suplidores</a></li>
+                    <li><a id="ContainerStatus" href="/ContenedorEstatus/"><i class="fa fa-comment"></i>Estatus de Contenedores</a></li>
+                    <li><a id="OrderStatus" href="/OrdenEstatus/"><i class="fa fa-comment"></i>Estatus de Ordenes</a></li>
+                    <li><a id="Notifications" href="/Notificacion/"><i class="fa fa-inbox"></i>Notificaciones</a></li>
+                    <li><a id="Users" href="/User/UsersList"><i class="fa fa-group"></i>Usuarios</a></li>
                 }
 
-                @if (Session["role"] != null && Session["role"].ToString() == "Admin")
+                @*@if (Session["role"] != null && Session["role"].ToString() == "Admin")
                 {
                     <li><a href="/Notification"><i class="fa fa-bars"></i>Menu Admin</a></li>
-                }
+                }*@
             </ul>
         </nav>
 

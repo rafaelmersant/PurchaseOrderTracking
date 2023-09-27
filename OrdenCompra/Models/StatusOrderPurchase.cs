@@ -14,8 +14,17 @@ namespace OrdenCompra.Models
     
     public partial class StatusOrderPurchase
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
+        public StatusOrderPurchase()
+        {
+            this.OrderPurchases = new HashSet<OrderPurchase>();
+        }
+    
         public int Id { get; set; }
         public string Description { get; set; }
         public System.DateTime CreatedDate { get; set; }
+    
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<OrderPurchase> OrderPurchases { get; set; }
     }
 }

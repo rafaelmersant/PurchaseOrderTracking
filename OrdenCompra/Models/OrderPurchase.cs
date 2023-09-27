@@ -18,9 +18,10 @@ namespace OrdenCompra.Models
         public OrderPurchase()
         {
             this.OrderPurchaseContainers = new HashSet<OrderPurchaseContainer>();
-            this.OrderPurchaseArticlesContainers = new HashSet<OrderPurchaseArticlesContainer>();
             this.OrderPurchaseDelivers = new HashSet<OrderPurchaseDeliver>();
             this.OrderPurchaseHistories = new HashSet<OrderPurchaseHistory>();
+            this.NotificationCenters = new HashSet<NotificationCenter>();
+            this.OrderPurchaseArticlesContainers = new HashSet<OrderPurchaseArticlesContainer>();
         }
     
         public int Id { get; set; }
@@ -36,10 +37,14 @@ namespace OrdenCompra.Models
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<OrderPurchaseContainer> OrderPurchaseContainers { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<OrderPurchaseArticlesContainer> OrderPurchaseArticlesContainers { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<OrderPurchaseDeliver> OrderPurchaseDelivers { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<OrderPurchaseHistory> OrderPurchaseHistories { get; set; }
+        public virtual Provider Provider { get; set; }
+        public virtual StatusOrderPurchase StatusOrderPurchase { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<NotificationCenter> NotificationCenters { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<OrderPurchaseArticlesContainer> OrderPurchaseArticlesContainers { get; set; }
     }
 }

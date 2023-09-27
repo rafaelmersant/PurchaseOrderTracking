@@ -69,11 +69,7 @@
                             <td align="center">
                                 <a class="btn btn-sm btn-success" href="@Url.Action("Edit",new { id = @item.Id })" title="Editar">
                                     <i class="fa fa-edit"></i>
-
                                 </a>
-                                @*<a class="btn btn-sm btn-danger" href="javascript:void(0)" onclick="deleteArticle(@item.Id,@item.Id)" title="Eliminar">
-                <i class="fa fa-remove"></i>
-            </a>*@
                             </td>
                         </tr>
                     }
@@ -91,6 +87,7 @@
 <script type="text/javascript">
 
     $(document).ready(function () {
+        $("#Articles").addClass("menu-active");
         $("#articlesTable").DataTable();
         $("#waitingIndicator").hide();
 
@@ -159,6 +156,11 @@
                     else {
                         console.log(response.message);
                         toastr.error(response.message);
+
+                        setTimeout(() => {
+                            if (response.message.includes("505"))
+                                window.location.reload(true);
+                        }, 2000);
                     }
 
                     $("#waitingIndicator").hide();

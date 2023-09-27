@@ -123,7 +123,7 @@ namespace OrdenCompra.Controllers
         {
             try
             {
-                if (Session["userID"] == null) throw new Exception("Por favor intente logearse de nuevo en el sistema. (La Sesión expiró)");
+                if (Session["userID"] == null) throw new Exception("505: Por favor intente logearse de nuevo en el sistema. (La Sesión expiró)");
 
                 var articles = Helper.GetArticles();
                 if (articles != null && articles.Tables.Count > 0 && articles.Tables[0].Rows.Count > 0)
@@ -159,6 +159,7 @@ namespace OrdenCompra.Controllers
                                         QuantityTraffic = 0,
                                         QuantityFactory = 0,
                                         QuantityAduana = 0,
+                                        InventoryStock = 0,
                                         AddedDate = DateTime.Now,
                                         AddedBy = int.Parse(Session["userID"].ToString())
                                     });

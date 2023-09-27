@@ -72,6 +72,7 @@
 <script type="text/javascript">
 
     $(document).ready(function () {
+        $("#Providers").addClass("menu-active");
         $("#providersTable").DataTable();
         $("#waitingIndicator").hide();
 
@@ -139,6 +140,11 @@
                     else {
                         console.log(response.message);
                         toastr.error(response.message);
+
+                        setTimeout(() => {
+                            if (response.message.includes("505"))
+                                window.location.reload(true);
+                        }, 2000);
                     }
 
                     $("#waitingIndicator").hide();

@@ -218,7 +218,7 @@ namespace OrdenCompra.App_Start
             try
             {
                 string sQuery = $"SELECT DPADNUMPED, DPADNUMART, DPADFECPED, DPADFECREC, DPCANTIDAD, DPCANTFABR, " +
-                                $"DPCANTTRAN, DPCANTPEND, DPCANTADUA, DPADPRECV1 FROM [QS36F.RCADDP00] WHERE DPADTIPTRA='P' AND DPADNUMPED = {purchaseOrderId}";
+                                $"DPCANTTRAN, DPCANTPEND, DPCANTADUA, DPADPRECV1 FROM [QS36F.RCADDP10] WHERE DPADTIPTRA='P' AND DPADNUMPED = {purchaseOrderId}";
 
                 if (ConfigurationManager.AppSettings["EnvironmentOrdenCompra"] != "DEV")
                     sQuery = sQuery.Replace("[", "").Replace("]", "");

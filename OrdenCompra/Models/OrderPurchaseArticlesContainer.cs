@@ -28,7 +28,7 @@ namespace OrdenCompra.Models
         public string MeasureUnit { get; set; }
         public Nullable<System.DateTime> ManufacturingDate { get; set; }
     
-        public virtual OrderPurchaseContainer OrderPurchaseContainer { get; set; }
         public virtual OrderPurchase OrderPurchase { get; set; }
+        public virtual OrderPurchaseContainer OrderPurchaseContainer { get; set; }
     }
 }

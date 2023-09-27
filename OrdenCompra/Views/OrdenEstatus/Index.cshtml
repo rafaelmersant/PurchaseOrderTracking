@@ -9,9 +9,9 @@
         <div class="bg-secondary text-light panel-custom border">
             <h6 class="panel-title">
                 Estatus de Orden
-                @*<span class="btn-group pull-right">
-                        <a href="@Url.Action("RegisterUser")" class="btn btn-danger btn-sm" style="margin-top: -7px">Nuevo Estatus</a>
-                    </span>*@
+                <span class="btn-group pull-right">
+                        <a href="@Url.Action("New")" class="btn btn-danger btn-sm" style="margin-top: -7px">Nuevo Estatus</a>
+                    </span>
             </h6>
         </div>
 
@@ -36,13 +36,12 @@
                             <td>@item.Description</td>
 
                             <td align="center">
-                                <a class="btn btn-sm btn-success" href="#" title="Editar">
+                                <a class="btn btn-sm btn-success" href="@Url.Action("Edit",new { id = @item.Id })" title="Editar">
                                     <i class="fa fa-edit"></i>
-
                                 </a>
-                                <a class="btn btn-sm btn-danger" href="javascript:void(0)" onclick="deleteNaviera(@item.Id,@item.Id)" title="Eliminar">
+                                @*<a class="btn btn-sm btn-danger" href="javascript:void(0)" onclick="deleteNaviera(@item.Id,@item.Id)" title="Eliminar">
                                     <i class="fa fa-remove"></i>
-                                </a>
+                                </a>*@
                             </td>
                         </tr>
                     }
@@ -63,6 +62,7 @@
 <script type="text/javascript">
 
     $(document).ready(function () {
+        $("#OrderStatus").addClass("menu-active");
         $("#statusTable").DataTable();
 
         //Replace Previous -> Anterior

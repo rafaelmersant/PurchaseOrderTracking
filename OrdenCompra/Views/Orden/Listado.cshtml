@@ -3,6 +3,27 @@
 @{
     ViewBag.Title = "Listado de Ordenes";
 }
+<style>
+    .Abierta {
+        color: orange;
+    }
+
+    .Producción {
+        color: yellow;
+    }
+
+    .En-puerto {
+        color: green;
+    }
+
+    .Producción {
+        color: dodgerblue;
+    }
+
+    .Cerrada {
+        color: red;
+    }
+</style>
 
 <link href="~/Content/dataTables.bootstrap4.min.css" rel="stylesheet" />
 <link href="~/Content/toastr.css" rel="stylesheet" type="text/css" />
@@ -28,6 +49,9 @@
                         <th>
                             Fecha de Orden
                         </th>
+                        <th class="text-center">
+                            Estatus
+                        </th>
                         <th></th>
                     </tr>
                 </thead>
@@ -36,14 +60,14 @@
                     {
                         <tr>
                             <td>@item.OrderPurchaseId</td>
-                            <td>@item.ProviderId</td>
+                            <td>@item.Provider.ProviderName</td>
                             <td>@string.Format("{0:dd/MM/yyyy}", item.DateDMA)</td>
-                            
+                            <td class="text-center @(item.StatusOrderPurchase.Description.Replace(' ', '-'))" style="font-weight: bold">@item.StatusOrderPurchase.Description</td>
                             <td align="center">
-                                <a class="btn btn-sm btn-success" href="@Url.Action("Edit",new { id = @item.Id })" title="Editar">
+                                @*<a class="btn btn-sm btn-success" href="@Url.Action("Edit",new { id = @item.Id })" title="Editar">
                                     <i class="fa fa-eye"></i>
 
-                                </a>
+                                </a>*@
                             </td>
                         </tr>
                     }
@@ -61,6 +85,7 @@
 <script type="text/javascript">
 
     $(document).ready(function () {
+        $("#ListOrders").addClass("menu-active");
         $("#ordenesTable").DataTable();
         
         //Replace Previous -> Anterior

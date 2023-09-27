@@ -490,12 +490,57 @@ namespace OrdenCompra.Controllers
             }
         }
 
+        private bool CreateAnotherContainerForArticle(OrderPurchaseArticlesContainer detail, decimal remainQuantity)
+        {
+            try
+            {
+                using (var db = new OrdenCompraRCEntities())
+                {
+                    var lastContainer = db.OrderPurchaseContainers.Where(c => c.OrderPurchaseId == detail.OrderPurchaseId).OrderByDescending(o => o.SortIndex).FirstOrDefault();
+                    if (lastContainer != null)
+                    {
+                        var container = db.OrderPurchaseContainers.Add(new OrderPurchaseContainer
+                        {
+                            CreatedDate = DateTime.Now,
+                            OrderPurchaseId = lastContainer.OrderPurchaseId,
+                            StatusId = 1,
+                            SortIndex = lastContainer.SortIndex + 1,
+                        });
+                        db.SaveChanges();
+
+                        db.OrderPurchaseArticlesContainers.Add(new OrderPurchaseArticlesContainer
+                        {
+                            ContainerId = container.Id,
+                            AddedDate = DateTime.Now,
+                            OrderPurchaseId = container.OrderPurchaseId,
+                            ArticleId = detail.ArticleId,
+                            QuantityRequested = remainQuantity,
+                            QuantityFactory = remainQuantity,
+                            QuantityTraffic = 0,
+                            QuantityLeft = 0,
+                            QuantityAduana = 0,
+                            Price = detail.Price
+                        });
+                        db.SaveChanges();
+
+                        return true;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Helper.SendException(ex, $"orderId: {detail.OrderPurchaseId} | containerId: {detail.ContainerId} | articleId: {detail.ArticleId}");
+            }
+
+            return false;
+        }
+
         [HttpPost]
         public JsonResult GetPurchaseOrder(int orderId)
         {
             try
             {
-                if (Session["userID"] == null) throw new Exception("Por favor intente logearse de nuevo en el sistema. (La Sesión expiró)");
+                if (Session["userID"] == null) throw new Exception("505: Por favor intente logearse de nuevo en el sistema. (La Sesión expiró)");
 
                 //Check first if the orderID was saved in the local DB (not AS400)
                 var orderHeader = GetOrderPurchaseHeader(orderId);
@@ -562,7 +607,7 @@ namespace OrdenCompra.Controllers
         {
             try
             {
-                if (Session["userID"] == null) throw new Exception("Por favor intente logearse de nuevo en el sistema. (La Sesión expiró)");
+                if (Session["userID"] == null) throw new Exception("505: Por favor intente logearse de nuevo en el sistema. (La Sesión expiró)");
 
                 using (var db = new OrdenCompraRCEntities())
                 {
@@ -612,7 +657,7 @@ namespace OrdenCompra.Controllers
         {
             try
             {
-                if (Session["userID"] == null) throw new Exception("Por favor intente logearse de nuevo en el sistema. (La Sesión expiró)");
+                if (Session["userID"] == null) throw new Exception("505: Por favor intente logearse de nuevo en el sistema. (La Sesión expiró)");
 
                 using (var db = new OrdenCompraRCEntities())
                 {
@@ -644,51 +689,6 @@ namespace OrdenCompra.Controllers
             }
         }
 
-        private bool CreateAnotherContainerForArticle(OrderPurchaseArticlesContainer detail, decimal remainQuantity)
-        {
-            try
-            {
-                using (var db = new OrdenCompraRCEntities())
-                {
-                    var lastContainer = db.OrderPurchaseContainers.Where(c => c.OrderPurchaseId == detail.OrderPurchaseId).OrderByDescending(o => o.SortIndex).FirstOrDefault();
-                    if (lastContainer != null)
-                    {
-                        var container = db.OrderPurchaseContainers.Add(new OrderPurchaseContainer
-                        {
-                            CreatedDate = DateTime.Now,
-                            OrderPurchaseId = lastContainer.OrderPurchaseId,
-                            StatusId = 1,
-                            SortIndex = lastContainer.SortIndex + 1,
-                        });
-                        db.SaveChanges();
-
-                        db.OrderPurchaseArticlesContainers.Add(new OrderPurchaseArticlesContainer
-                        {
-                            ContainerId = container.Id,
-                            AddedDate = DateTime.Now,
-                            OrderPurchaseId = container.OrderPurchaseId,
-                            ArticleId = detail.ArticleId,
-                            QuantityRequested = remainQuantity,
-                            QuantityFactory = remainQuantity,
-                            QuantityTraffic = 0,
-                            QuantityLeft = 0,
-                            QuantityAduana = 0,
-                            Price = detail.Price
-                        });
-                        db.SaveChanges();
-
-                        return true;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Helper.SendException(ex, $"orderId: {detail.OrderPurchaseId} | containerId: {detail.ContainerId} | articleId: {detail.ArticleId}");
-            }
-
-            return false;
-        }
-
         [HttpPost]
         public JsonResult UpdateQuantityField(int detailId, decimal newQuantity, decimal traffic, decimal factory, string BL)
         {
@@ -696,7 +696,7 @@ namespace OrdenCompra.Controllers
             {
                 bool anotherContainer = false;
 
-                if (Session["userID"] == null) throw new Exception("Por favor intente logearse de nuevo en el sistema. (La Sesión expiró)");
+                if (Session["userID"] == null) throw new Exception("505: Por favor intente logearse de nuevo en el sistema. (La Sesión expiró)");
 
                 using (var db = new OrdenCompraRCEntities())
                 {
