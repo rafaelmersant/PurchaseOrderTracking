@@ -282,8 +282,8 @@
     <Content Include="Content\Site.css" />
     <Content Include="Models\OrdenCompraRC.Context.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>OrdenCompraRC.Context.cs</LastGenOutput>
       <DependentUpon>OrdenCompraRC.edmx</DependentUpon>
+      <LastGenOutput>OrdenCompraRC.Context.cs</LastGenOutput>
     </Content>
     <Content Include="Models\OrdenCompraRC.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
@@ -292,6 +292,8 @@
     </Content>
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
+    <Content Include="Content\toastr.scss" />
+    <Content Include="Content\toastr.less" />
     <EntityDeploy Include="Models\OrdenCompraRC.edmx">
       <Generator>EntityModelCodeGenerator</Generator>
       <LastGenOutput>OrdenCompraRC.Designer.cs</LastGenOutput>
@@ -299,8 +301,6 @@
     <Content Include="Models\OrdenCompraRC.edmx.diagram">
       <DependentUpon>OrdenCompraRC.edmx</DependentUpon>
     </Content>
-    <Content Include="Content\toastr.scss" />
-    <Content Include="Content\toastr.less" />
     <None Include="Scripts\jquery-3.4.1.intellisense.js" />
     <Content Include="Scripts\jquery-3.4.1.js" />
     <Content Include="Scripts\jquery-3.4.1.min.js" />

@@ -44,6 +44,11 @@
                     @Html.EditorFor(model => model.Size, new { htmlAttributes = new { @class = "form-control form-control-sm col-4" } })
                     @Html.ValidationMessageFor(model => model.Size, "", new { @class = "text-danger" })
                 </div>
+                <div class="col-12 mb-2">
+                    @Html.CheckBoxFor(model => model.Mix, new { htmlAttributes = new { @class = "form-control form-control-sm col-4" } })
+                    <label for="validationDefaultMix">Mixto (poner cantidad total en un mismo contenedor)</label>
+                    @Html.ValidationMessageFor(model => model.Mix, "", new { @class = "text-danger" })
+                </div>
             </div>
                 <button id="editArticulo" class="btn btn-danger" type="submit">
                     Guardar cambios

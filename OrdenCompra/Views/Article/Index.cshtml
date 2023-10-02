@@ -41,6 +41,9 @@
                         <th>
                             Tamaño
                         </th>
+                        <th class="text-center">
+                            Mixto
+                        </th>
                         <th>
                             Inventario
                         </th>
@@ -62,6 +65,7 @@
                             <td>@item.Mark.Description</td>
                             <td>@item.Model</td>
                             <td>@item.Size</td>
+                            <td class="text-center">@(item.Mix ? "Si" : "No")</td>
                             <td>@item.InventoryStock</td>
                             <td>@item.QuantityMinStock</td>
                             <td>@item.QuantityMaxPerContainer</td>

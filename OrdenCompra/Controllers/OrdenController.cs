@@ -224,129 +224,6 @@ namespace OrdenCompra.Controllers
             }
         }
 
-        private void CreateRequiredContainersForOrderPerArticlesOLD(int orderId)
-        {
-            try
-            {
-                using (var db = new OrdenCompraRCEntities())
-                {
-                    var _orderArticles = db.OrderPurchaseArticlesContainers.Where(o => o.OrderPurchaseId == orderId);
-                    decimal containers = 0;
-
-                    var articles = db.Articles.Where(a => _orderArticles.Any(x => x.ArticleId == a.Id)).ToList();
-                                        
-                    foreach (var article in _orderArticles)
-                    {
-                        var _article = articles.FirstOrDefault(a => a.Id == article.ArticleId);
-                        if (_article == null)
-                        {
-                            var __article = HelperApp.GetArticleById(article.ArticleId);
-                            if (__article != null && __article.Tables.Count > 0 && __article.Tables[0].Rows.Count > 0)
-                            {
-                                HelperApp.AddNewArticle(__article.Tables[0].Rows[0]);
-                                _article = db.Articles.FirstOrDefault(a => a.Id == article.ArticleId);
-                            }
-                        }
-
-                        if (_article != null)
-                        {
-                            var maxPerContainer = _article.QuantityMaxPerContainer <= 0 ? article.QuantityRequested : _article.QuantityMaxPerContainer ?? 1M;
-                            var _containers = maxPerContainer != 99 ? article.QuantityRequested / maxPerContainer : 1;
-                            containers += _containers;
-                        }
-                    }
-
-                    if (containers <= 1) return;
-
-                    //backup original detail before continue
-                    foreach (var __article__ in _orderArticles.ToList())
-                    {
-                        db.OrderPurchaseArticlesContainerTmps.Add(new OrderPurchaseArticlesContainerTmp()
-                        {
-                            Id = __article__.Id,
-                            AddedDate = __article__.AddedDate,
-                            ArticleId = __article__.ArticleId,
-                            ContainerId = __article__.ContainerId,
-                            ManufacturingDate = __article__.ManufacturingDate,
-                            OrderPurchaseId = __article__.OrderPurchaseId,
-                            Price = __article__.Price,
-                            QuantityRequested = __article__.QuantityRequested,
-                            QuantityLeft = __article__.QuantityLeft,
-                            QuantityTraffic = __article__.QuantityTraffic,
-                            QuantityFactory = __article__.QuantityFactory,
-                            QuantityAduana = __article__.QuantityAduana,
-                            QuantityTmp = __article__.QuantityRequested
-                        });
-                        db.SaveChanges();
-                    }
-
-                    var orderArticles = db.OrderPurchaseArticlesContainerTmps.Where(t => t.OrderPurchaseId == orderId).ToList();
-                    //If there are more than 1 container then we need to create them with the articles and their max quantity per container
-                    for (int icontainer = 0; icontainer < containers; icontainer++)
-                    {
-                        OrderPurchaseContainer _container = null;
-
-                        if (icontainer == 0)
-                            _container = db.OrderPurchaseContainers.FirstOrDefault(c => c.OrderPurchaseId == orderId);
-                        else
-                        {
-                            _container = db.OrderPurchaseContainers.Add(new OrderPurchaseContainer
-                            {
-                                CreatedDate = DateTime.Now,
-                                OrderPurchaseId = orderId,
-                                StatusId = 1,
-                                SortIndex = icontainer + 1,
-                            });
-                            db.SaveChanges();
-                        }
-                        
-                        for (int i = 0; i < orderArticles.Count; i++)
-                        {
-                            decimal maxPerContainer = orderArticles[i].QuantityRequested;
-                            
-                            int articleId = orderArticles[i].ArticleId;
-                            Article _article = db.Articles.FirstOrDefault(a => a.Id == articleId);
-                            maxPerContainer = _article != null && _article.QuantityMaxPerContainer <= 0 ? maxPerContainer : _article.QuantityMaxPerContainer?? 1M;
-
-                            decimal quantityToDeduct = orderArticles[i].QuantityRequested > maxPerContainer ? maxPerContainer : orderArticles[i].QuantityRequested;
-                            orderArticles[i].QuantityRequested -= quantityToDeduct;
-                            
-                            if (quantityToDeduct > 0)
-                            {
-                                if (icontainer == 0)
-                                {
-                                    var item = db.OrderPurchaseArticlesContainers.FirstOrDefault(a => a.OrderPurchaseId == orderId && a.ArticleId == articleId);
-                                    item.QuantityRequested = quantityToDeduct;
-                                } 
-                                else
-                                {
-                                    db.OrderPurchaseArticlesContainers.Add(new OrderPurchaseArticlesContainer
-                                    {
-                                        ContainerId = _container.Id,
-                                        AddedDate = DateTime.Now,
-                                        OrderPurchaseId = orderId,
-                                        ArticleId = orderArticles[i].ArticleId,
-                                        QuantityRequested = quantityToDeduct,
-                                        QuantityFactory = orderArticles[i].QuantityFactory,
-                                        QuantityTraffic = orderArticles[i].QuantityTraffic,
-                                        QuantityLeft = orderArticles[i].QuantityLeft,
-                                        QuantityAduana = orderArticles[i].QuantityAduana,
-                                        Price = orderArticles[i].Price
-                                    });
-                                }
-                                
-                                db.SaveChanges();
-                            }
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                HelperUtility.SendException(ex);
-            }
-        }
-
         private void CreateBackupOriginalOrderPurchase(List<OrderPurchaseArticlesContainer> _orderArticles)
         {
             try
@@ -473,10 +350,8 @@ namespace OrdenCompra.Controllers
                         if (_article != null)
                         {
                             var maxPerContainer = _article.QuantityMaxPerContainer ?? 1M;
-                            if (_article.QuantityMaxPerContainer <= 0 || _article.QuantityMaxPerContainer == 99)
-                            {
+                            if (_article.QuantityMaxPerContainer <= 0 || _article.QuantityMaxPerContainer == 99 || _article.Mix)
                                 maxPerContainer = article.QuantityRequested;
-                            }
 
                             containersPerArticle = article.QuantityRequested / maxPerContainer;
 

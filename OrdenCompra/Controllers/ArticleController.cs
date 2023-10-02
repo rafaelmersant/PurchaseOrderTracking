@@ -80,6 +80,7 @@ namespace OrdenCompra.Controllers
                         if (article_edit != null)
                         {
                             article_edit.Size = _article.Size.ToUpper();
+                            article_edit.Mix = _article.Mix;
                             
                             db.SaveChanges();
                             return RedirectToAction("Index", "Article");
