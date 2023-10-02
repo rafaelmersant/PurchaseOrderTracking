@@ -15,8 +15,6 @@
         <EntityTypeShape EntityType="OrdenCompraRCModel.StatusOrderPurchase" Width="1.5" PointX="12.375" PointY="3.75" />
         <EntityTypeShape EntityType="OrdenCompraRCModel.OrderPurchaseArticlesContainerTmp" Width="1.5" PointX="12.375" PointY="6.75" />
         <EntityTypeShape EntityType="OrdenCompraRCModel.Mark" Width="1.5" PointX="8.375" PointY="14.125" />
-        <EntityTypeShape EntityType="OrdenCompraRCModel.Article" Width="1.5" PointX="10.625" PointY="13" />
-        <AssociationConnector Association="OrdenCompraRCModel.FK_Mark" />
         <EntityTypeShape EntityType="OrdenCompraRCModel.OrderPurchaseContainer" Width="1.5" PointX="3" PointY="1.375" />
         <EntityTypeShape EntityType="OrdenCompraRCModel.OrderPurchaseDeliver" Width="1.5" PointX="3" PointY="12" />
         <EntityTypeShape EntityType="OrdenCompraRCModel.Provider" Width="1.5" PointX="13.375" PointY="11.75" />
@@ -27,12 +25,14 @@
         <AssociationConnector Association="OrdenCompraRCModel.FK_OrderPurchase_H" />
         <AssociationConnector Association="OrdenCompraRCModel.FK_Provider_OC" />
         <AssociationConnector Association="OrdenCompraRCModel.FK_Status_OC" />
-        <EntityTypeShape EntityType="OrdenCompraRCModel.NotificationCenter" Width="1.5" PointX="17.875" PointY="10.25" />
-        <AssociationConnector Association="OrdenCompraRCModel.FK_ArticleID_OPC" />
-        <AssociationConnector Association="OrdenCompraRCModel.FK_OrderID_OPC" />
         <EntityTypeShape EntityType="OrdenCompraRCModel.OrderPurchaseArticlesContainer" Width="1.5" PointX="17.875" PointY="4.125" />
         <AssociationConnector Association="OrdenCompraRCModel.FK_OrderPurchase_AC" />
         <AssociationConnector Association="OrdenCompraRCModel.FK_OrderPurchase_C" />
+        <EntityTypeShape EntityType="OrdenCompraRCModel.Article" Width="1.5" PointX="10.625" PointY="12.875" />
+        <AssociationConnector Association="OrdenCompraRCModel.FK_Mark" />
+        <EntityTypeShape EntityType="OrdenCompraRCModel.NotificationCenter" Width="1.5" PointX="17.875" PointY="10.25" />
+        <AssociationConnector Association="OrdenCompraRCModel.FK_ArticleID_OPC" />
+        <AssociationConnector Association="OrdenCompraRCModel.FK_OrderID_OPC" />
         </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

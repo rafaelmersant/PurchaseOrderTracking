@@ -12,6 +12,7 @@ using System.Web;
 using System.Web.Mvc;
 using System.Web.UI.WebControls.WebParts;
 using System.Web.WebSockets;
+using Utility;
 
 namespace OrdenCompra.Controllers
 {
@@ -30,7 +31,7 @@ namespace OrdenCompra.Controllers
             }
             catch (Exception ex)
             {
-                Helper.SendException(ex);
+                HelperUtility.SendException(ex);
             }
 
             return View();
@@ -51,7 +52,7 @@ namespace OrdenCompra.Controllers
             }
             catch (Exception ex)
             {
-                Helper.SendException(ex);
+                HelperUtility.SendException(ex);
 
                 return null;
             }
@@ -68,7 +69,7 @@ namespace OrdenCompra.Controllers
             }
             catch (Exception ex)
             {
-                Helper.SendException(ex);
+                HelperUtility.SendException(ex);
             }
 
             return null;
@@ -118,7 +119,7 @@ namespace OrdenCompra.Controllers
             }
             catch (Exception ex)
             {
-                Helper.SendException(ex, $"orderID: {orderId}");
+                HelperUtility.SendException(ex, $"orderID: {orderId}");
             }
         }
 
@@ -177,7 +178,7 @@ namespace OrdenCompra.Controllers
             }
             catch (Exception ex)
             {
-                Helper.SendException(ex, $"OrderID: {orderId}");
+                HelperUtility.SendException(ex, $"OrderID: {orderId}");
             }
         }
 
@@ -219,7 +220,7 @@ namespace OrdenCompra.Controllers
             }
             catch (Exception ex)
             {
-                Helper.SendException(ex);
+                HelperUtility.SendException(ex);
             }
         }
 
@@ -239,10 +240,10 @@ namespace OrdenCompra.Controllers
                         var _article = articles.FirstOrDefault(a => a.Id == article.ArticleId);
                         if (_article == null)
                         {
-                            var __article = Helper.GetArticleById(article.ArticleId);
+                            var __article = HelperApp.GetArticleById(article.ArticleId);
                             if (__article != null && __article.Tables.Count > 0 && __article.Tables[0].Rows.Count > 0)
                             {
-                                Helper.AddNewArticle(__article.Tables[0].Rows[0]);
+                                HelperApp.AddNewArticle(__article.Tables[0].Rows[0]);
                                 _article = db.Articles.FirstOrDefault(a => a.Id == article.ArticleId);
                             }
                         }
@@ -342,7 +343,7 @@ namespace OrdenCompra.Controllers
             }
             catch (Exception ex)
             {
-                Helper.SendException(ex);
+                HelperUtility.SendException(ex);
             }
         }
 
@@ -377,7 +378,7 @@ namespace OrdenCompra.Controllers
             }
             catch (Exception ex)
             {
-                Helper.SendException(ex);
+                HelperUtility.SendException(ex);
             }
         }
 
@@ -433,7 +434,7 @@ namespace OrdenCompra.Controllers
             }
             catch (Exception ex)
             {
-                Helper.SendException(ex);
+                HelperUtility.SendException(ex);
             }
         }
 
@@ -461,10 +462,10 @@ namespace OrdenCompra.Controllers
                         var _article = articles.FirstOrDefault(a => a.Id == article.ArticleId);
                         if (_article == null)
                         {
-                            var __article = Helper.GetArticleById(article.ArticleId);
+                            var __article = HelperApp.GetArticleById(article.ArticleId);
                             if (__article != null && __article.Tables.Count > 0 && __article.Tables[0].Rows.Count > 0)
                             {
-                                Helper.AddNewArticle(__article.Tables[0].Rows[0]);
+                                HelperApp.AddNewArticle(__article.Tables[0].Rows[0]);
                                 _article = db.Articles.FirstOrDefault(a => a.Id == article.ArticleId);
                             }
                         }
@@ -486,7 +487,7 @@ namespace OrdenCompra.Controllers
             }
             catch (Exception ex)
             {
-                Helper.SendException(ex, $"orderID: {orderId}");
+                HelperUtility.SendException(ex, $"orderID: {orderId}");
             }
         }
 
@@ -529,7 +530,7 @@ namespace OrdenCompra.Controllers
             }
             catch (Exception ex)
             {
-                Helper.SendException(ex, $"orderId: {detail.OrderPurchaseId} | containerId: {detail.ContainerId} | articleId: {detail.ArticleId}");
+                HelperUtility.SendException(ex, $"orderId: {detail.OrderPurchaseId} | containerId: {detail.ContainerId} | articleId: {detail.ArticleId}");
             }
 
             return false;
@@ -549,11 +550,11 @@ namespace OrdenCompra.Controllers
                 if (orderHeader == null)
                 {
                     //Take order header from AS400
-                    var __orderHeader = Helper.GetOrderPurchaseHeader(orderId);
+                    var __orderHeader = HelperApp.GetOrderPurchaseHeader(orderId);
                     PopulateOrderPurchaseHeader(__orderHeader, orderId);
 
                     //Take order detail from AS400
-                    var __orderDetail = Helper.GetOrderPurchaseDetail(orderId);
+                    var __orderDetail = HelperApp.GetOrderPurchaseDetail(orderId);
                     PopulateOrderPurchaseDetailRequest(__orderDetail, orderId);
 
                     //Create other containers if apply
@@ -596,7 +597,7 @@ namespace OrdenCompra.Controllers
             }
             catch (Exception ex)
             {
-                Helper.SendException(ex, $"orderID: {orderId}");
+                HelperUtility.SendException(ex, $"orderID: {orderId}");
 
                 return Json(new { result = "500", message = ex.Message });
             }
@@ -646,7 +647,7 @@ namespace OrdenCompra.Controllers
             }
             catch (Exception ex)
             {
-                Helper.SendException(ex, $"containerId: {containerId} | type: {type} | value: {value}");
+                HelperUtility.SendException(ex, $"containerId: {containerId} | type: {type} | value: {value}");
 
                 return Json(new { result = "500", message = ex.Message });
             }
@@ -683,7 +684,7 @@ namespace OrdenCompra.Controllers
             }
             catch (Exception ex)
             {
-                Helper.SendException(ex, $"orderId: {orderId} | type: {type} | value: {value}");
+                HelperUtility.SendException(ex, $"orderId: {orderId} | type: {type} | value: {value}");
 
                 return Json(new { result = "500", message = ex.Message });
             }
@@ -732,7 +733,7 @@ namespace OrdenCompra.Controllers
             }
             catch (Exception ex)
             {
-                Helper.SendException(ex);
+                HelperUtility.SendException(ex);
 
                 return Json(new { result = "500", message = ex.Message });
             }
@@ -774,7 +775,7 @@ namespace OrdenCompra.Controllers
             }
             catch (Exception ex)
             {
-                Helper.SendException(ex, $"containerId: {containerId} | articleId: {articleId} | quantity: {quantity}");
+                HelperUtility.SendException(ex, $"containerId: {containerId} | articleId: {articleId} | quantity: {quantity}");
 
                 return Json(new { result = "500", message = ex.Message });
             }

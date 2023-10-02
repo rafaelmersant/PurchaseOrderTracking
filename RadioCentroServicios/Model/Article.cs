@@ -7,7 +7,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace OrdenCompra.Models
+namespace RadioCentroServicios.Model
 {
     using System;
     using System.Collections.Generic;
@@ -35,8 +35,8 @@ namespace OrdenCompra.Models
         public System.DateTime AddedDate { get; set; }
         public int AddedBy { get; set; }
     
-        public virtual Mark Mark { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<NotificationCenter> NotificationCenters { get; set; }
+        public virtual Mark Mark { get; set; }
     }
 }

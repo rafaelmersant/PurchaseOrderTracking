@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Web;
 using System.Web.Mvc;
+using Utility;
 
 namespace OrdenCompra.Controllers
 {
@@ -33,7 +34,7 @@ namespace OrdenCompra.Controllers
             }
             catch (Exception ex)
             {
-                Helper.SendException(ex);
+                HelperUtility.SendException(ex);
             }
 
             return View();
@@ -51,7 +52,7 @@ namespace OrdenCompra.Controllers
             }
             catch (Exception ex)
             {
-                Helper.SendException(ex);
+                HelperUtility.SendException(ex);
             }
 
             return RedirectToAction("Login", "User");
@@ -65,7 +66,7 @@ namespace OrdenCompra.Controllers
             {
                 using (var db = new OrdenCompraRCEntities())
                 {
-                    string _pass = Helper.SHA256(password);
+                    string _pass = HelperUtility.SHA256(password);
                     var _user = db.Users.FirstOrDefault(u => u.EmployeeID == username && u.PasswordHash == _pass);
 
                     if (_user != null)
@@ -99,7 +100,7 @@ namespace OrdenCompra.Controllers
             }
             catch (Exception ex)
             {
-                Helper.SendException(ex);
+                HelperUtility.SendException(ex);
 
                 ViewBag.Message = ex.Message;
             }
@@ -122,7 +123,7 @@ namespace OrdenCompra.Controllers
             }
             catch (Exception ex)
             {
-                Helper.SendException(ex);
+                HelperUtility.SendException(ex);
 
                 return null;
             }
@@ -153,7 +154,7 @@ namespace OrdenCompra.Controllers
             }
             catch (Exception ex)
             {
-                Helper.SendException(ex);
+                HelperUtility.SendException(ex);
             }
         }
 
@@ -181,7 +182,7 @@ namespace OrdenCompra.Controllers
                             IdHash = Guid.NewGuid(),
                             Email = user.Email,
                             EmployeeID = user.EmployeeID,
-                            PasswordHash = Helper.SHA256(user.PasswordHash),
+                            PasswordHash = HelperUtility.SHA256(user.PasswordHash),
                             Role = user.Role
                         };
 
@@ -194,7 +195,7 @@ namespace OrdenCompra.Controllers
             }
             catch (Exception ex)
             {
-                Helper.SendException(ex);
+                HelperUtility.SendException(ex);
 
                 ViewBag.Result = "danger";
                 ViewBag.Message = ex.Message;
@@ -231,7 +232,7 @@ namespace OrdenCompra.Controllers
             }
             catch (Exception ex)
             {
-                Helper.SendException(ex);
+                HelperUtility.SendException(ex);
 
                 return View();
             }
@@ -271,7 +272,7 @@ namespace OrdenCompra.Controllers
                 }
                 catch (Exception ex)
                 {
-                    Helper.SendException(ex);
+                    HelperUtility.SendException(ex);
 
                     ViewBag.Result = "danger";
                     ViewBag.Message = ex.Message;
@@ -300,7 +301,7 @@ namespace OrdenCompra.Controllers
             }
             catch (Exception ex)
             {
-                Helper.SendException(ex);
+                HelperUtility.SendException(ex);
 
                 return Json(new { result = "500", message = ex.Message });
             }
@@ -336,12 +337,12 @@ namespace OrdenCompra.Controllers
 
                     var user_edit = db.Users.FirstOrDefault(u => u.EmployeeID == employeeId);
                     string newPassword = Environment.TickCount.ToString().Substring(0, 4);
-                    string newPasswordHash = Helper.SHA256(newPassword);
+                    string newPasswordHash = HelperUtility.SHA256(newPassword);
 
                     user_edit.PasswordHash = newPasswordHash;
                     db.SaveChanges();
 
-                    Helper.SendRecoverPasswordEmail(newPassword, email);
+                    HelperUtility.SendRecoverPasswordEmail(newPassword, email);
 
                     return new JsonResult { Data = "200", JsonRequestBehavior = JsonRequestBehavior.AllowGet };
                 }
@@ -349,7 +350,7 @@ namespace OrdenCompra.Controllers
             catch (Exception ex)
             {
                 if (!ex.Message.Contains("/email"))
-                    Helper.SendException(ex);
+                    HelperUtility.SendException(ex);
 
                 return new JsonResult { Data = ex.Message, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
             }
@@ -370,13 +371,13 @@ namespace OrdenCompra.Controllers
                 using (var db = new OrdenCompraRCEntities())
                 {
                     string employeeId = Session["employeeID"].ToString();
-                    string password = Helper.SHA256(currentPassword);
+                    string password = HelperUtility.SHA256(currentPassword);
 
                     var currentUser = db.Users.FirstOrDefault(u => u.EmployeeID == employeeId && u.PasswordHash == password);
 
                     if (currentUser != null)
                     {
-                        currentUser.PasswordHash = Helper.SHA256(newPassword);
+                        currentUser.PasswordHash = HelperUtility.SHA256(newPassword);
                         db.SaveChanges();
                     }
                     else
@@ -389,7 +390,7 @@ namespace OrdenCompra.Controllers
             }
             catch (Exception ex)
             {
-                Helper.SendException(ex);
+                HelperUtility.SendException(ex);
 
                 return new JsonResult { Data = ex.Message, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
             }

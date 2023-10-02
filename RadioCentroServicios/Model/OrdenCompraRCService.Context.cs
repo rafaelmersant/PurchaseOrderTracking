@@ -7,7 +7,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace OrdenCompra.Models
+namespace RadioCentroServicios.Model
 {
     using System;
     using System.Data.Entity;
@@ -15,10 +15,10 @@ namespace OrdenCompra.Models
     using System.Data.Entity.Core.Objects;
     using System.Linq;
     
-    public partial class OrdenCompraRCEntities : DbContext
+    public partial class OrdenCompraRCServiceEntities : DbContext
     {
-        public OrdenCompraRCEntities()
-            : base("name=OrdenCompraRCEntities")
+        public OrdenCompraRCServiceEntities()
+            : base("name=OrdenCompraRCServiceEntities")
         {
         }
     
@@ -27,33 +27,24 @@ namespace OrdenCompra.Models
             throw new UnintentionalCodeFirstException();
         }
     
+        public virtual DbSet<Article> Articles { get; set; }
         public virtual DbSet<InventoryHistory> InventoryHistories { get; set; }
         public virtual DbSet<LoginHistory> LoginHistories { get; set; }
-        public virtual DbSet<NotificationGroup> NotificationGroups { get; set; }
-        public virtual DbSet<OrderPurchaseDoc> OrderPurchaseDocs { get; set; }
-        public virtual DbSet<OrderPurchaseHistory> OrderPurchaseHistories { get; set; }
-        public virtual DbSet<StatusContainer> StatusContainers { get; set; }
-        public virtual DbSet<User> Users { get; set; }
-        public virtual DbSet<StatusOrderPurchase> StatusOrderPurchases { get; set; }
-        public virtual DbSet<OrderPurchaseArticlesContainerTmp> OrderPurchaseArticlesContainerTmps { get; set; }
         public virtual DbSet<Mark> Marks { get; set; }
-        public virtual DbSet<OrderPurchaseContainer> OrderPurchaseContainers { get; set; }
-        public virtual DbSet<OrderPurchaseDeliver> OrderPurchaseDelivers { get; set; }
-        public virtual DbSet<Provider> Providers { get; set; }
-        public virtual DbSet<ShippingCompany> ShippingCompanies { get; set; }
+        public virtual DbSet<NotificationCenter> NotificationCenters { get; set; }
+        public virtual DbSet<NotificationGroup> NotificationGroups { get; set; }
         public virtual DbSet<OrderPurchase> OrderPurchases { get; set; }
         public virtual DbSet<OrderPurchaseArticlesContainer> OrderPurchaseArticlesContainers { get; set; }
-        public virtual DbSet<Article> Articles { get; set; }
-        public virtual DbSet<NotificationCenter> NotificationCenters { get; set; }
-    
-        public virtual ObjectResult<GetPurchaseOrderHeader_Result> GetPurchaseOrderHeader(Nullable<int> orderID)
-        {
-            var orderIDParameter = orderID.HasValue ?
-                new ObjectParameter("orderID", orderID) :
-                new ObjectParameter("orderID", typeof(int));
-    
-            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<GetPurchaseOrderHeader_Result>("GetPurchaseOrderHeader", orderIDParameter);
-        }
+        public virtual DbSet<OrderPurchaseArticlesContainerTmp> OrderPurchaseArticlesContainerTmps { get; set; }
+        public virtual DbSet<OrderPurchaseContainer> OrderPurchaseContainers { get; set; }
+        public virtual DbSet<OrderPurchaseDeliver> OrderPurchaseDelivers { get; set; }
+        public virtual DbSet<OrderPurchaseDoc> OrderPurchaseDocs { get; set; }
+        public virtual DbSet<OrderPurchaseHistory> OrderPurchaseHistories { get; set; }
+        public virtual DbSet<Provider> Providers { get; set; }
+        public virtual DbSet<ShippingCompany> ShippingCompanies { get; set; }
+        public virtual DbSet<StatusContainer> StatusContainers { get; set; }
+        public virtual DbSet<StatusOrderPurchase> StatusOrderPurchases { get; set; }
+        public virtual DbSet<User> Users { get; set; }
     
         public virtual ObjectResult<GetPurchaseOrderContainer_Result> GetPurchaseOrderContainer(Nullable<int> containerId)
         {
@@ -71,6 +62,15 @@ namespace OrdenCompra.Models
                 new ObjectParameter("orderID", typeof(int));
     
             return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<GetPurchaseOrderDetail_Result>("GetPurchaseOrderDetail", orderIDParameter);
+        }
+    
+        public virtual ObjectResult<GetPurchaseOrderHeader_Result> GetPurchaseOrderHeader(Nullable<int> orderID)
+        {
+            var orderIDParameter = orderID.HasValue ?
+                new ObjectParameter("orderID", orderID) :
+                new ObjectParameter("orderID", typeof(int));
+    
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<GetPurchaseOrderHeader_Result>("GetPurchaseOrderHeader", orderIDParameter);
         }
     }
 }

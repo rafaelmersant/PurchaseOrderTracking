@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Web;
 using System.Web.Mvc;
+using Utility;
 
 namespace OrdenCompra.Controllers
 {
@@ -27,7 +28,7 @@ namespace OrdenCompra.Controllers
             }
             catch (Exception ex)
             {
-                Helper.SendException(ex);
+                HelperUtility.SendException(ex);
 
                 return null;
             }
@@ -73,7 +74,7 @@ namespace OrdenCompra.Controllers
             }
             catch (Exception ex)
             {
-                Helper.SendException(ex);
+                HelperUtility.SendException(ex);
 
                 ViewBag.Result = "danger";
                 ViewBag.Message = ex.Message;
@@ -106,7 +107,7 @@ namespace OrdenCompra.Controllers
             }
             catch (Exception ex)
             {
-                Helper.SendException(ex);
+                HelperUtility.SendException(ex);
 
                 return View();
             }
@@ -146,7 +147,7 @@ namespace OrdenCompra.Controllers
                 }
                 catch (Exception ex)
                 {
-                    Helper.SendException(ex);
+                    HelperUtility.SendException(ex);
 
                     ViewBag.Result = "danger";
                     ViewBag.Message = ex.Message;
@@ -167,7 +168,7 @@ namespace OrdenCompra.Controllers
             }
             catch (Exception ex)
             {
-                Helper.SendException(ex);
+                HelperUtility.SendException(ex);
             }
 
             return navieras;

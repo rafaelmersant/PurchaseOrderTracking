@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using Utility;
 
 namespace OrdenCompra.Controllers
 {
@@ -25,7 +26,7 @@ namespace OrdenCompra.Controllers
             }
             catch (Exception ex)
             {
-                Helper.SendException(ex);
+                HelperUtility.SendException(ex);
 
                 return null;
             }
@@ -45,7 +46,7 @@ namespace OrdenCompra.Controllers
             }
             catch (Exception ex)
             {
-                Helper.SendException(ex);
+                HelperUtility.SendException(ex);
 
                 return null;
             }
@@ -73,7 +74,7 @@ namespace OrdenCompra.Controllers
             }
             catch (Exception ex)
             {
-                Helper.SendException(ex, $"notificacion Id: {id}");
+                HelperUtility.SendException(ex, $"notificacion Id: {id}");
 
                 return Json(new { result = "500", message = ex.Message });
             }
@@ -99,7 +100,7 @@ namespace OrdenCompra.Controllers
             }
             catch (Exception ex)
             {
-                Helper.SendException(ex, $"groupId: {groupId} | email: {email}");
+                HelperUtility.SendException(ex, $"groupId: {groupId} | email: {email}");
 
                 return Json(new { result = "500", message = ex.Message });
             }
@@ -125,7 +126,7 @@ namespace OrdenCompra.Controllers
             }
             catch (Exception ex)
             {
-                Helper.SendException(ex, $"groupId: {groupId} | email: {email}");
+                HelperUtility.SendException(ex, $"groupId: {groupId} | email: {email}");
 
                 return Json(new { result = "500", message = ex.Message });
             }

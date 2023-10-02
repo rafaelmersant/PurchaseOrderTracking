@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net;
 using System.Web;
 using System.Web.Mvc;
+using Utility;
 
 namespace OrdenCompra.Controllers
 {
@@ -29,7 +30,7 @@ namespace OrdenCompra.Controllers
             }
             catch (Exception ex)
             {
-                Helper.SendException(ex);
+                HelperUtility.SendException(ex);
 
                 return null;
             }
@@ -58,7 +59,7 @@ namespace OrdenCompra.Controllers
             }
             catch (Exception ex)
             {
-                Helper.SendException(ex);
+                HelperUtility.SendException(ex);
 
                 return View();
             }
@@ -87,7 +88,7 @@ namespace OrdenCompra.Controllers
                 }
                 catch (Exception ex)
                 {
-                    Helper.SendException(ex);
+                    HelperUtility.SendException(ex);
 
                     ViewBag.Result = "danger";
                     ViewBag.Message = ex.Message;
@@ -114,7 +115,7 @@ namespace OrdenCompra.Controllers
             }
             catch (Exception ex)
             {
-                Helper.SendException(ex);
+                HelperUtility.SendException(ex);
             }
         }
 
@@ -125,7 +126,7 @@ namespace OrdenCompra.Controllers
             {
                 if (Session["userID"] == null) throw new Exception("505: Por favor intente logearse de nuevo en el sistema. (La Sesión expiró)");
 
-                var articles = Helper.GetArticles();
+                var articles = HelperApp.GetArticles();
                 if (articles != null && articles.Tables.Count > 0 && articles.Tables[0].Rows.Count > 0)
                 {
                     var _articles = articles.Tables[0];
@@ -181,7 +182,7 @@ namespace OrdenCompra.Controllers
                             }
                             catch (Exception ex)
                             {
-                                Helper.SendException(ex, $"articulo ID: {__article.ItemArray[0]}");
+                                HelperUtility.SendException(ex, $"articulo ID: {__article.ItemArray[0]}");
                             }
                         }
                     }
@@ -195,7 +196,7 @@ namespace OrdenCompra.Controllers
             }
             catch (Exception ex)
             {
-                Helper.SendException(ex);
+                HelperUtility.SendException(ex);
 
                 return Json(new { result = "500", message = ex.Message });
             }

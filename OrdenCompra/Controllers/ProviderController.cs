@@ -6,6 +6,7 @@ using System.Data;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using Utility;
 
 namespace OrdenCompra.Controllers
 {
@@ -28,7 +29,7 @@ namespace OrdenCompra.Controllers
             }
             catch (Exception ex)
             {
-                Helper.SendException(ex);
+                HelperUtility.SendException(ex);
 
                 return null;
             }
@@ -41,7 +42,7 @@ namespace OrdenCompra.Controllers
             {
                 if (Session["userID"] == null) throw new Exception("505: Por favor intente logearse de nuevo en el sistema. (La Sesión expiró)");
 
-                var providers = Helper.GetProviders();
+                var providers = HelperApp.GetProviders();
                 if (providers != null && providers.Tables.Count > 0 && providers.Tables[0].Rows.Count > 0)
                 {
                     var _providers = providers.Tables[0];
@@ -85,7 +86,7 @@ namespace OrdenCompra.Controllers
             }
             catch (Exception ex)
             {
-                Helper.SendException(ex);
+                HelperUtility.SendException(ex);
 
                 return Json(new { result = "500", message = ex.Message });
             }
