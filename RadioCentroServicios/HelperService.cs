@@ -28,7 +28,8 @@ namespace RadioCentroServicios
                         Type = "Suplidor",
                         SentDate = DateTime.Now,
                         OrderPurchaseId = orderId,
-                        Condition = $"Fecha de Fabricación: {manufacturingDate} (Faltan {elapsedDays} días)"
+                        Condition = $"Fecha de Fabricación: {manufacturingDate} (Faltan {elapsedDays} días)",
+                        Active = true
                     });
 
                     db.SaveChanges();
@@ -202,7 +203,7 @@ namespace RadioCentroServicios
         {
             try
             {
-                string sQuery = $"SELECT EANUMARTIC, SUM(EAEXACTUAL) EAEXACTUAL FROM [QS36F.RCFAMP00] WHERE EASTATUS != 9 GROUP BY EANUMARTIC";
+                string sQuery = $"SELECT EANUMARTIC, SUM(EAEXACTUAL) EAEXACTUAL FROM [QS36F.RCFAEA10] WHERE EASTATUS != 9 GROUP BY EANUMARTIC";
 
                 if (ConfigurationManager.AppSettings["EnvironmentOrdenCompra"] != "DEV")
                     sQuery = sQuery.Replace("[", "").Replace("]", "");

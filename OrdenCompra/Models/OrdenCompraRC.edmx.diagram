@@ -33,6 +33,8 @@
         <AssociationConnector Association="OrdenCompraRCModel.FK_Provider_OC" ManuallyRouted="false" />
         <AssociationConnector Association="OrdenCompraRCModel.FK_Status_OC" ManuallyRouted="false" />
         <AssociationConnector Association="OrdenCompraRCModel.FK_OrderPurchase_C" ManuallyRouted="false" />
+        <EntityTypeShape EntityType="OrdenCompraRCModel.TimeLineOrder" Width="1.5" PointX="13.375" PointY="0.75" />
+        <AssociationConnector Association="OrdenCompraRCModel.FK_TimeLineOrder_TimeLineOrder" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

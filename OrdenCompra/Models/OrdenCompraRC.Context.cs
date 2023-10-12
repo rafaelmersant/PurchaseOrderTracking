@@ -45,6 +45,7 @@ namespace OrdenCompra.Models
         public virtual DbSet<StatusContainer> StatusContainers { get; set; }
         public virtual DbSet<StatusOrderPurchase> StatusOrderPurchases { get; set; }
         public virtual DbSet<User> Users { get; set; }
+        public virtual DbSet<TimeLineOrder> TimeLineOrders { get; set; }
     
         public virtual ObjectResult<GetPurchaseOrderContainer_Result> GetPurchaseOrderContainer(Nullable<int> containerId)
         {

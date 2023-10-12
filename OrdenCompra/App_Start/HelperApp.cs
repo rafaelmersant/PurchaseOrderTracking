@@ -45,6 +45,29 @@ namespace OrdenCompra.App_Start
             }
         }
 
+        public static void SaveTimeLineOrder(int orderId, string source, string comment, int userLogged)
+        {
+            try
+            {
+                using (var db = new OrdenCompraRCEntities())
+                {
+                    db.TimeLineOrders.Add(new TimeLineOrder
+                    {
+                        OrderId = orderId,
+                        Source = source,
+                        Comment = comment,
+                        CreatedDate = DateTime.Now,
+                        CreatedByUser = userLogged
+                    });
+                    db.SaveChanges();
+                }
+            }
+            catch (Exception ex)
+            {
+                HelperUtility.SendException(ex, $"orderId:{orderId}");
+            }
+        }
+
         //GET Article by Id
         public static DataSet GetArticleById(int id)
         {

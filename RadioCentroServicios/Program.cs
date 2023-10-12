@@ -43,12 +43,22 @@ namespace RadioCentroServicios
                             try
                             {
                                 var articleId = int.Parse(item.ItemArray[0].ToString());
+                                var quantity = decimal.Parse(item.ItemArray[1].ToString());
+
                                 var article = db.Articles.FirstOrDefault(a => a.Id == articleId);
                                 if (article != null)
                                 {
-                                    article.InventoryStock = decimal.Parse(item.ItemArray[1].ToString());
+                                    article.InventoryStock = quantity;
                                     db.SaveChanges();
                                 }
+
+                                db.InventoryHistories.Add(new InventoryHistory
+                                {
+                                    ArticleId = articleId,
+                                    QuantityAvailable = quantity,
+                                    Date = DateTime.Now
+                                });
+                                db.SaveChanges();
                             }
                             catch (Exception ex)
                             {

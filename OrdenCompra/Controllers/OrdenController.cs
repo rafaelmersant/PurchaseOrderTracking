@@ -266,21 +266,29 @@ namespace OrdenCompra.Controllers
                 using (var db = new OrdenCompraRCEntities())
                 {
                     var orderArticle = db.OrderPurchaseArticlesContainerTmps.FirstOrDefault(t => t.OrderPurchaseId == orderId && t.ArticleId == articleId);
+                    OrderPurchaseContainer _container = null;
 
                     for (int i = 0; i < containersPerArticle; i++)
                     {
-                        OrderPurchaseContainer _container = db.OrderPurchaseContainers.Add(new OrderPurchaseContainer
+                        Article _article = db.Articles.FirstOrDefault(a => a.Id == articleId);
+
+                        if (_article.Mix)
+                            _container = db.OrderPurchaseContainers.Where(c => c.OrderPurchaseId == orderId).OrderByDescending(o => o.SortIndex).FirstOrDefault();
+                        
+                        if (_container == null || !_article.Mix)
                         {
-                            CreatedDate = DateTime.Now,
-                            OrderPurchaseId = orderId,
-                            StatusId = 1,
-                            SortIndex = container,
-                        });
-                        db.SaveChanges();
+                            _container = db.OrderPurchaseContainers.Add(new OrderPurchaseContainer
+                            {
+                                CreatedDate = DateTime.Now,
+                                OrderPurchaseId = orderId,
+                                StatusId = 1,
+                                SortIndex = container,
+                            });
+                            db.SaveChanges();
+                        }
 
                         decimal maxPerContainer = orderArticle.QuantityRequested;
 
-                        Article _article = db.Articles.FirstOrDefault(a => a.Id == articleId);
                         maxPerContainer = _article != null && _article.QuantityMaxPerContainer <= 0 ? maxPerContainer : _article.QuantityMaxPerContainer ?? 1M;
 
                         decimal quantityToDeduct = orderArticle.QuantityRequested > maxPerContainer ? maxPerContainer : orderArticle.QuantityRequested;
@@ -305,7 +313,8 @@ namespace OrdenCompra.Controllers
                             db.SaveChanges();
                         }
 
-                        container += 1;
+                        if (!_article.Mix)
+                            container += 1;
                     }
                 }
             }
@@ -496,8 +505,13 @@ namespace OrdenCompra.Controllers
                         int year = int.Parse(value.Substring(6, 4));
                         int month = int.Parse(value.Substring(3, 2));
                         int day = int.Parse(value.Substring(0, 2));
+                        var newDate = new DateTime(year, month, day);
 
-                        container.ManufacturingDate = new DateTime(year, month, day);
+                        HelperApp.SaveTimeLineOrder(container.OrderPurchaseId, "Fecha de Fabricación", 
+                                                    $"Fue cambiada la fecha de fabricación {container.ManufacturingDate} por {newDate} para el contenedor No. {container.SortIndex}",
+                                                    int.Parse(Session["userID"].ToString()));
+
+                        container.ManufacturingDate = newDate;
                     }
 
                     if (type == "DueDate")
@@ -505,15 +519,42 @@ namespace OrdenCompra.Controllers
                         int year = int.Parse(value.Substring(6, 4));
                         int month = int.Parse(value.Substring(3, 2));
                         int day = int.Parse(value.Substring(0, 2));
+                        var newDate = new DateTime(year, month, day);
 
-                        container.DueDate = new DateTime(year, month, day);
+                        HelperApp.SaveTimeLineOrder(container.OrderPurchaseId, "Fecha de Entrega",
+                                                    $"Fue cambiada la fecha de entrega {container.ManufacturingDate} por {newDate} para el contenedor No. {container.SortIndex}",
+                                                    int.Parse(Session["userID"].ToString()));
+
+                        container.DueDate = newDate;
                     }
 
                     if (type == "Status")
-                        container.StatusId = int.Parse(value);
-                    
+                    {
+                        var _newStatus = int.Parse(value);
+
+                        var oldStatus = db.StatusContainers.FirstOrDefault(s => s.Id == container.StatusId).Description;
+                        var newStatus = db.StatusContainers.FirstOrDefault(s => s.Id == _newStatus).Description;
+
+                        container.StatusId = _newStatus;
+                        
+                        HelperApp.SaveTimeLineOrder(container.OrderPurchaseId, "Estatus de Contenedor",
+                                                    $"Fue cambiado el estatus {oldStatus} por {newStatus} para el contenedor No. {container.SortIndex}",
+                                                    int.Parse(Session["userID"].ToString()));
+                    }
+                        
                     if (type == "Naviera")
-                        container.ShippingCompanyId = int.Parse(value);
+                    {
+                        var _newNaviera = int.Parse(value);
+                        
+                        var oldNaviera = container.ShippingCompanyId != null? db.ShippingCompanies.FirstOrDefault(s => s.Id == container.ShippingCompanyId).Description : "";
+                        var newNaviera = db.ShippingCompanies.FirstOrDefault(s => s.Id == _newNaviera).Description;
+
+                        container.ShippingCompanyId = _newNaviera;
+
+                        HelperApp.SaveTimeLineOrder(container.OrderPurchaseId, "Naviera de Contenedor",
+                                                    $"Fue cambiada la naviera {oldNaviera} por {newNaviera} para el contenedor No. {container.SortIndex}",
+                                                    int.Parse(Session["userID"].ToString()));
+                    }
 
                     db.SaveChanges();
                 }
@@ -545,13 +586,29 @@ namespace OrdenCompra.Controllers
                         int year = int.Parse(value.Substring(6, 4));
                         int month = int.Parse(value.Substring(3, 2));
                         int day = int.Parse(value.Substring(0, 2));
+                        var newDate = new DateTime(year, month, day);
 
-                        order.DateDMA = new DateTime(year, month, day);
+                        HelperApp.SaveTimeLineOrder(order.OrderPurchaseId, "Fecha de Orden",
+                                                    $"Fue cambiada la fecha de la orden {order.DateDMA} por {newDate} para el la orden No. {orderId}",
+                                                    int.Parse(Session["userID"].ToString()));
+
+                        order.DateDMA = newDate;
                     }
 
                     if (type == "status")
-                        order.StatusId = int.Parse(value);
+                    {
+                        var _newStatus = int.Parse(value);
 
+                        var oldStatus = db.StatusOrderPurchases.FirstOrDefault(s => s.Id == order.StatusId).Description;
+                        var newStatus = db.StatusOrderPurchases.FirstOrDefault(s => s.Id == _newStatus).Description;
+
+                        order.StatusId = _newStatus;
+
+                        HelperApp.SaveTimeLineOrder(order.OrderPurchaseId, "Estatus de Orden",
+                                                    $"Fue cambiado el estatus {oldStatus} por {newStatus} para la orden No. {orderId}",
+                                                    int.Parse(Session["userID"].ToString()));
+                    }
+                        
                     db.SaveChanges();
                 }
 
@@ -579,6 +636,29 @@ namespace OrdenCompra.Controllers
                     var detail = db.OrderPurchaseArticlesContainers.FirstOrDefault(o => o.Id == detailId);
                     if (detail == null) return Json(new { result = "404", message = "No se pudo actualizar la cantidad para dicho articulo." });
 
+                    try
+                    {
+                        var article = db.Articles.FirstOrDefault(a => a.Id == detail.ArticleId);
+
+                        string comment = $"Fue actualizada la cantidad para el articulo {article.Id}-{article.Description}";
+
+                        if (detail.QuantityRequested != newQuantity)
+                            comment += $" cantidad anterior: { detail.QuantityRequested} | nueva cantidad: { newQuantity}";
+
+                        if (detail.QuantityTraffic != traffic)
+                            comment += $" cantidad en transito anterior: {detail.QuantityTraffic} | nueva cantidad en transito: {traffic}";
+
+                        if (detail.QuantityFactory != factory)
+                            comment += $" cantidad en fabrica anterior: {detail.QuantityFactory} | nueva cantidad en fabrica: {factory}";
+
+                        HelperApp.SaveTimeLineOrder(detail.OrderPurchaseId, "Actualiza Cantidad de Articulo",
+                                                    comment, int.Parse(Session["userID"].ToString()));
+                    }
+                    catch (Exception ex)
+                    {
+                        HelperUtility.SendException(ex);
+                    }
+
                     detail.QuantityRequested = newQuantity;
                     detail.QuantityTraffic = traffic;
                     detail.QuantityFactory = factory;
@@ -588,6 +668,11 @@ namespace OrdenCompra.Controllers
                     {
                         decimal remainQuantity = newQuantity - traffic;
                         anotherContainer = CreateAnotherContainerForArticle(detail, remainQuantity);
+
+                        var newContainer = db.OrderPurchaseContainers.Where(c => c.OrderPurchaseId == detail.OrderPurchaseId).OrderByDescending(o => o.SortIndex).FirstOrDefault();
+                        HelperApp.SaveTimeLineOrder(detail.OrderPurchaseId, "Nuevo contenedor",
+                                                    $"Fue creado un nuevo contenedor el No. {newContainer.SortIndex}", 
+                                                    int.Parse(Session["userID"].ToString()));
                     }
                         
                     if (!string.IsNullOrEmpty(BL))
@@ -595,6 +680,10 @@ namespace OrdenCompra.Controllers
                         var container = db.OrderPurchaseContainers.FirstOrDefault(o => o.Id == detail.ContainerId);
                         if (container != null && container.BL != BL)
                         {
+                            HelperApp.SaveTimeLineOrder(detail.OrderPurchaseId, "BL actualizado",
+                                                    $"Fue actualizado el BL de {container.BL} por {BL}",
+                                                    int.Parse(Session["userID"].ToString()));
+
                             container.BL = BL;
                             db.SaveChanges();
                         }
@@ -644,6 +733,11 @@ namespace OrdenCompra.Controllers
                     });
 
                     db.SaveChanges();
+
+                    var _article = db.Articles.FirstOrDefault(a => a.Id == article.ArticleId);
+                    HelperApp.SaveTimeLineOrder(container.OrderPurchaseId, "Nuevo articulo en contenedor",
+                                                    $"Fue agregar el articulo {_article.Id}-{_article.Description} al contenedor No. {container.SortIndex}",
+                                                    int.Parse(Session["userID"].ToString()));
                 }
 
                 return Json(new { result = "200", message = "success" });

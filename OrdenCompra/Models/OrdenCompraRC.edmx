@@ -4,7 +4,7 @@
   <edmx:Runtime>
     <!-- SSDL content -->
     <edmx:StorageModels>
-      <Schema Namespace="OrdenCompraRCModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+    <Schema Namespace="OrdenCompraRCModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
         <EntityType Name="Article">
           <Key>
             <PropertyRef Name="Id" />
@@ -207,6 +207,17 @@
           <Property Name="Description" Type="varchar" MaxLength="20" Nullable="false" />
           <Property Name="CreatedDate" Type="datetime" Nullable="false" />
         </EntityType>
+        <EntityType Name="TimeLineOrder">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="OrderId" Type="int" Nullable="false" />
+          <Property Name="Source" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="Comment" Type="varchar" MaxLength="200" Nullable="false" />
+          <Property Name="CreatedByUser" Type="int" Nullable="false" />
+          <Property Name="CreatedDate" Type="datetime" Nullable="false" />
+        </EntityType>
         <EntityType Name="User">
           <Key>
             <PropertyRef Name="Id" />
@@ -344,6 +355,18 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK_TimeLineOrder_TimeLineOrder">
+          <End Role="TimeLineOrder" Type="Self.TimeLineOrder" Multiplicity="1" />
+          <End Role="TimeLineOrder1" Type="Self.TimeLineOrder" Multiplicity="0..1" />
+          <ReferentialConstraint>
+            <Principal Role="TimeLineOrder">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="TimeLineOrder1">
+              <PropertyRef Name="Id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Function Name="GetPurchaseOrderContainer" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
           <Parameter Name="containerId" Type="int" Mode="In" />
         </Function>
@@ -371,6 +394,7 @@
           <EntitySet Name="ShippingCompany" EntityType="Self.ShippingCompany" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="StatusContainer" EntityType="Self.StatusContainer" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="StatusOrderPurchase" EntityType="Self.StatusOrderPurchase" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="TimeLineOrder" EntityType="Self.TimeLineOrder" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="User" EntityType="Self.User" Schema="dbo" store:Type="Tables" />
           <AssociationSet Name="FK_ArticleID_OPC" Association="Self.FK_ArticleID_OPC">
             <End Role="Article" EntitySet="Article" />
@@ -412,9 +436,12 @@
             <End Role="StatusOrderPurchase" EntitySet="StatusOrderPurchase" />
             <End Role="OrderPurchase" EntitySet="OrderPurchase" />
           </AssociationSet>
+          <AssociationSet Name="FK_TimeLineOrder_TimeLineOrder" Association="Self.FK_TimeLineOrder_TimeLineOrder">
+            <End Role="TimeLineOrder" EntitySet="TimeLineOrder" />
+            <End Role="TimeLineOrder1" EntitySet="TimeLineOrder" />
+          </AssociationSet>
         </EntityContainer>
-      </Schema>
-    </edmx:StorageModels>
+      </Schema></edmx:StorageModels>
     <!-- CSDL content -->
     <edmx:ConceptualModels>
       <Schema Namespace="OrdenCompraRCModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
@@ -837,14 +864,19 @@
             <End Role="OrderPurchaseArticlesContainer" EntitySet="OrderPurchaseArticlesContainers" />
           </AssociationSet>
           <FunctionImport Name="GetPurchaseOrderContainer" ReturnType="Collection(OrdenCompraRCModel.GetPurchaseOrderContainer_Result)">
-            <Parameter Name="containerId" Mode="In" Type="Int32" />
+          <Parameter Name="containerId" Mode="In" Type="Int32" />
           </FunctionImport>
           <FunctionImport Name="GetPurchaseOrderDetail" ReturnType="Collection(OrdenCompraRCModel.GetPurchaseOrderDetail_Result)">
-            <Parameter Name="orderID" Mode="In" Type="Int32" />
+          <Parameter Name="orderID" Mode="In" Type="Int32" />
           </FunctionImport>
           <FunctionImport Name="GetPurchaseOrderHeader" ReturnType="Collection(OrdenCompraRCModel.GetPurchaseOrderHeader_Result)">
-            <Parameter Name="orderID" Mode="In" Type="Int32" />
+          <Parameter Name="orderID" Mode="In" Type="Int32" />
           </FunctionImport>
+          <EntitySet Name="TimeLineOrders" EntityType="OrdenCompraRCModel.TimeLineOrder" />
+          <AssociationSet Name="FK_TimeLineOrder_TimeLineOrder" Association="OrdenCompraRCModel.FK_TimeLineOrder_TimeLineOrder">
+            <End Role="TimeLineOrder" EntitySet="TimeLineOrders" />
+            <End Role="TimeLineOrder1" EntitySet="TimeLineOrders" />
+          </AssociationSet>
         </EntityContainer>
         <ComplexType Name="GetPurchaseOrderContainer_Result">
           <Property Type="Int32" Name="Id" Nullable="false" />
@@ -893,6 +925,31 @@
           <Property Type="String" Name="Status" Nullable="false" MaxLength="20" />
           <Property Type="String" Name="CreatedByEmail" Nullable="true" MaxLength="40" />
         </ComplexType>
+        <EntityType Name="TimeLineOrder">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="OrderId" Type="Int32" Nullable="false" />
+          <Property Name="Source" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="Comment" Type="String" Nullable="false" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="CreatedByUser" Type="Int32" Nullable="false" />
+          <Property Name="CreatedDate" Type="DateTime" Nullable="false" Precision="3" />
+          <NavigationProperty Name="TimeLineOrder1" Relationship="OrdenCompraRCModel.FK_TimeLineOrder_TimeLineOrder" FromRole="TimeLineOrder" ToRole="TimeLineOrder1" />
+          <NavigationProperty Name="TimeLineOrder2" Relationship="OrdenCompraRCModel.FK_TimeLineOrder_TimeLineOrder" FromRole="TimeLineOrder1" ToRole="TimeLineOrder" />
+        </EntityType>
+        <Association Name="FK_TimeLineOrder_TimeLineOrder">
+          <End Type="OrdenCompraRCModel.TimeLineOrder" Role="TimeLineOrder" Multiplicity="1" />
+          <End Type="OrdenCompraRCModel.TimeLineOrder" Role="TimeLineOrder1" Multiplicity="0..1" />
+          <ReferentialConstraint>
+            <Principal Role="TimeLineOrder">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="TimeLineOrder1">
+              <PropertyRef Name="Id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -1187,6 +1244,18 @@
               </ComplexTypeMapping>
             </ResultMapping>
           </FunctionImportMapping>
+          <EntitySetMapping Name="TimeLineOrders">
+            <EntityTypeMapping TypeName="OrdenCompraRCModel.TimeLineOrder">
+              <MappingFragment StoreEntitySet="TimeLineOrder">
+                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
+                <ScalarProperty Name="CreatedByUser" ColumnName="CreatedByUser" />
+                <ScalarProperty Name="Comment" ColumnName="Comment" />
+                <ScalarProperty Name="Source" ColumnName="Source" />
+                <ScalarProperty Name="OrderId" ColumnName="OrderId" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
         </EntityContainerMapping>
       </Mapping>
     </edmx:Mappings>
