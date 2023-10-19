@@ -57,7 +57,7 @@ namespace OrdenCompra.App_Start
                         Source = source,
                         Comment = comment,
                         CreatedDate = DateTime.Now,
-                        CreatedByUser = userLogged
+                        CreatedBy = userLogged
                     });
                     db.SaveChanges();
                 }
@@ -73,7 +73,7 @@ namespace OrdenCompra.App_Start
         {
             try
             {
-                string sQuery = $"SELECT MPNARTICUL, MPDESCRIPC, MPUMAYMED, MPNUMMARCA, MPMODELO, MPSTOCKCRI, MPSTOCKMAX FROM [QS36F.RCFAMP00] WHERE MPNARTICUL = {id}";
+                string sQuery = $"SELECT MAADNUMART, MAADDESART, MAADUNIMAY, MAADMARCA, MAADMODELO, MAADSTMICO, MAADCANXFU FROM [QS36F.RCADMA00] WHERE MAADNUMART = {id}";
 
                 if (ConfigurationManager.AppSettings["EnvironmentOrdenCompra"] != "DEV")
                     sQuery = sQuery.Replace("[", "").Replace("]", "");
@@ -87,7 +87,7 @@ namespace OrdenCompra.App_Start
 
             return null;
         }
-
+        
         //GET Purchase Order Header
         public static DataSet GetOrderPurchaseHeader(int purchaseOrderId)
         {
@@ -175,7 +175,7 @@ namespace OrdenCompra.App_Start
         {
             try
             {
-                string sQuery = $"SELECT MPNARTICUL, MPDESCRIPC, MPNUMMARCA, MPMODELO, MPSTOCKCRI, MPSTOCKMAX FROM [QS36F.RCFAMP00] WHERE MPCOREGIST != 9";
+                string sQuery = $"SELECT MAADNUMART, MAADDESART, MAADMARCA, MAADMODELO, MAADSTMICO, MAADCANXFU FROM [QS36F.RCADMA00] WHERE MAADSTAT != 9";
 
                 if (ConfigurationManager.AppSettings["EnvironmentOrdenCompra"] != "DEV")
                     sQuery = sQuery.Replace("[", "").Replace("]", "");

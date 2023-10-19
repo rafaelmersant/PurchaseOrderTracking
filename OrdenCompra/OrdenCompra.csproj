@@ -355,6 +355,7 @@
     <Content Include="Views\OrdenEstatus\Edit.cshtml" />
     <Content Include="Views\ContainerStatus\New.cshtml" />
     <Content Include="Views\ContainerStatus\Edit.cshtml" />
+    <Content Include="Views\Orden\Detalle.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

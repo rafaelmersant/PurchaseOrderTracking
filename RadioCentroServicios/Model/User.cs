@@ -14,6 +14,12 @@ namespace RadioCentroServicios.Model
     
     public partial class User
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
+        public User()
+        {
+            this.TimeLineOrders = new HashSet<TimeLineOrder>();
+        }
+    
         public int Id { get; set; }
         public System.Guid IdHash { get; set; }
         public string EmployeeID { get; set; }
@@ -21,5 +27,8 @@ namespace RadioCentroServicios.Model
         public string Role { get; set; }
         public string Email { get; set; }
         public System.DateTime CreatedDate { get; set; }
+    
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<TimeLineOrder> TimeLineOrders { get; set; }
     }
 }

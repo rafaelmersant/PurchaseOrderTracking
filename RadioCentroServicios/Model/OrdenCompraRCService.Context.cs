@@ -27,7 +27,6 @@ namespace RadioCentroServicios.Model
             throw new UnintentionalCodeFirstException();
         }
     
-        public virtual DbSet<Article> Articles { get; set; }
         public virtual DbSet<InventoryHistory> InventoryHistories { get; set; }
         public virtual DbSet<LoginHistory> LoginHistories { get; set; }
         public virtual DbSet<Mark> Marks { get; set; }
@@ -44,6 +43,8 @@ namespace RadioCentroServicios.Model
         public virtual DbSet<ShippingCompany> ShippingCompanies { get; set; }
         public virtual DbSet<StatusContainer> StatusContainers { get; set; }
         public virtual DbSet<StatusOrderPurchase> StatusOrderPurchases { get; set; }
+        public virtual DbSet<Article> Articles { get; set; }
+        public virtual DbSet<TimeLineOrder> TimeLineOrders { get; set; }
         public virtual DbSet<User> Users { get; set; }
     
         public virtual ObjectResult<GetPurchaseOrderContainer_Result> GetPurchaseOrderContainer(Nullable<int> containerId)

@@ -1,0 +1,37 @@
+﻿@model IEnumerable<OrdenCompra.Models.TimeLineOrder>
+
+@{
+    ViewBag.Title = "Histórico de Cambios";
+}
+
+@if (Model.FirstOrDefault() == null)
+{
+    <h2> No se han realizado cambios en la Orden</h2>
+}
+else
+{
+
+    <h5 class="ml-4">Histórico de Cambios para la Orden No. @Model.FirstOrDefault().OrderId</h5>
+
+    foreach (var item in Model)
+    {
+        <div class="container-fluid mt-3">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            @item.Source
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text">@item.Comment</p>
+                        </div>
+                        <div class="card-footer text-right">
+                            <small class="text-muted">Realizado por @item.User.Email (@string.Format("{0:dd/MMM/yyyy hh:mm tt}", item.CreatedDate))</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+}

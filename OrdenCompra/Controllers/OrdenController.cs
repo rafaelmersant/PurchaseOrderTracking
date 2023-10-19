@@ -58,6 +58,50 @@ namespace OrdenCompra.Controllers
             }
         }
 
+        public ActionResult Detalle(int id)
+        {
+            var db = new OrdenCompraRCEntities();
+            var changes = db.TimeLineOrders.Where(o => o.OrderId == id).OrderByDescending(o => o.CreatedDate).ToList();
+            
+            return View(changes);
+        }
+
+        [HttpPost]
+        public JsonResult Delete(int id)
+        {
+            try
+            {
+                using (var db = new OrdenCompraRCEntities())
+                {
+                    //REMOVE THIS COMMENT FOR LIVE DEPLOYMENT
+                    //var timeLine = db.TimeLineOrders.FirstOrDefault(o => o.OrderId == id);
+                    //if (timeLine != null) return Json(new { result = "500", message = "No puede eliminar la orden porque ha sido modificada." });
+
+                    var ordenTmp = db.OrderPurchaseArticlesContainerTmps.Where(o => o.OrderPurchaseId == id);
+                    db.OrderPurchaseArticlesContainerTmps.RemoveRange(ordenTmp);
+
+                    var ordenContainerArticles = db.OrderPurchaseArticlesContainers.Where(o => o.OrderPurchaseId == id);
+                    db.OrderPurchaseArticlesContainers.RemoveRange(ordenContainerArticles);
+
+                    var ordenContainers = db.OrderPurchaseContainers.Where(o => o.OrderPurchaseId == id);
+                    db.OrderPurchaseContainers.RemoveRange(ordenContainers);
+
+                    var ordenPurchase = db.OrderPurchases.FirstOrDefault(o => o.OrderPurchaseId == id);
+                    db.OrderPurchases.Remove(ordenPurchase);
+
+                    db.SaveChanges();
+                }
+            }
+            catch (Exception ex)
+            {
+                HelperUtility.SendException(ex);
+
+                return Json(new { result = "500", message = ex.Message });
+            }
+
+            return Json(new { result = "200", message = "Success" });
+        }
+
         private OrderPurchase GetOrderPurchaseHeader(int OrderId)
         {
             try
@@ -556,6 +600,20 @@ namespace OrdenCompra.Controllers
                                                     int.Parse(Session["userID"].ToString()));
                     }
 
+                    if (type == "BL")
+                    {
+                        if (container != null && container.BL != value)
+                        {
+                            container.BL = value;
+
+                            HelperApp.SaveTimeLineOrder(container.OrderPurchaseId, "BL actualizado",
+                                                    $"Fue actualizado el BL de {container.BL} por {value}",
+                                                    int.Parse(Session["userID"].ToString()));
+
+                            db.SaveChanges();
+                        }
+                    }
+
                     db.SaveChanges();
                 }
 
@@ -564,6 +622,34 @@ namespace OrdenCompra.Controllers
             catch (Exception ex)
             {
                 HelperUtility.SendException(ex, $"containerId: {containerId} | type: {type} | value: {value}");
+
+                return Json(new { result = "500", message = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult UpdateContainerFieldByArticle(int orderId, int articleId, string type, string value)
+        {
+            try
+            {
+                if (Session["userID"] == null) throw new Exception("505: Por favor intente logearse de nuevo en el sistema. (La Sesión expiró)");
+
+                using (var db = new OrdenCompraRCEntities())
+                {
+                    var articlesContainers = db.OrderPurchaseArticlesContainers.Where(c => c.OrderPurchaseId == orderId && c.ArticleId == articleId);
+                    var containers = db.OrderPurchaseContainers.Where(c => articlesContainers.Any(a => a.ContainerId == c.Id)).ToList();
+
+                    foreach (var container in containers)
+                    {
+                        UpdateContainerField(container.Id, type, value);
+                    }
+                }
+
+                return Json(new { result = "200", message = "success" });
+            }
+            catch (Exception ex)
+            {
+                HelperUtility.SendException(ex, $"orderId: {orderId} | articleId: {articleId} | type: {type} | value: {value}");
 
                 return Json(new { result = "500", message = ex.Message });
             }
@@ -633,6 +719,8 @@ namespace OrdenCompra.Controllers
 
                 using (var db = new OrdenCompraRCEntities())
                 {
+                    bool isTrafficChange = false;
+
                     var detail = db.OrderPurchaseArticlesContainers.FirstOrDefault(o => o.Id == detailId);
                     if (detail == null) return Json(new { result = "404", message = "No se pudo actualizar la cantidad para dicho articulo." });
 
@@ -646,7 +734,10 @@ namespace OrdenCompra.Controllers
                             comment += $" cantidad anterior: { detail.QuantityRequested} | nueva cantidad: { newQuantity}";
 
                         if (detail.QuantityTraffic != traffic)
+                        {
                             comment += $" cantidad en transito anterior: {detail.QuantityTraffic} | nueva cantidad en transito: {traffic}";
+                            isTrafficChange = true;
+                        }
 
                         if (detail.QuantityFactory != factory)
                             comment += $" cantidad en fabrica anterior: {detail.QuantityFactory} | nueva cantidad en fabrica: {factory}";
@@ -664,7 +755,7 @@ namespace OrdenCompra.Controllers
                     detail.QuantityFactory = factory;
                     db.SaveChanges();
 
-                    if (traffic < newQuantity)
+                    if (traffic < newQuantity && isTrafficChange)
                     {
                         decimal remainQuantity = newQuantity - traffic;
                         anotherContainer = CreateAnotherContainerForArticle(detail, remainQuantity);

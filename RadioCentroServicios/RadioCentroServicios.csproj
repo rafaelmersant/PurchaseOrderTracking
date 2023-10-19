@@ -151,6 +151,9 @@
     <Compile Include="Model\StatusOrderPurchase.cs">
       <DependentUpon>OrdenCompraRCService.tt</DependentUpon>
     </Compile>
+    <Compile Include="Model\TimeLineOrder.cs">
+      <DependentUpon>OrdenCompraRCService.tt</DependentUpon>
+    </Compile>
     <Compile Include="Model\User.cs">
       <DependentUpon>OrdenCompraRCService.tt</DependentUpon>
     </Compile>

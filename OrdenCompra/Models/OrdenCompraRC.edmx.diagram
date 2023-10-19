@@ -5,7 +5,6 @@
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
       <Diagram DiagramId="c67d0ed7f3fe402284db33164c409860" Name="Diagram1">
-        <EntityTypeShape EntityType="OrdenCompraRCModel.Article" Width="1.5" PointX="6" PointY="1.5" IsExpanded="true" />
         <EntityTypeShape EntityType="OrdenCompraRCModel.InventoryHistory" Width="1.5" PointX="0.75" PointY="0.75" IsExpanded="true" />
         <EntityTypeShape EntityType="OrdenCompraRCModel.LoginHistory" Width="1.5" PointX="8.75" PointY="0.75" IsExpanded="true" />
         <EntityTypeShape EntityType="OrdenCompraRCModel.Mark" Width="1.5" PointX="3.75" PointY="2.875" IsExpanded="true" />
@@ -22,9 +21,6 @@
         <EntityTypeShape EntityType="OrdenCompraRCModel.ShippingCompany" Width="1.5" PointX="7.75" PointY="11.75" IsExpanded="true" />
         <EntityTypeShape EntityType="OrdenCompraRCModel.StatusContainer" Width="1.5" PointX="9.75" PointY="11.75" IsExpanded="true" />
         <EntityTypeShape EntityType="OrdenCompraRCModel.StatusOrderPurchase" Width="1.5" PointX="0.75" PointY="4.75" IsExpanded="true" />
-        <EntityTypeShape EntityType="OrdenCompraRCModel.User" Width="1.5" PointX="11.75" PointY="11.75" IsExpanded="true" />
-        <AssociationConnector Association="OrdenCompraRCModel.FK_ArticleID_OPC" ManuallyRouted="false" />
-        <AssociationConnector Association="OrdenCompraRCModel.FK_Mark" ManuallyRouted="false" />
         <AssociationConnector Association="OrdenCompraRCModel.FK_OrderID_OPC" ManuallyRouted="false" />
         <AssociationConnector Association="OrdenCompraRCModel.FK_OrderPurchase" ManuallyRouted="false" />
         <AssociationConnector Association="OrdenCompraRCModel.FK_OrderPurchase_AC" ManuallyRouted="false" />
@@ -33,8 +29,12 @@
         <AssociationConnector Association="OrdenCompraRCModel.FK_Provider_OC" ManuallyRouted="false" />
         <AssociationConnector Association="OrdenCompraRCModel.FK_Status_OC" ManuallyRouted="false" />
         <AssociationConnector Association="OrdenCompraRCModel.FK_OrderPurchase_C" ManuallyRouted="false" />
-        <EntityTypeShape EntityType="OrdenCompraRCModel.TimeLineOrder" Width="1.5" PointX="13.375" PointY="0.75" />
-        <AssociationConnector Association="OrdenCompraRCModel.FK_TimeLineOrder_TimeLineOrder" />
+        <EntityTypeShape EntityType="OrdenCompraRCModel.Article" Width="1.5" PointX="6" PointY="1.5" />
+        <AssociationConnector Association="OrdenCompraRCModel.FK_ArticleID_OPC" />
+        <AssociationConnector Association="OrdenCompraRCModel.FK_Mark" />
+        <EntityTypeShape EntityType="OrdenCompraRCModel.TimeLineOrder" Width="1.5" PointX="14.625" PointY="12" />
+        <EntityTypeShape EntityType="OrdenCompraRCModel.User" Width="1.5" PointX="12.375" PointY="12" />
+        <AssociationConnector Association="OrdenCompraRCModel.FK_TimeLineOrder_User" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

@@ -4,7 +4,7 @@
   <edmx:Runtime>
     <!-- SSDL content -->
     <edmx:StorageModels>
-      <Schema Namespace="OrdenCompraRCServiceModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+    <Schema Namespace="OrdenCompraRCServiceModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
         <EntityType Name="Article">
           <Key>
             <PropertyRef Name="Id" />
@@ -23,6 +23,7 @@
           <Property Name="Mix" Type="bit" Nullable="false" />
           <Property Name="AddedDate" Type="datetime" Nullable="false" />
           <Property Name="AddedBy" Type="int" Nullable="false" />
+          <Property Name="Active" Type="bit" Nullable="false" />
         </EntityType>
         <EntityType Name="InventoryHistory">
           <Key>
@@ -207,10 +208,20 @@
           <Property Name="Description" Type="varchar" MaxLength="20" Nullable="false" />
           <Property Name="CreatedDate" Type="datetime" Nullable="false" />
         </EntityType>
+        <EntityType Name="TimeLineOrder">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="OrderId" Type="int" Nullable="false" />
+          <Property Name="Source" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="Comment" Type="varchar" MaxLength="200" Nullable="false" />
+          <Property Name="CreatedBy" Type="int" Nullable="false" />
+          <Property Name="CreatedDate" Type="datetime" Nullable="false" />
+        </EntityType>
         <EntityType Name="User">
           <Key>
             <PropertyRef Name="Id" />
-            <PropertyRef Name="IdHash" />
           </Key>
           <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="IdHash" Type="uniqueidentifier" Nullable="false" />
@@ -344,6 +355,18 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK_TimeLineOrder_User">
+          <End Role="User" Type="Self.User" Multiplicity="1" />
+          <End Role="TimeLineOrder" Type="Self.TimeLineOrder" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="User">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="TimeLineOrder">
+              <PropertyRef Name="CreatedBy" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Function Name="GetPurchaseOrderContainer" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
           <Parameter Name="containerId" Type="int" Mode="In" />
         </Function>
@@ -371,6 +394,7 @@
           <EntitySet Name="ShippingCompany" EntityType="Self.ShippingCompany" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="StatusContainer" EntityType="Self.StatusContainer" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="StatusOrderPurchase" EntityType="Self.StatusOrderPurchase" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="TimeLineOrder" EntityType="Self.TimeLineOrder" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="User" EntityType="Self.User" Schema="dbo" store:Type="Tables" />
           <AssociationSet Name="FK_ArticleID_OPC" Association="Self.FK_ArticleID_OPC">
             <End Role="Article" EntitySet="Article" />
@@ -412,33 +436,15 @@
             <End Role="StatusOrderPurchase" EntitySet="StatusOrderPurchase" />
             <End Role="OrderPurchase" EntitySet="OrderPurchase" />
           </AssociationSet>
+          <AssociationSet Name="FK_TimeLineOrder_User" Association="Self.FK_TimeLineOrder_User">
+            <End Role="User" EntitySet="User" />
+            <End Role="TimeLineOrder" EntitySet="TimeLineOrder" />
+          </AssociationSet>
         </EntityContainer>
-      </Schema>
-    </edmx:StorageModels>
+      </Schema></edmx:StorageModels>
     <!-- CSDL content -->
     <edmx:ConceptualModels>
       <Schema Namespace="OrdenCompraRCServiceModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
-        <EntityType Name="Article">
-          <Key>
-            <PropertyRef Name="Id" />
-          </Key>
-          <Property Name="Id" Type="Int32" Nullable="false" />
-          <Property Name="Description" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="Size" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
-          <Property Name="Model" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
-          <Property Name="MarkId" Type="Int32" />
-          <Property Name="InventoryStock" Type="Decimal" Precision="18" Scale="2" />
-          <Property Name="QuantityTraffic" Type="Decimal" Precision="18" Scale="2" />
-          <Property Name="QuantityFactory" Type="Decimal" Precision="18" Scale="2" />
-          <Property Name="QuantityAduana" Type="Decimal" Precision="18" Scale="2" />
-          <Property Name="QuantityMaxPerContainer" Type="Decimal" Precision="18" Scale="2" />
-          <Property Name="QuantityMinStock" Type="Decimal" Precision="18" Scale="2" />
-          <Property Name="Mix" Type="Boolean" Nullable="false" />
-          <Property Name="AddedDate" Type="DateTime" Nullable="false" Precision="3" />
-          <Property Name="AddedBy" Type="Int32" Nullable="false" />
-          <NavigationProperty Name="NotificationCenters" Relationship="Self.FK_ArticleID_OPC" FromRole="Article" ToRole="NotificationCenter" />
-          <NavigationProperty Name="Mark" Relationship="Self.FK_Mark" FromRole="Article" ToRole="Mark" />
-        </EntityType>
         <EntityType Name="InventoryHistory">
           <Key>
             <PropertyRef Name="Id" />
@@ -462,7 +468,7 @@
           </Key>
           <Property Name="Id" Type="Int32" Nullable="false" />
           <Property Name="Description" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
-          <NavigationProperty Name="Articles" Relationship="Self.FK_Mark" FromRole="Mark" ToRole="Article" />
+          <NavigationProperty Name="Articles" Relationship="OrdenCompraRCServiceModel.FK_Mark" FromRole="Mark" ToRole="Article" />
         </EntityType>
         <EntityType Name="NotificationCenter">
           <Key>
@@ -477,8 +483,8 @@
           <Property Name="Condition" Type="String" MaxLength="150" FixedLength="false" Unicode="false" />
           <Property Name="DeactivatedDate" Type="DateTime" Precision="3" />
           <Property Name="DeactivatedBy" Type="Int32" />
-          <NavigationProperty Name="Article" Relationship="Self.FK_ArticleID_OPC" FromRole="NotificationCenter" ToRole="Article" />
           <NavigationProperty Name="OrderPurchase" Relationship="Self.FK_OrderID_OPC" FromRole="NotificationCenter" ToRole="OrderPurchase" />
+          <NavigationProperty Name="Article" Relationship="OrdenCompraRCServiceModel.FK_ArticleID_OPC" FromRole="NotificationCenter" ToRole="Article" />
         </EntityType>
         <EntityType Name="NotificationGroup">
           <Key>
@@ -640,43 +646,6 @@
           <Property Name="CreatedDate" Type="DateTime" Nullable="false" Precision="3" />
           <NavigationProperty Name="OrderPurchases" Relationship="Self.FK_Status_OC" FromRole="StatusOrderPurchase" ToRole="OrderPurchase" />
         </EntityType>
-        <EntityType Name="User">
-          <Key>
-            <PropertyRef Name="Id" />
-            <PropertyRef Name="IdHash" />
-          </Key>
-          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="IdHash" Type="Guid" Nullable="false" />
-          <Property Name="EmployeeID" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="PasswordHash" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="Role" Type="String" MaxLength="15" FixedLength="false" Unicode="false" />
-          <Property Name="Email" Type="String" MaxLength="40" FixedLength="false" Unicode="false" />
-          <Property Name="CreatedDate" Type="DateTime" Nullable="false" Precision="3" />
-        </EntityType>
-        <Association Name="FK_ArticleID_OPC">
-          <End Role="Article" Type="Self.Article" Multiplicity="0..1" />
-          <End Role="NotificationCenter" Type="Self.NotificationCenter" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Article">
-              <PropertyRef Name="Id" />
-            </Principal>
-            <Dependent Role="NotificationCenter">
-              <PropertyRef Name="ArticleId" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_Mark">
-          <End Role="Mark" Type="Self.Mark" Multiplicity="0..1" />
-          <End Role="Article" Type="Self.Article" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Mark">
-              <PropertyRef Name="Id" />
-            </Principal>
-            <Dependent Role="Article">
-              <PropertyRef Name="MarkId" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <Association Name="FK_OrderID_OPC">
           <End Role="OrderPurchase" Type="Self.OrderPurchase" Multiplicity="0..1" />
           <End Role="NotificationCenter" Type="Self.NotificationCenter" Multiplicity="*" />
@@ -778,7 +747,6 @@
           </ReferentialConstraint>
         </Association>
         <EntityContainer Name="OrdenCompraRCServiceEntities" annotation:LazyLoadingEnabled="true">
-          <EntitySet Name="Articles" EntityType="Self.Article" />
           <EntitySet Name="InventoryHistories" EntityType="Self.InventoryHistory" />
           <EntitySet Name="LoginHistories" EntityType="Self.LoginHistory" />
           <EntitySet Name="Marks" EntityType="Self.Mark" />
@@ -795,15 +763,6 @@
           <EntitySet Name="ShippingCompanies" EntityType="Self.ShippingCompany" />
           <EntitySet Name="StatusContainers" EntityType="Self.StatusContainer" />
           <EntitySet Name="StatusOrderPurchases" EntityType="Self.StatusOrderPurchase" />
-          <EntitySet Name="Users" EntityType="Self.User" />
-          <AssociationSet Name="FK_ArticleID_OPC" Association="Self.FK_ArticleID_OPC">
-            <End Role="Article" EntitySet="Articles" />
-            <End Role="NotificationCenter" EntitySet="NotificationCenters" />
-          </AssociationSet>
-          <AssociationSet Name="FK_Mark" Association="Self.FK_Mark">
-            <End Role="Mark" EntitySet="Marks" />
-            <End Role="Article" EntitySet="Articles" />
-          </AssociationSet>
           <AssociationSet Name="FK_OrderID_OPC" Association="Self.FK_OrderID_OPC">
             <End Role="OrderPurchase" EntitySet="OrderPurchases" />
             <End Role="NotificationCenter" EntitySet="NotificationCenters" />
@@ -837,14 +796,29 @@
             <End Role="OrderPurchaseArticlesContainer" EntitySet="OrderPurchaseArticlesContainers" />
           </AssociationSet>
           <FunctionImport Name="GetPurchaseOrderContainer" ReturnType="Collection(OrdenCompraRCServiceModel.GetPurchaseOrderContainer_Result)">
-            <Parameter Name="containerId" Mode="In" Type="Int32" />
+          <Parameter Name="containerId" Mode="In" Type="Int32" />
           </FunctionImport>
           <FunctionImport Name="GetPurchaseOrderDetail" ReturnType="Collection(OrdenCompraRCServiceModel.GetPurchaseOrderDetail_Result)">
-            <Parameter Name="orderID" Mode="In" Type="Int32" />
+          <Parameter Name="orderID" Mode="In" Type="Int32" />
           </FunctionImport>
           <FunctionImport Name="GetPurchaseOrderHeader" ReturnType="Collection(OrdenCompraRCServiceModel.GetPurchaseOrderHeader_Result)">
-            <Parameter Name="orderID" Mode="In" Type="Int32" />
+          <Parameter Name="orderID" Mode="In" Type="Int32" />
           </FunctionImport>
+          <EntitySet Name="Articles" EntityType="OrdenCompraRCServiceModel.Article" />
+          <AssociationSet Name="FK_ArticleID_OPC" Association="OrdenCompraRCServiceModel.FK_ArticleID_OPC">
+            <End Role="Article" EntitySet="Articles" />
+            <End Role="NotificationCenter" EntitySet="NotificationCenters" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Mark" Association="OrdenCompraRCServiceModel.FK_Mark">
+            <End Role="Mark" EntitySet="Marks" />
+            <End Role="Article" EntitySet="Articles" />
+          </AssociationSet>
+          <EntitySet Name="TimeLineOrders" EntityType="OrdenCompraRCServiceModel.TimeLineOrder" />
+          <EntitySet Name="Users" EntityType="OrdenCompraRCServiceModel.User" />
+          <AssociationSet Name="FK_TimeLineOrder_User" Association="OrdenCompraRCServiceModel.FK_TimeLineOrder_User">
+            <End Role="User" EntitySet="Users" />
+            <End Role="TimeLineOrder" EntitySet="TimeLineOrders" />
+          </AssociationSet>
         </EntityContainer>
         <ComplexType Name="GetPurchaseOrderContainer_Result">
           <Property Type="Int32" Name="Id" Nullable="false" />
@@ -893,32 +867,95 @@
           <Property Type="String" Name="Status" Nullable="false" MaxLength="20" />
           <Property Type="String" Name="CreatedByEmail" Nullable="true" MaxLength="40" />
         </ComplexType>
+        <EntityType Name="Article">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" />
+          <Property Name="Description" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="Size" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="Model" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="MarkId" Type="Int32" />
+          <Property Name="InventoryStock" Type="Decimal" Precision="18" Scale="2" />
+          <Property Name="QuantityTraffic" Type="Decimal" Precision="18" Scale="2" />
+          <Property Name="QuantityFactory" Type="Decimal" Precision="18" Scale="2" />
+          <Property Name="QuantityAduana" Type="Decimal" Precision="18" Scale="2" />
+          <Property Name="QuantityMaxPerContainer" Type="Decimal" Precision="18" Scale="2" />
+          <Property Name="QuantityMinStock" Type="Decimal" Precision="18" Scale="2" />
+          <Property Name="Mix" Type="Boolean" Nullable="false" />
+          <Property Name="AddedDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="AddedBy" Type="Int32" Nullable="false" />
+          <Property Name="Active" Type="Boolean" Nullable="false" />
+          <NavigationProperty Name="NotificationCenters" Relationship="OrdenCompraRCServiceModel.FK_ArticleID_OPC" FromRole="Article" ToRole="NotificationCenter" />
+          <NavigationProperty Name="Mark" Relationship="OrdenCompraRCServiceModel.FK_Mark" FromRole="Article" ToRole="Mark" />
+        </EntityType>
+        <Association Name="FK_ArticleID_OPC">
+          <End Type="OrdenCompraRCServiceModel.Article" Role="Article" Multiplicity="0..1" />
+          <End Type="OrdenCompraRCServiceModel.NotificationCenter" Role="NotificationCenter" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Article">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="NotificationCenter">
+              <PropertyRef Name="ArticleId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Mark">
+          <End Type="OrdenCompraRCServiceModel.Mark" Role="Mark" Multiplicity="0..1" />
+          <End Type="OrdenCompraRCServiceModel.Article" Role="Article" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Mark">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Article">
+              <PropertyRef Name="MarkId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="TimeLineOrder">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="OrderId" Type="Int32" Nullable="false" />
+          <Property Name="Source" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="Comment" Type="String" Nullable="false" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="CreatedBy" Type="Int32" Nullable="false" />
+          <Property Name="CreatedDate" Type="DateTime" Nullable="false" Precision="3" />
+          <NavigationProperty Name="User" Relationship="OrdenCompraRCServiceModel.FK_TimeLineOrder_User" FromRole="TimeLineOrder" ToRole="User" />
+        </EntityType>
+        <EntityType Name="User">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="IdHash" Type="Guid" Nullable="false" />
+          <Property Name="EmployeeID" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="PasswordHash" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="Role" Type="String" MaxLength="15" FixedLength="false" Unicode="false" />
+          <Property Name="Email" Type="String" MaxLength="40" FixedLength="false" Unicode="false" />
+          <Property Name="CreatedDate" Type="DateTime" Nullable="false" Precision="3" />
+          <NavigationProperty Name="TimeLineOrders" Relationship="OrdenCompraRCServiceModel.FK_TimeLineOrder_User" FromRole="User" ToRole="TimeLineOrder" />
+        </EntityType>
+        <Association Name="FK_TimeLineOrder_User">
+          <End Type="OrdenCompraRCServiceModel.User" Role="User" Multiplicity="1" />
+          <End Type="OrdenCompraRCServiceModel.TimeLineOrder" Role="TimeLineOrder" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="User">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="TimeLineOrder">
+              <PropertyRef Name="CreatedBy" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
     <edmx:Mappings>
       <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
         <EntityContainerMapping StorageEntityContainer="OrdenCompraRCServiceModelStoreContainer" CdmEntityContainer="OrdenCompraRCServiceEntities">
-          <EntitySetMapping Name="Articles">
-            <EntityTypeMapping TypeName="OrdenCompraRCServiceModel.Article">
-              <MappingFragment StoreEntitySet="Article">
-                <ScalarProperty Name="Id" ColumnName="Id" />
-                <ScalarProperty Name="Description" ColumnName="Description" />
-                <ScalarProperty Name="Size" ColumnName="Size" />
-                <ScalarProperty Name="Model" ColumnName="Model" />
-                <ScalarProperty Name="MarkId" ColumnName="MarkId" />
-                <ScalarProperty Name="InventoryStock" ColumnName="InventoryStock" />
-                <ScalarProperty Name="QuantityTraffic" ColumnName="QuantityTraffic" />
-                <ScalarProperty Name="QuantityFactory" ColumnName="QuantityFactory" />
-                <ScalarProperty Name="QuantityAduana" ColumnName="QuantityAduana" />
-                <ScalarProperty Name="QuantityMaxPerContainer" ColumnName="QuantityMaxPerContainer" />
-                <ScalarProperty Name="QuantityMinStock" ColumnName="QuantityMinStock" />
-                <ScalarProperty Name="Mix" ColumnName="Mix" />
-                <ScalarProperty Name="AddedDate" ColumnName="AddedDate" />
-                <ScalarProperty Name="AddedBy" ColumnName="AddedBy" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <EntitySetMapping Name="InventoryHistories">
             <EntityTypeMapping TypeName="OrdenCompraRCServiceModel.InventoryHistory">
               <MappingFragment StoreEntitySet="InventoryHistory">
@@ -1115,19 +1152,6 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <EntitySetMapping Name="Users">
-            <EntityTypeMapping TypeName="OrdenCompraRCServiceModel.User">
-              <MappingFragment StoreEntitySet="User">
-                <ScalarProperty Name="Id" ColumnName="Id" />
-                <ScalarProperty Name="IdHash" ColumnName="IdHash" />
-                <ScalarProperty Name="EmployeeID" ColumnName="EmployeeID" />
-                <ScalarProperty Name="PasswordHash" ColumnName="PasswordHash" />
-                <ScalarProperty Name="Role" ColumnName="Role" />
-                <ScalarProperty Name="Email" ColumnName="Email" />
-                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <FunctionImportMapping FunctionImportName="GetPurchaseOrderContainer" FunctionName="OrdenCompraRCServiceModel.Store.GetPurchaseOrderContainer">
             <ResultMapping>
               <ComplexTypeMapping TypeName="OrdenCompraRCServiceModel.GetPurchaseOrderContainer_Result">
@@ -1187,6 +1211,52 @@
               </ComplexTypeMapping>
             </ResultMapping>
           </FunctionImportMapping>
+          <EntitySetMapping Name="Articles">
+            <EntityTypeMapping TypeName="OrdenCompraRCServiceModel.Article">
+              <MappingFragment StoreEntitySet="Article">
+                <ScalarProperty Name="Active" ColumnName="Active" />
+                <ScalarProperty Name="AddedBy" ColumnName="AddedBy" />
+                <ScalarProperty Name="AddedDate" ColumnName="AddedDate" />
+                <ScalarProperty Name="Mix" ColumnName="Mix" />
+                <ScalarProperty Name="QuantityMinStock" ColumnName="QuantityMinStock" />
+                <ScalarProperty Name="QuantityMaxPerContainer" ColumnName="QuantityMaxPerContainer" />
+                <ScalarProperty Name="QuantityAduana" ColumnName="QuantityAduana" />
+                <ScalarProperty Name="QuantityFactory" ColumnName="QuantityFactory" />
+                <ScalarProperty Name="QuantityTraffic" ColumnName="QuantityTraffic" />
+                <ScalarProperty Name="InventoryStock" ColumnName="InventoryStock" />
+                <ScalarProperty Name="MarkId" ColumnName="MarkId" />
+                <ScalarProperty Name="Model" ColumnName="Model" />
+                <ScalarProperty Name="Size" ColumnName="Size" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="TimeLineOrders">
+            <EntityTypeMapping TypeName="OrdenCompraRCServiceModel.TimeLineOrder">
+              <MappingFragment StoreEntitySet="TimeLineOrder">
+                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
+                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
+                <ScalarProperty Name="Comment" ColumnName="Comment" />
+                <ScalarProperty Name="Source" ColumnName="Source" />
+                <ScalarProperty Name="OrderId" ColumnName="OrderId" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Users">
+            <EntityTypeMapping TypeName="OrdenCompraRCServiceModel.User">
+              <MappingFragment StoreEntitySet="User">
+                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
+                <ScalarProperty Name="Email" ColumnName="Email" />
+                <ScalarProperty Name="Role" ColumnName="Role" />
+                <ScalarProperty Name="PasswordHash" ColumnName="PasswordHash" />
+                <ScalarProperty Name="EmployeeID" ColumnName="EmployeeID" />
+                <ScalarProperty Name="IdHash" ColumnName="IdHash" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
         </EntityContainerMapping>
       </Mapping>
     </edmx:Mappings>

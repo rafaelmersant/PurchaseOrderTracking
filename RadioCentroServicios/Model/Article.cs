@@ -34,6 +34,7 @@ namespace RadioCentroServicios.Model
         public bool Mix { get; set; }
         public System.DateTime AddedDate { get; set; }
         public int AddedBy { get; set; }
+        public bool Active { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<NotificationCenter> NotificationCenters { get; set; }

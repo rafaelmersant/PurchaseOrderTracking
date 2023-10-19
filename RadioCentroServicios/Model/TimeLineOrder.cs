@@ -7,7 +7,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace OrdenCompra.Models
+namespace RadioCentroServicios.Model
 {
     using System;
     using System.Collections.Generic;

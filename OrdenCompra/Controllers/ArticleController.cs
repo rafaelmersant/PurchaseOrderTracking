@@ -79,7 +79,7 @@ namespace OrdenCompra.Controllers
 
                         if (article_edit != null)
                         {
-                            article_edit.Size = _article.Size.ToUpper();
+                            article_edit.Size = string.IsNullOrEmpty(_article.Size) ? "" : _article.Size.ToUpper();
                             article_edit.Mix = _article.Mix;
                             
                             db.SaveChanges();
@@ -133,6 +133,8 @@ namespace OrdenCompra.Controllers
                     var _articles = articles.Tables[0];
                     using (var db = new OrdenCompraRCEntities())
                     {
+                        int _result = db.Database.ExecuteSqlCommand("UPDATE Article set Active = 0");
+
                         var __article__ = db.Articles.ToList();
 
                         foreach (DataRow __article in _articles.Rows)
@@ -163,7 +165,9 @@ namespace OrdenCompra.Controllers
                                         QuantityAduana = 0,
                                         InventoryStock = 0,
                                         AddedDate = DateTime.Now,
-                                        AddedBy = int.Parse(Session["userID"].ToString())
+                                        AddedBy = int.Parse(Session["userID"].ToString()),
+                                        Active = true,
+                                        Mix = maxPerContainer == 0
                                     });
 
                                     db.SaveChanges();
@@ -177,6 +181,8 @@ namespace OrdenCompra.Controllers
                                         article.Model = __article.ItemArray[3].ToString();
                                         article.QuantityMinStock = stockMinimum;
                                         article.QuantityMaxPerContainer = maxPerContainer;
+                                        article.Active = true;
+                                        article.Mix = maxPerContainer == 0;
                                         db.SaveChanges();
                                     }
                                 }

@@ -22,6 +22,7 @@
 <div class="text-center mb-1" style="position: relative">
 
     <div class="text-right" id="formHeaderInfo" style="right: 20px; top:10px; position: absolute">
+        <a href="javascript:void(0);" class="fa fa-list h6" id="btn-detail"></a>
         @*<span class="text-light">Fecha Creación: <span id="requestedDate" class="font-weight-bold"></span> </span>*@
         @*<span class="ml-3 text-light">Estatus: <span id="requestStatus" class="font-weight-bold"></span></span>*@
     </div>
@@ -92,8 +93,53 @@
                     <input type="text" id="observation" name="observation" value="" class="form-control form-control-sm col-12" />
                 </div>
             </div>
-
         </form>
+    </section>
+    
+    <section id="massive-update" class="bg-light-gray pb-2 mb-3">
+        <div class="bg-secondary text-light panel-custom border">
+            <h6 id="title-massive" class="panel-title" style="cursor: pointer;">+ Actualización masiva de datos en contenedores</h6>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group mt-1 ml-2 col-lg-2 col-md-2 col-sm-12">
+                <label for="manufacturingDateMassive">Fecha Fabricación:</label>
+                <input type="text" id="manufacturingDateMassive" name="manufacturingDateMassive" value="" class="form-control form-control-sm datepicker" autocomplete="off" />
+            </div>
+            <div class="form-group mt-1 ml-2 col-lg-2 col-md-2 col-sm-12">
+                <label for="dueDateMassive">Fecha Entrega:</label>
+                <input type="text" id="dueDateMassive" name="dueDateMassive" value="" class="form-control form-control-sm datepicker" autocomplete="off" />
+            </div>
+            <div class="form-group mt-1 ml-2 col-lg-2 col-md-2 col-sm-12">
+                <label for="BLMassive">BL</label>
+                <input type="text" id="BLMassive" name="BLMassive" class="form-control form-control-sm" autocomplete="off" />
+            </div>
+            <div class="form-group mt-1 ml-2 col-lg-2 col-md-2 col-sm-12">
+                <label for="navieraMassive">Puerto</label>
+                <div id="container-naviera-massive-div"></div>
+            </div>
+            <div class="form-group mt-1 ml-2 col-lg-2 col-md-2 col-sm-12">
+                <label for="statusMassive">Estatus</label>
+                <div id="container-estatus-massive-div"></div>
+            </div>
+
+        </div>
+        <div class="form-row">
+            <div class="form-group mt-1 ml-2 col-lg-2 col-md-2 col-sm-12">
+                <label class="font-weight-bold">Articulos:</label>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group ml-2 col-lg-12 col-md-12 col-sm-12">
+                <div id="articles-massive"></div>
+            </div>
+        </div>
+        <div class="form-row mt-2">
+            <div class="form-group ml-2 col-lg-6 col-md-6 col-sm-12">
+                <button class="btn btn-danger btn-sm" id="ApplyChanges">Aplicar cambios masivos</button>
+                <span id="waitingIndicatorMassive" class="spinner-border text-danger float-left" style="margin-right: 5px; display: none"></span>
+            </div>
+        </div>
     </section>
 
     <a href="javascript:void(0);" id="btnToggleContainers" onclick="toggleContainers()" class="text-info">Reducir todos los contenedores</a>
@@ -114,6 +160,9 @@
 <script type="text/javascript">
 
     $(document).ready(async function () {
+        $("#massive-update").hide();
+        $("#massive-update .form-row").fadeOut();
+        $("#btn-detail").hide();
         $("#QueryOrder").addClass("menu-active");
         $("#btnSearchOrder").removeClass("disabled");
         $("#btnToggleContainers").hide();
@@ -162,6 +211,119 @@
             }
         });
 
+        $("#ApplyChanges").click(function (evt) {
+            evt.preventDefault();
+            evt.stopPropagation();
+
+            const dueDateMassive = $("#dueDateMassive").val();
+            const manufacturingDateMassive = $("#manufacturingDateMassive").val();
+            const BLMassive = $("#BLMassive").val();
+            const navieraMassive = $("#navieraMassive").val();
+            const statusMassive = $("#statusMassive").val();
+
+            if (!dueDateMassive && !manufacturingDateMassive && !BLMassive && !navieraMassive && !statusMassive) {
+                toastr.error("Debe digitar un valor para aplicar cambios masivos.");
+                return false;
+            }
+
+            let updated = false;
+
+            if (confirm(`Esta seguro que desea aplicar los cambios masivos?`)) {
+                $("#waitingIndicatorMassive").show();
+
+                for (const item of $(".article-massive-value")) {
+                    const articleId = item.id.split("-")[1];
+                    const orderId = $("#orderId").val();
+
+                    if (item.checked) {
+                        updated = true;
+
+                        if (dueDateMassive) {
+                            $.ajax({
+                                "url": `/Orden/UpdateContainerFieldByArticle?orderId=${orderId}&articleId=${articleId}&type=DueDate&value=${dueDateMassive}`,
+                                "type": "POST",
+                                "success": async function (response) {
+                                    console.log('response:', response);
+                                }
+                            });
+                        }
+
+                        if (manufacturingDateMassive) {
+                            $.ajax({
+                                "url": `/Orden/UpdateContainerFieldByArticle?orderId=${orderId}&articleId=${articleId}&type=ManufacturingDate&value=${manufacturingDateMassive}`,
+                                "type": "POST",
+                                "success": async function (response) {
+                                    console.log('response:', response);
+                                }
+                            });
+                        }
+
+                        if (BLMassive) {
+                            $.ajax({
+                                "url": `/Orden/UpdateContainerFieldByArticle?orderId=${orderId}&articleId=${articleId}&type=BL&value=${BLMassive}`,
+                                "type": "POST",
+                                "success": async function (response) {
+                                    console.log('response:', response);
+                                }
+                            });
+                        }
+
+                        if (navieraMassive) {
+                            $.ajax({
+                                "url": `/Orden/UpdateContainerFieldByArticle?orderId=${orderId}&articleId=${articleId}&type=Naviera&value=${navieraMassive}`,
+                                "type": "POST",
+                                "success": async function (response) {
+                                    console.log('response:', response);
+                                }
+                            });
+                        }
+
+                        if (statusMassive) {
+                            $.ajax({
+                                "url": `/Orden/UpdateContainerFieldByArticle?orderId=${orderId}&articleId=${articleId}&type=Status&value=${statusMassive}`,
+                                "type": "POST",
+                                "success": async function (response) {
+                                    console.log('response:', response);
+                                }
+                            });
+                        }
+                    }
+                }
+            }
+
+            if (!updated) {
+                toastr.error("Debe seleccionar al menos un articulo para aplicar los cambios.");
+                $("#waitingIndicatorMassive").hide();
+            }
+            else {
+                setTimeout(() => {
+                    $("#waitingIndicatorMassive").hide();
+                    toastr.success("Cambios aplicados con exito!");
+                    $("#btnSearchOrder").click();
+                },4000)
+            }
+        })
+
+        $("#btn-detail").click(function (evt) {
+            const OrdenNo = $("#orderId").val();
+            window.location = `/Orden/Detalle/${OrdenNo}`;
+        });
+
+        $("#title-massive").click(function (evt) {
+            evt.preventDefault();
+            evt.stopPropagation();
+
+            if ($("#title-massive").html() === "+ Actualización masiva de datos en contenedores") {
+                $("#title-massive").html("- Actualización masiva de datos en contenedores");
+
+                $("#massive-update .form-row").fadeIn();
+            }
+            else {
+                $("#title-massive").html("+ Actualización masiva de datos en contenedores");
+                $("#massive-update .form-row").fadeOut();
+            }
+        })
+
         //$("#endDate").on("change", function (evt) {
         //    console.log("Cambiando fecha fin")
         //    validateDate()
@@ -189,6 +351,8 @@
             "type": "POST",
             "success": async function (response) {
                 if (response.result === "200") {
+                    $("#btn-detail").show();
+
                     console.log('ORDER CREATED!')
                     console.log(response);
                     orderDetails = response;
@@ -212,8 +376,40 @@
                     $("#OrderStatusId").val(`${response.message.Header.StatusId}`);
                     $("#observation").val(`${response.message.Header.Observation}`);
 
-                    if (response.message.Containers.length > 1)
+                    if (response.message.Containers.length > 1) {
                         $("#btnToggleContainers").show();
+
+                        let articlesMassive = [];
+                        for (const article of unique_articles) {
+                            articlesMassive.push(`<input type="checkbox" class="article-massive-value" id="article-${article.Id}""/> <label for="article-${article.Id}" style="cursor: pointer;">${article.Id} - ${article.Description}</label> <br/>`);
+                        }
+                        $("#articles-massive").html(articlesMassive);
+                        $("#massive-update").fadeIn();
+
+                        //Navieras
+                        let _navieras = @Html.Raw(Json.Encode(ViewBag.Navieras));
+                        let navieras = [];
+                        navieras.push(`<option value=""></option>`);
+
+                        for (const naviera of _navieras) {
+                            navieras.push(`<option value="${naviera.Id}">${naviera.Description}->${naviera.Port}</option>`)
+                        }
+                        $("#container-naviera-massive-div").html(`<select class="form-control form-control-sm small-box" id="navieraMassive">
+                                                                    ${navieras}
+                                                                  </select>`);
+
+                        //Container Status
+                        let _containerStatus = @Html.Raw(Json.Encode(ViewBag.ContainerStatus));
+                        let containerStatus = [];
+                        containerStatus.push(`<option value=""></option>`);
+
+                        for (const status of _containerStatus) {
+                            containerStatus.push(`<option value="${status.Id}">${status.Description}</option>`)
+                        }
+                        $("#container-estatus-massive-div").html(`<select class="form-control form-control-sm small-box" id="statusMassive">
+                                                                    ${containerStatus}
+                                                                  </select>`);
+                    }
 
                     let views = [];
                     for (const container of response.message.Containers) {
@@ -311,7 +507,7 @@
                             toastr.error("Favor digitar una cantidad valida para el articulo que esta tratando de agregar.");
                             return false;
                         }
-                        
+
                         if (confirm(`Esta seguro que desea agregar el articulo para el contenedor #${container[0].container.SortIndex}?`)) {
                             $.ajax({
                                 "url": `/Orden/AddNewArticleToContainer?containerId=${containerId}&articleId=${articleId}&quantity=${quantity}`,
@@ -324,7 +520,14 @@
                                         }, 2000)
                                     }
                                     else
-                                        toastr.error("Hubo un error al tratar de agregar el articulo.");
+                                        if (response.message.includes('(403)') || response.result === '404' || response.message.includes("505")) {
+                                            toastr.error(response.message);
+                                            setTimeout(() => {
+                                                window.location.reload(true);
+                                            }, 2500);
+                                        }
+                                        else
+                                            toastr.error("Hubo un error al tratar de agregar el articulo.");
                                 }
                             });
                         } else {
@@ -349,7 +552,14 @@
                                     if (response.result === "200")
                                         toastr.success(`Fecha actualizada para la orden #${orderId}`);
                                     else
-                                        toastr.error("Hubo un error al tratar de actualizar la fecha para esta orden.");
+                                        if (response.message.includes('(403)') || response.result === '404' || response.message.includes("505")) {
+                                            toastr.error(response.message);
+                                            setTimeout(() => {
+                                                window.location.reload(true);
+                                            }, 2500);
+                                        }
+                                        else
+                                            toastr.error("Hubo un error al tratar de actualizar la fecha para esta orden.");
                                 }
                             });
                         } else {
@@ -371,7 +581,14 @@
                                     if (response.result === "200")
                                         toastr.success(`Estatus actualizado para la orden #${orderId}`);
                                     else
-                                        toastr.error("Hubo un error al tratar de actualizar el estatus para esta orden.");
+                                        if (response.message.includes('(403)') || response.result === '404' || response.message.includes("505")) {
+                                            toastr.error(response.message);
+                                            setTimeout(() => {
+                                                window.location.reload(true);
+                                            }, 2500);
+                                        }
+                                        else
+                                            toastr.error("Hubo un error al tratar de actualizar el estatus para esta orden.");
                                 }
                             });
                         } else {
@@ -393,8 +610,16 @@
                                 "success": async function (response) {
                                     if (response.result === "200")
                                         toastr.success(`Fecha de fabricación actualizada para el contenedor #${container[0].container.SortIndex}`);
-                                    else
-                                        toastr.error("Hubo un error al tratar de actualizar la fecha de fabricación para este contenedor.");
+                                    else {
+                                        if (response.message.includes('(403)') || response.result === '404' || response.message.includes("505")) {
+                                            toastr.error(response.message);
+                                            setTimeout(() => {
+                                                window.location.reload(true);
+                                            }, 2500);
+                                        }
+                                        else
+                                            toastr.error("Hubo un error al tratar de actualizar la fecha de fabricación para este contenedor.");
+                                    }
                                 }
                             });
                         } else {
@@ -417,7 +642,14 @@
                                     if (response.result === "200")
                                         toastr.success(`Fecha de entrega actualizada para el contenedor #${container[0].container.SortIndex}`);
                                     else
-                                        toastr.error("Hubo un error al tratar de actualizar la fecha de entrega para este contenedor.");
+                                        if (response.message.includes('(403)') || response.result === '404' || response.message.includes("505")) {
+                                            toastr.error(response.message);
+                                            setTimeout(() => {
+                                                window.location.reload(true);
+                                            }, 2500);
+                                        }
+                                        else
+                                            toastr.error("Hubo un error al tratar de actualizar la fecha de entrega para este contenedor.");
                                 }
                             });
                         } else {
@@ -440,7 +672,14 @@
                                     if (response.result === "200")
                                         toastr.success(`Estatus actualizado para el contenedor #${container[0].container.SortIndex}`);
                                     else
-                                        toastr.error("Hubo un error al tratar de actualizar el estatus para este contenedor.");
+                                        if (response.message.includes('(403)') || response.result === '404' || response.message.includes("505")) {
+                                            toastr.error(response.message);
+                                            setTimeout(() => {
+                                                window.location.reload(true);
+                                            }, 2500);
+                                        }
+                                        else
+                                            toastr.error("Hubo un error al tratar de actualizar el estatus para este contenedor.");
                                 }
                             });
                         }
@@ -464,7 +703,15 @@
                                     if (response.result === "200")
                                         toastr.success(`Naviera actualizada para el contenedor #${container[0].container.SortIndex}`);
                                     else
-                                        toastr.error("Hubo un error al tratar de actualizar la naviera para este contenedor.");
+                                        if (response.message.includes('(403)') || response.result === '404' || response.message.includes("505")) {
+                                            toastr.error(response.message);
+                                            setTimeout(() => {
+                                                window.location.reload(true);
+                                            }, 2500);
+                                        }
+                                        else
+                                            toastr.error("Hubo un error al tratar de actualizar la naviera para este contenedor.");
+                                        
                                 }
                             });
                         } else {
@@ -522,7 +769,6 @@
 
         //Articles
         let articles  = [];
-        //navieras.push(`<option value=""></option>`);
 
         for (const article of _articles) {
             articles.push(`<option value="${article.Id}">${article.Id} - ${article.Description}</option>`)
@@ -539,31 +785,31 @@
                     </div>
 
                     <div class="form-group mt-1 ml-2 col-lg-1 col-md-1 col-sm-12">
-                        <label for="dueDate">Estatus</label>
+                        <label for="container-estatus-${container.container.Id}">Estatus</label>
                         <select class="form-control form-control-sm small-box bg-secondary text-light containerStatus" id="container-estatus-${container.container.Id}">
                            ${containerStatus}
                         </select>
                     </div>
 
                     <div class="form-group mt-1 ml-2 col-lg-2 col-md-2 col-sm-12">
-                        <label for="dueDate">Puerto</label>
+                        <label for="container-naviera-${container.container.Id}">Puerto</label>
                         <select class="form-control form-control-sm small-box bg-secondary text-light containerNaviera" id="container-naviera-${container.container.Id}">
                             ${navieras}
                         </select>
                     </div>
 
                     <div class="form-group mt-1 ml-2 col-lg-2 col-md-2 col-sm-12">
-                        <label for="bl">BL</label>
+                        <label for="BL-${container.container.Id}">BL</label>
                         <input type="text" id="BL-${container.container.Id}" name="BL" value="${container.container.BL}" class="form-control form-control-sm bg-light-gray quantityField containerBL" autocomplete="off"/>
                     </div>
 
                     <div class="form-group mt-1 ml-2 col-lg-2 col-md-2 col-sm-12">
-                        <label for="manufacturingDate">Fecha Fabricación:</label>
+                        <label for="manufacturingDate-${container.container.Id}">Fecha Fabricación:</label>
                         <input type="text" id="manufacturingDate-${container.container.Id}" name="manufacturingDate" value="${manufacturingDate}" class="form-control form-control-sm bg-light-gray datepicker containerManufacturingDate" autocomplete="off"/>
                     </div>
 
                     <div class="form-group mt-1 ml-2 col-lg-2 col-md-2 col-sm-12">
-                        <label for="dueDate">Fecha Entrega:</label>
+                        <label for="dueDate-${container.container.Id}">Fecha Entrega:</label>
                         <input type="text" id="dueDate-${container.container.Id}" name="dueDate" value="${dueDate}" class="form-control form-control-sm bg-light-gray datepicker containerDueDate" autocomplete="off"/>
                     </div>
                 </div>

@@ -64,10 +64,14 @@
                             <td>@string.Format("{0:dd/MM/yyyy}", item.DateDMA)</td>
                             <td class="text-center @(item.StatusOrderPurchase.Description.Replace(' ', '-'))" style="font-weight: bold">@item.StatusOrderPurchase.Description</td>
                             <td align="center">
-                                @*<a class="btn btn-sm btn-success" href="@Url.Action("Edit",new { id = @item.Id })" title="Editar">
-                                    <i class="fa fa-eye"></i>
+                                <a class="btn btn-sm btn-danger" href="javascript:void(0)" onclick="deleteOrder(@item.OrderPurchaseId)" title="Eliminar">
+                                    <i class="fa fa-remove"></i>
+                                </a>
 
-                                </a>*@
+                                @*<a class="btn btn-sm btn-success" href="@Url.Action("Edit",new { id = @item.Id })" title="Editar">
+            <i class="fa fa-eye"></i>
+
+        </a>*@
                             </td>
                         </tr>
                     }
@@ -83,6 +87,24 @@
     <script src="~/Scripts/toastr.js"></script>
 }
 <script type="text/javascript">
+
+    const deleteOrder = (id) => {
+        if (confirm(`Seguro que desea eliminar la orden No. ${id} ?`)) {
+            $.ajax({
+                "url": "/Orden/Delete?id=" + id,
+                "type": "POST",
+                "success": function (response) {
+                    if (response.result === "200") {
+                        window.location.reload();
+                    } else {
+                        console.log(response.message);
+                        alert(response.message);
+                        //alert('Hubo un error tratando de eliminar la orden (Contacte al administrador del sistema).');
+                    }
+                }
+            });
+        }
+    }
 
     $(document).ready(function () {
         $("#ListOrders").addClass("menu-active");

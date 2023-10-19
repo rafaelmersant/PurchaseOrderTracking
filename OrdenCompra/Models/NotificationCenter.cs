@@ -24,7 +24,7 @@ namespace OrdenCompra.Models
         public Nullable<System.DateTime> DeactivatedDate { get; set; }
         public Nullable<int> DeactivatedBy { get; set; }
     
-        public virtual Article Article { get; set; }
         public virtual OrderPurchase OrderPurchase { get; set; }
+        public virtual Article Article { get; set; }
     }
 }
