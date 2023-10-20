@@ -3,6 +3,7 @@ using OrdenCompra.App_Start;
 using OrdenCompra.Models;
 using OrdenCompra.ViewModels;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -604,12 +605,11 @@ namespace OrdenCompra.Controllers
                     {
                         if (container != null && container.BL != value)
                         {
-                            container.BL = value;
-
                             HelperApp.SaveTimeLineOrder(container.OrderPurchaseId, "BL actualizado",
-                                                    $"Fue actualizado el BL de {container.BL} por {value}",
+                                                    $"Fue actualizado el BL de {container.BL} por {value} para el contenedor No. {container.SortIndex}",
                                                     int.Parse(Session["userID"].ToString()));
 
+                            container.BL = value;
                             db.SaveChanges();
                         }
                     }
@@ -628,18 +628,34 @@ namespace OrdenCompra.Controllers
         }
 
         [HttpPost]
-        public JsonResult UpdateContainerFieldByArticle(int orderId, int articleId, string type, string value)
+        public JsonResult UpdateContainerFieldByArticle(int orderId, int articleId, string containers, string type, string value)
         {
             try
             {
                 if (Session["userID"] == null) throw new Exception("505: Por favor intente logearse de nuevo en el sistema. (La Sesión expiró)");
 
+                List<OrderPurchaseContainer> _containers = new List<OrderPurchaseContainer>(); 
+
                 using (var db = new OrdenCompraRCEntities())
                 {
-                    var articlesContainers = db.OrderPurchaseArticlesContainers.Where(c => c.OrderPurchaseId == orderId && c.ArticleId == articleId);
-                    var containers = db.OrderPurchaseContainers.Where(c => articlesContainers.Any(a => a.ContainerId == c.Id)).ToList();
+                    if (articleId == 0)
+                    {
+                        List<int> containersId = new List<int>();
+                        foreach (var c in containers.Split(','))
+                        {
+                            if (int.TryParse(c, out int result))
+                                containersId.Add(result);
+                        }
 
-                    foreach (var container in containers)
+                        _containers = db.OrderPurchaseContainers.Where(c => containersId.Any(a => a == c.Id)).ToList();
+                    } 
+                    else
+                    {
+                        var articlesContainers = db.OrderPurchaseArticlesContainers.Where(c => c.OrderPurchaseId == orderId && c.ArticleId == articleId);
+                        _containers = db.OrderPurchaseContainers.Where(c => articlesContainers.Any(a => a.ContainerId == c.Id)).ToList();
+                    }
+
+                    foreach (var container in _containers)
                     {
                         UpdateContainerField(container.Id, type, value);
                     }
@@ -649,7 +665,7 @@ namespace OrdenCompra.Controllers
             }
             catch (Exception ex)
             {
-                HelperUtility.SendException(ex, $"orderId: {orderId} | articleId: {articleId} | type: {type} | value: {value}");
+                HelperUtility.SendException(ex, $"orderId: {orderId} | articleId: {articleId} | containers: {containers} | type: {type} | value: {value}");
 
                 return Json(new { result = "500", message = ex.Message });
             }
@@ -772,7 +788,7 @@ namespace OrdenCompra.Controllers
                         if (container != null && container.BL != BL)
                         {
                             HelperApp.SaveTimeLineOrder(detail.OrderPurchaseId, "BL actualizado",
-                                                    $"Fue actualizado el BL de {container.BL} por {BL}",
+                                                    $"Fue actualizado el BL de {container.BL} por {BL} para el contenedor #${container.SortIndex}",
                                                     int.Parse(Session["userID"].ToString()));
 
                             container.BL = BL;

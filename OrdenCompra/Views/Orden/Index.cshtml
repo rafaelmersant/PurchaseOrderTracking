@@ -34,12 +34,6 @@
         <div class="bg-secondary text-light panel-custom border">
             <h6 class="panel-title">
                 Orden de Compra: Información de Cabecera
-                @*<span class="btn-group pull-right">
-                        @if (Session["role"] != null && Session["role"].ToString() != "AdminConsulta")
-                        {
-                            <a href="@Url.Action("Index","Orden", new { id = ""})" class="btn btn-danger btn-sm" style="margin-top: -3px">Nueva Orden</a>
-                        }
-                    </span>*@
             </h6>
         </div>
 
@@ -95,7 +89,7 @@
             </div>
         </form>
     </section>
-    
+
     <section id="massive-update" class="bg-light-gray pb-2 mb-3">
         <div class="bg-secondary text-light panel-custom border">
             <h6 id="title-massive" class="panel-title" style="cursor: pointer;">+ Actualización masiva de datos en contenedores</h6>
@@ -122,16 +116,35 @@
                 <label for="statusMassive">Estatus</label>
                 <div id="container-estatus-massive-div"></div>
             </div>
-
         </div>
         <div class="form-row">
             <div class="form-group mt-1 ml-2 col-lg-2 col-md-2 col-sm-12">
-                <label class="font-weight-bold">Articulos:</label>
+                <label class="font-weight-bold">Seleccionar por:</label>
+                <select id="selectBy" class="form-control form-control-sm small-box">
+                    <option value="Articulo">Articulos</option>
+                    <option value="Contenedor">Contenedores</option>
+                </select>
             </div>
         </div>
+
+        @*<div class="form-row">
+            <div class="form-group mt-1 ml-2 col-lg-2 col-md-2 col-sm-12">
+                <label class="font-weight-bold">Articulos:</label>
+            </div>
+        </div>*@
         <div class="form-row">
             <div class="form-group ml-2 col-lg-12 col-md-12 col-sm-12">
                 <div id="articles-massive"></div>
+            </div>
+        </div>
+        @*<div class="form-row">
+            <div class="form-group mt-1 ml-2 col-lg-2 col-md-2 col-sm-12">
+                <label class="font-weight-bold">Contenedores:</label>
+            </div>
+        </div>*@
+        <div class="form-row">
+            <div class="form-group ml-2 col-lg-12 col-md-12 col-sm-12">
+                <div id="containersMassive"></div>
             </div>
         </div>
         <div class="form-row mt-2">
@@ -160,6 +173,7 @@
 <script type="text/javascript">
 
     $(document).ready(async function () {
+        $("#containersMassive").hide();
         $("#massive-update").hide();
         $("#massive-update .form-row").fadeOut();
         $("#btn-detail").hide();
@@ -211,7 +225,7 @@
             }
         });
 
-        $("#ApplyChanges").click(function (evt) {
+        $("#ApplyChanges").click(async function (evt) {
             evt.preventDefault();
             evt.stopPropagation();
 
@@ -220,6 +234,7 @@
             const BLMassive = $("#BLMassive").val();
             const navieraMassive = $("#navieraMassive").val();
             const statusMassive = $("#statusMassive").val();
+            const containers = $("#containers-massive").val();
 
             if (!dueDateMassive && !manufacturingDateMassive && !BLMassive && !navieraMassive && !statusMassive) {
                 toastr.error("Debe digitar un valor para aplicar cambios masivos.");
@@ -228,62 +243,71 @@
 
             let updated = false;
 
-            if (confirm(`Esta seguro que desea aplicar los cambios masivos?`)) {
+            if (await confirm(`Esta seguro que desea aplicar los cambios masivos?`)) {
                 $("#waitingIndicatorMassive").show();
 
-                for (const item of $(".article-massive-value")) {
-                    const articleId = item.id.split("-")[1];
+                const data = $("#selectBy").val() === "Articulo" ? $(".article-massive-value") : [{ id: 0, checked: true }];
+
+                for (const item of data) {
+                    let articleId = 0;
                     const orderId = $("#orderId").val();
 
+                    if ($("#selectBy").val() === "Articulo")
+                        articleId = item.id.split("-")[1];
+
                     if (item.checked) {
-                        updated = true;
 
                         if (dueDateMassive) {
-                            $.ajax({
-                                "url": `/Orden/UpdateContainerFieldByArticle?orderId=${orderId}&articleId=${articleId}&type=DueDate&value=${dueDateMassive}`,
+                            await $.ajax({
+                                "url": `/Orden/UpdateContainerFieldByArticle?orderId=${orderId}&articleId=${articleId}&containers=${containers}&type=DueDate&value=${dueDateMassive}`,
                                 "type": "POST",
                                 "success": async function (response) {
                                     console.log('response:', response);
+                                    updated = true;
                                 }
                             });
                         }
 
                         if (manufacturingDateMassive) {
-                            $.ajax({
-                                "url": `/Orden/UpdateContainerFieldByArticle?orderId=${orderId}&articleId=${articleId}&type=ManufacturingDate&value=${manufacturingDateMassive}`,
+                            await $.ajax({
+                                "url": `/Orden/UpdateContainerFieldByArticle?orderId=${orderId}&articleId=${articleId}&containers=${containers}&type=ManufacturingDate&value=${manufacturingDateMassive}`,
                                 "type": "POST",
                                 "success": async function (response) {
                                     console.log('response:', response);
+                                    updated = true;
                                 }
                             });
                         }
 
                         if (BLMassive) {
-                            $.ajax({
-                                "url": `/Orden/UpdateContainerFieldByArticle?orderId=${orderId}&articleId=${articleId}&type=BL&value=${BLMassive}`,
+                            await $.ajax({
+                                "url": `/Orden/UpdateContainerFieldByArticle?orderId=${orderId}&articleId=${articleId}&containers=${containers}&type=BL&value=${BLMassive}`,
                                 "type": "POST",
                                 "success": async function (response) {
                                     console.log('response:', response);
+                                    updated = true;
                                 }
                             });
                         }
 
                         if (navieraMassive) {
-                            $.ajax({
-                                "url": `/Orden/UpdateContainerFieldByArticle?orderId=${orderId}&articleId=${articleId}&type=Naviera&value=${navieraMassive}`,
+                            await $.ajax({
+                                "url": `/Orden/UpdateContainerFieldByArticle?orderId=${orderId}&articleId=${articleId}&containers=${containers}&type=Naviera&value=${navieraMassive}`,
                                 "type": "POST",
                                 "success": async function (response) {
                                     console.log('response:', response);
+                                    updated = true;
                                 }
                             });
                         }
 
                         if (statusMassive) {
-                            $.ajax({
-                                "url": `/Orden/UpdateContainerFieldByArticle?orderId=${orderId}&articleId=${articleId}&type=Status&value=${statusMassive}`,
+                            await $.ajax({
+                                "url": `/Orden/UpdateContainerFieldByArticle?orderId=${orderId}&articleId=${articleId}&containers=${containers}&type=Status&value=${statusMassive}`,
                                 "type": "POST",
                                 "success": async function (response) {
                                     console.log('response:', response);
+                                    updated = true;
                                 }
                             });
                         }
@@ -324,10 +348,15 @@
             }
         })
 
-        //$("#endDate").on("change", function (evt) {
-        //    console.log("Cambiando fecha fin")
-        //    validateDate()
-        //});
+        $("#selectBy").on("change", function (evt) {
+            if (this.value === "Articulo") {
+                $("#articles-massive").show();
+                $("#containersMassive").hide();
+            } else {
+                $("#articles-massive").hide();
+                $("#containersMassive").show();
+            }
+        });
     });
 
     function getPurchaseOrderDetail(orderId) {
@@ -384,6 +413,7 @@
                             articlesMassive.push(`<input type="checkbox" class="article-massive-value" id="article-${article.Id}""/> <label for="article-${article.Id}" style="cursor: pointer;">${article.Id} - ${article.Description}</label> <br/>`);
                         }
                         $("#articles-massive").html(articlesMassive);
+
                         $("#massive-update").fadeIn();
 
                         //Navieras
@@ -397,6 +427,16 @@
                         $("#container-naviera-massive-div").html(`<select class="form-control form-control-sm small-box" id="navieraMassive">
                                                                     ${navieras}
                                                                   </select>`);
+
+                        //Containers
+                        let containers = [];
+                        for (const container of response.message.Containers) {
+                            containers.push(`<option value="${container.container.Id}">Contenedor ${container.container.SortIndex}</option>`)
+                        }
+                        $("#containersMassive").html(`<select name="containers-massive" id="containers-massive" class="form-control form-control-sm" multiple>
+                                                       ${containers}
+                                                      </select>`);
+
 
                         //Container Status
                         let _containerStatus = @Html.Raw(Json.Encode(ViewBag.ContainerStatus));
@@ -711,7 +751,7 @@
                                         }
                                         else
                                             toastr.error("Hubo un error al tratar de actualizar la naviera para este contenedor.");
-                                        
+
                                 }
                             });
                         } else {
