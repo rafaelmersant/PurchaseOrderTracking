@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using OrdenCompra.App_Start;
 using OrdenCompra.Models;
 using OrdenCompra.ViewModels;
@@ -892,6 +893,10 @@ namespace OrdenCompra.Controllers
                                 UploadedDate = DateTime.Now
                             });
                             db.SaveChanges();
+
+                            HelperApp.SaveTimeLineOrder(orderId, "Documento adjuntado",
+                                                   $"Fue subido el archivo {description}",
+                                                   int.Parse(Session["userID"].ToString()));
                         }
                     }
                     catch (Exception ex)
@@ -938,6 +943,8 @@ namespace OrdenCompra.Controllers
         {
             try
             {
+                if (Session["userID"] == null) throw new Exception("505: Por favor intente logearse de nuevo en el sistema. (La Sesión expiró)");
+
                 using (var db = new OrdenCompraRCEntities())
                 {
                     var document = db.OrderPurchaseDocs.FirstOrDefault(d => d.Id == id);
@@ -950,6 +957,11 @@ namespace OrdenCompra.Controllers
                         if (System.IO.File.Exists(filePathToDelete))
                         {
                             System.IO.File.Delete(filePathToDelete);
+
+                            HelperApp.SaveTimeLineOrder(document.OrderPurchaseId, "Documento eliminado",
+                                                   $"Fue eliminado el archivo {document.FileName}",
+                                                   int.Parse(Session["userID"].ToString()));
+
                             return Json(new { result = "200", message = "success" });
                         }
                     }
