@@ -90,7 +90,7 @@
         </form>
     </section>
 
-    <section id="massive-update" class="bg-light-gray pb-2 mb-3">
+    <section id="massive-update" class="bg-light-gray pb-2 mb-3" style="display:none;">
         <div class="bg-secondary text-light panel-custom border">
             <h6 id="title-massive" class="panel-title" style="cursor: pointer;">+ Actualización masiva de datos en contenedores</h6>
         </div>
@@ -126,22 +126,11 @@
                 </select>
             </div>
         </div>
-
-        @*<div class="form-row">
-            <div class="form-group mt-1 ml-2 col-lg-2 col-md-2 col-sm-12">
-                <label class="font-weight-bold">Articulos:</label>
-            </div>
-        </div>*@
         <div class="form-row">
             <div class="form-group ml-2 col-lg-12 col-md-12 col-sm-12">
                 <div id="articles-massive"></div>
             </div>
         </div>
-        @*<div class="form-row">
-            <div class="form-group mt-1 ml-2 col-lg-2 col-md-2 col-sm-12">
-                <label class="font-weight-bold">Contenedores:</label>
-            </div>
-        </div>*@
         <div class="form-row">
             <div class="form-group ml-2 col-lg-12 col-md-12 col-sm-12">
                 <div id="containersMassive"></div>
@@ -155,8 +144,51 @@
         </div>
     </section>
 
-    <a href="javascript:void(0);" id="btnToggleContainers" onclick="toggleContainers()" class="text-info">Reducir todos los contenedores</a>
-    <section style="overflow-y:scroll; overflow-x: hidden; max-height:500px">
+    <form id="upload-files" class="bg-light-gray pb-2 mb-3" enctype="multipart/form-data" style="display:none;">
+        <div class="bg-secondary text-light panel-custom border">
+            <h6 id="title-upload" class="panel-title" style="cursor: pointer;">+ Subir documentos (archivos)</h6>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group mt-1 ml-2 col-lg-2 col-md-2 col-sm-12">
+                @*<label for="fileUpload">Buscar archivo</label>*@
+                <input type="file" class="form-control-file" id="fileUploadOrder" name="file" style="display: none">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group ml-2 col-lg-6 col-md-6 col-sm-12">
+                <label for="FileNameOrderText">Nombre de archivo</label>
+                <br />
+                <input type="text" id="FileNameOrderText" name="FileNameOrderText" class="form-control form-control-sm d-inline" readonly />
+                <span onclick="document.getElementById('fileUploadOrder').click(); return false;" class="fa fa-search d-inline h6" style="cursor: pointer"></span>
+            </div>
+        </div>
+
+        <div class="form-row mt-2">
+            <div class="form-group ml-2 col-lg-6 col-md-6 col-sm-12">
+                <label for="FileDescription">Descripción</label>
+                <input type="text" id="FileDescription" name="FileDescription" class="form-control form-control-sm" autocomplete="off" />
+            </div>
+        </div>
+
+        <div class="form-row mt-2">
+            <div class="form-group ml-2 col-lg-6 col-md-6 col-sm-12">
+                <button class="btn btn-danger btn-sm" id="SaveDocFile">Guardar archivo</button>
+                <span id="waitingIndicatorFile" class="spinner-border text-danger float-left" style="margin-right: 5px; display: none"></span>
+            </div>
+        </div>
+
+        <div class="form-row mt-2">
+            <div class="form-group ml-2 col-lg-6 col-md-6 col-sm-12">
+                <div id="uploaded-files"></div>
+            </div>
+        </div>
+
+    </form>
+
+    <a href="javascript:void(0);" id="btnToggleContainers" onclick="toggleContainers()" class="text-info" style="display:none;">Reducir todos los contenedores</a>
+    <section id="containers-section" style="overflow-y:scroll; overflow-x: hidden; max-height:500px; display:none;">
         <div id="containers"></div>
     </section>
 </div>
@@ -175,7 +207,9 @@
     $(document).ready(async function () {
         $("#containersMassive").hide();
         $("#massive-update").hide();
+        $("#upload-files").hide();
         $("#massive-update .form-row").fadeOut();
+        $("#upload-files .form-row").fadeOut();
         $("#btn-detail").hide();
         $("#QueryOrder").addClass("menu-active");
         $("#btnSearchOrder").removeClass("disabled");
@@ -346,7 +380,22 @@
                 $("#title-massive").html("+ Actualización masiva de datos en contenedores");
                 $("#massive-update .form-row").fadeOut();
             }
-        })
+        });
+
+        $("#title-upload").click(function (evt) {
+            evt.preventDefault();
+            evt.stopPropagation();
+
+            if ($("#title-upload").html() === "+ Subir documentos (archivos)") {
+                $("#title-upload").html("- Subir documentos (archivos)");
+
+                $("#upload-files .form-row").fadeIn();
+            }
+            else {
+                $("#title-upload").html("+ Subir documentos (archivos)");
+                $("#upload-files .form-row").fadeOut();
+            }
+        });
 
         $("#selectBy").on("change", function (evt) {
             if (this.value === "Articulo") {
@@ -357,7 +406,107 @@
                 $("#containersMassive").show();
             }
         });
+
+        $("#fileUploadOrder").change(function (evt) {
+            const selectedFile = this.files[0]; // Get the selected file
+            console.log('selected file:', selectedFile)
+            if (selectedFile) {
+                $("#FileNameOrderText").val(selectedFile.name);
+            }
+        });
+
+        $("#SaveDocFile").click(function (evt) {
+            evt.preventDefault();
+            evt.stopPropagation();
+
+            const orderId = $("#orderId").val();
+            const fileDescription = $("#FileDescription").val();
+
+            if (!orderId || !fileDescription) {
+                toastr.error("Favor especificar la descripción del archivo.");
+                return false;
+            }
+
+            var formData = new FormData();
+            var fileInput = $("input[type='file']")[0].files[0];
+
+            if (fileInput) {
+                formData.append("file", fileInput);
+                formData.append("orderId", orderId);
+                formData.append("description", fileDescription);
+
+                $.ajax({
+                    url: "/Orden/UploadFile",
+                    type: "POST",
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (data) {
+                        if (data.result === "200") {
+                            toastr.success("El archivo fue guardado satisfactoriamente!");
+                            $("#FileDescription").val('');
+                            $("#FileNameOrderText").val('');
+                            $("input[type='file']").val('');
+
+                            getUploadedFiles($("#orderId").val());
+                        } else {
+                            toastr.error(data.message);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error(error);
+                        toastr.error("Error tratando de guardar el archivo: " + error);
+                    }
+                });
+            } else {
+                toastr.error("No ha seleccionado ningun archivo.");
+            }
+        });
+
     });
+
+    function deleteFile(id, fileName) {
+
+        if (confirm(`Esta seguro de eliminar el archivo: ${fileName}?`)) {
+
+            $.ajax({
+                "url": `/Orden/DeleteFile?id=${id}`,
+                "type": "POST",
+                "success": async function (response) {
+                    if (response.result === "200") {
+                        toastr.success(`El archivo: ${fileName} fue eliminado con exito!`);
+                        getUploadedFiles($("#orderId").val());
+                    } else {
+                        toastr.error(response.message);
+                    }
+                }
+            });
+        }
+    }
+
+    function getUploadedFiles(orderId) {
+        $.ajax({
+            "url": `/Orden/GetUploadedFiles?orderId=${orderId}`,
+            "type": "POST",
+            "success": async function (response) {
+                if (response.result === "200") {
+                    console.log('Uploaded files:', response.message);
+
+                    let docs = [];
+                    for (const doc of response.message) {
+                        docs.push(`<a href="/Documentos/${doc.Url}" class="text-custom">${doc.FileName}</a> 
+                                   <span class='fa fa-trash text-custom h6' style='cursor: pointer;' onclick="deleteFile(${doc.Id}, '${doc.FileName}')" title="Eliminar"> </span> <br/>`);
+                    }
+
+                    $("#uploaded-files").html(`<span class="mt-2"> <strong>Archivos adjuntos:</strong> </span><br/>`);
+                    $("#uploaded-files").append(docs);
+
+                    if (!docs.length) 
+                        $("#uploaded-files").html("");    
+                }
+            }
+        });
+    }
 
     function getPurchaseOrderDetail(orderId) {
         console.log('SEARCH ORDER ID:', orderId);
@@ -381,6 +530,9 @@
             "success": async function (response) {
                 if (response.result === "200") {
                     $("#btn-detail").show();
+                    $("#containers-section").show();
+
+                    getUploadedFiles(orderId);
 
                     console.log('ORDER CREATED!')
                     console.log(response);
@@ -415,6 +567,7 @@
                         $("#articles-massive").html(articlesMassive);
 
                         $("#massive-update").fadeIn();
+                        $("#upload-files").fadeIn();
 
                         //Navieras
                         let _navieras = @Html.Raw(Json.Encode(ViewBag.Navieras));

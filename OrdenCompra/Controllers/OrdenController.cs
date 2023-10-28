@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
@@ -856,5 +857,113 @@ namespace OrdenCompra.Controllers
                 return Json(new { result = "500", message = ex.Message });
             }
         }
+
+        [HttpPost]
+        public JsonResult UploadFile()
+        {
+            try
+            {
+                if (Session["userID"] == null) throw new Exception("505: Por favor intente logearse de nuevo en el sistema. (La Sesión expiró)");
+
+                HttpPostedFileBase file = Request.Files["file"];
+
+                if (file != null && file.ContentLength > 0)
+                {
+                    string description = Request.Form["description"];
+                    int orderId = int.Parse(Request.Form["orderId"]);
+                    int userId = int.Parse(Session["userID"].ToString());
+
+                    string fileName = Path.GetFileName(file.FileName);
+                    string newFileName = $"{Path.GetFileNameWithoutExtension(file.FileName)}_{orderId}{Path.GetExtension(fileName)}";
+                    string filePath = Path.Combine(Server.MapPath("~/Documentos"), newFileName);
+
+                    file.SaveAs(filePath);
+
+                    try
+                    {
+                        using (var db = new OrdenCompraRCEntities())
+                        {
+                            db.OrderPurchaseDocs.Add(new OrderPurchaseDoc
+                            {
+                                FileName = description,
+                                Url = newFileName,
+                                OrderPurchaseId = orderId,
+                                UploadedBy = userId,
+                                UploadedDate = DateTime.Now
+                            });
+                            db.SaveChanges();
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        HelperUtility.SendException(ex);
+                    }
+
+                    return Json(new { result = "200", message = "success" });
+                }
+                else
+                {
+                    return Json(new { result = "404", message = "No ha seleccionado" });
+                }
+            }
+            catch (Exception ex)
+            {
+                HelperUtility.SendException(ex);
+
+                return Json(new { result = "500", message = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult GetUploadedFiles(int orderId)
+        {
+            try
+            {
+                using (var db = new OrdenCompraRCEntities())
+                {
+                    var documents = db.OrderPurchaseDocs.Where(d => d.OrderPurchaseId == orderId).ToList();
+                    return Json(new { result = "200", message = documents });
+                }
+            }
+            catch (Exception ex)
+            {
+                HelperUtility.SendException(ex, $"orderID: {orderId}");
+
+                return Json(new { result = "500", message = ex.Message});
+            }
+        }
+
+        [HttpPost]
+        public JsonResult DeleteFile(int id)
+        {
+            try
+            {
+                using (var db = new OrdenCompraRCEntities())
+                {
+                    var document = db.OrderPurchaseDocs.FirstOrDefault(d => d.Id == id);
+                    if (document != null)
+                    {
+                        db.OrderPurchaseDocs.Remove(document);
+                        db.SaveChanges();
+
+                        string filePathToDelete = Server.MapPath($"~/Documentos/{document.Url}");
+                        if (System.IO.File.Exists(filePathToDelete))
+                        {
+                            System.IO.File.Delete(filePathToDelete);
+                            return Json(new { result = "200", message = "success" });
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                HelperUtility.SendException(ex, $"fileId: {id}");
+
+                return Json(new { result = "500", message = ex.Message });
+            }
+
+            return Json(new { result = "404", message = "El archivo no fue encontrado." });
+        }
+
     }
 }
