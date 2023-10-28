@@ -1,4 +1,4 @@
-﻿@model IEnumerable<OrdenCompra.Models.OrderPurchase>
+﻿@model OrdenCompra.ViewModels.OrderPurchaseQueryViewModel
 
 @{
     ViewBag.Title = "Listado de Ordenes";
@@ -23,10 +23,20 @@
     .Cerrada {
         color: red;
     }
+
+    .select2-container,
+    .select2-container--default .selection {
+        width: 100% !important;
+    }
+
+    .select2-search__field {
+        max-width: none !important;
+    }
 </style>
 
 <link href="~/Content/dataTables.bootstrap4.min.css" rel="stylesheet" />
 <link href="~/Content/toastr.css" rel="stylesheet" type="text/css" />
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
 <div class="container-fluid">
     <section class="text-dark border-custom border">
@@ -36,8 +46,88 @@
             </h6>
         </div>
 
-        <div class="mt-3 ml-2 mr-2">
-            <table id="ordenesTable" class="table table-striped table-bordered table-condensed table-sm mt-4">
+        <section id="massive-update" class="bg-light pb-2 mb-3">
+            <div class="bg-light-gray text-secondary panel-custom border">
+                <h6 id="title-massive" class="panel-title" style="cursor: pointer;">+ Filtro avanzado</h6>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group mt-1 ml-2 col-lg-4 col-md-4 col-sm-12">
+                    <label for="orderDate">Articulos</label><br />
+                    @*<input type="text" id="article-type" name="article-type" value="" class="form-control form-control-sm" />*@
+                    @Html.DropDownList("articleId", new SelectList(ViewBag.Articles, "Value", "Text"), new
+                     {
+                         @class = "form-control form-control-sm small-box searchable-dropdown",
+                         @style = "border: 1px solid lightgray; color: gray;"
+                     })
+                </div>
+                <div class="form-group mt-1 col-lg-3 col-md-3 col-sm-12">
+                    <label for="orderDate">Modelos</label>
+                    @Html.DropDownList("modelId", new SelectList(ViewBag.Models, "Value", "Text"), new
+                     {
+                         @class = "form-control form-control-sm small-box",
+                         @style = "border: 1px solid lightgray; color: gray;"
+                     })
+                </div>
+                <div class="form-group mt-1 col-lg-3 col-md-3 col-sm-12">
+                    <label for="orderDate">Marcas</label>
+                    @Html.DropDownList("markId", new SelectList(ViewBag.Marks, "Value", "Text"), new
+                     {
+                         @class = "form-control form-control-sm small-box",
+                         @style = "border: 1px solid lightgray; color: gray;"
+                     })
+                </div>
+            </div>
+
+            <span class="mt-2 ml-2 mb-2 text-custom" id="show-articles" onclick="toggleArticles();" style="cursor: pointer;">Mostrar columna de articulos</span>
+        </section>
+
+        @if (Model.Articles != null)
+        {
+            <div class="bg-light-gray text-secondary panel-custom border">
+                <h6 class="panel-title" style="cursor: pointer;">Articulos Consolidados</h6>
+            </div>
+            <div class="mt-3 ml-2 mr-2">
+                <table id="articlesTable" class="table table-striped table-bordered table-condensed table-sm">
+                    <thead>
+                        <tr class="bg-danger text-light">
+                            <th>
+                                Código
+                            </th>
+                            <th>
+                                Articulo
+                            </th>
+                            <th class="text-right">
+                                Cantidad Solicitada
+                            </th>
+                            <th class="text-right">
+                                Cantidad en Fabrica
+                            </th>
+                            <th class="text-right">
+                                Cantidad en Transito
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Articles)
+                        {
+                            var fullTraffic = item.TotalRequested == item.TotalTraffic;
+
+                            <tr class="@(fullTraffic ? "font-weight-bold" : "")">
+                                <td>@item.Id</td>
+                                <td>@item.Description</td>
+                                <td class="text-right">@item.TotalRequested</td>
+                                <td class="text-right">@item.TotalFactory</td>
+                                <td class="text-right">@item.TotalTraffic</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+
+        <div class="mt-2 ml-2 mr-2">
+            <table id="ordenesTable" class="table table-striped table-bordered table-condensed table-sm">
                 <thead>
                     <tr>
                         <th>
@@ -46,7 +136,10 @@
                         <th>
                             Suplidor
                         </th>
-                        <th>
+                        <th id="articles-header" style="min-width: 380px; display: none">
+                            Articulos
+                        </th>
+                        <th class="text-center">
                             Fecha de Orden
                         </th>
                         <th class="text-center">
@@ -56,22 +149,25 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var item in Model)
+                    @foreach (var item in Model.Orders)
                     {
-                        <tr>
+                        var redirectURL = System.Web.HttpContext.Current.Request.Url.GetLeftPart(UriPartial.Authority) + $"/Orden/Index?id={item.OrderPurchaseId}";
+
+                        <tr onclick="window.open('@redirectURL', '_blank');" style="cursor: pointer;" title="Click para ver detalle" onmouseover="this.style.opacity = 0.8; this.style.fontSize = '14px';" onmouseout="this.style.opacity = 1; this.style.fontSize='13px';">
                             <td>@item.OrderPurchaseId</td>
                             <td>@item.Provider.ProviderName</td>
-                            <td>@string.Format("{0:dd/MM/yyyy}", item.DateDMA)</td>
+                            <td class="articles-details" style="display: none">
+                                @foreach (var article in item.OrderPurchaseArticlesContainers.Select(s => new { s.ArticleId, s.Article.Description }).Distinct().OrderBy(o => o.Description).ToList())
+                                {
+                                    <span>@article.ArticleId - @article.Description</span><br />
+                                }
+                            </td>
+                            <td class="text-center">@string.Format("{0:dd/MM/yyyy}", item.DateDMA)</td>
                             <td class="text-center @(item.StatusOrderPurchase.Description.Replace(' ', '-'))" style="font-weight: bold">@item.StatusOrderPurchase.Description</td>
                             <td align="center">
                                 <a class="btn btn-sm btn-danger" href="javascript:void(0)" onclick="deleteOrder(@item.OrderPurchaseId)" title="Eliminar">
                                     <i class="fa fa-remove"></i>
                                 </a>
-
-                                @*<a class="btn btn-sm btn-success" href="@Url.Action("Edit",new { id = @item.Id })" title="Editar">
-            <i class="fa fa-eye"></i>
-
-        </a>*@
                             </td>
                         </tr>
                     }
@@ -85,6 +181,7 @@
     <script src="~/Scripts/jquery.dataTables.min.js"></script>
     <script src="~/Scripts/dataTables.bootstrap4.min.js"></script>
     <script src="~/Scripts/toastr.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 }
 <script type="text/javascript">
 
@@ -107,9 +204,30 @@
     }
 
     $(document).ready(function () {
+        console.log('sumarized:', @ViewBag.ArticlesSumarized);
+
+        const articleId = new URLSearchParams(window.location.search).get('articulo');
+        if (articleId)
+            $("#articleId").val(articleId);
+
+        const modelId = new URLSearchParams(window.location.search).get('modelo');
+        if (modelId)
+            $("#modelId").val(modelId);
+
+        const markId = new URLSearchParams(window.location.search).get('marca');
+        if (markId)
+            $("#markId").val(markId);
+
+        $("#articleId").select2();
+        $("#modelId").select2();
+        $("#markId").select2();
+
+        $("#articles-header").hide();
+        $(".articles-details").hide();
+
         $("#ListOrders").addClass("menu-active");
         $("#ordenesTable").DataTable();
-        
+
         //Replace Previous -> Anterior
         $('body :not(script)').contents().filter(function () {
             return this.nodeType === 3;
@@ -151,6 +269,41 @@
         }).replaceWith(function () {
             return this.nodeValue.replace('Search', 'Buscar');
         });
+
+        $('body :not(script)').contents().filter(function () {
+            return this.nodeType === 3;
+        }).replaceWith(function () {
+            return this.nodeValue.replace('No data available in table', 'No existen registros para mostrar');
+        });
+
+        $("#articleId").on('change', function (evt) {
+            if (evt.currentTarget.value === 0)
+                window.location = '/Orden/Listado';
+
+                window.location = `/Orden/Listado?articulo=${ evt.currentTarget.value }`;
+        });
+
+        $("#modelId").on('change', function (evt) {
+            window.location = `/Orden/Listado?modelo=${evt.currentTarget.value}`;
+        });
+
+        $("#markId").on('change', function (evt) {
+            if (evt.currentTarget.value === 0)
+                window.location = '/Orden/Listado';
+
+            window.location = `/Orden/Listado?marca=${evt.currentTarget.value}`;
+        });
     });
 
+    function toggleArticles() {
+        if ($("#show-articles").html() === "Mostrar columna de articulos") {
+            $("#articles-header").show();
+            $(".articles-details").show();
+            $("#show-articles").html("Ocultar columna de articulos");
+        } else {
+            $("#articles-header").hide();
+            $(".articles-details").hide();
+            $("#show-articles").html("Mostrar columna de articulos");
+        }
+    }
 </script>

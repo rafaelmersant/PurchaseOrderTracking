@@ -209,5 +209,41 @@ namespace OrdenCompra.Controllers
             }
 
         }
+
+        public List<SelectListItem> GetArticles(string type = "article")
+        {
+            List<SelectListItem> array = new List<SelectListItem>();
+
+            try
+            {
+                var db = new OrdenCompraRCEntities();
+                array.Add(new SelectListItem { Text = "SELECCIONAR...", Value = "0" });
+                var _articles = db.Articles.Where(a => a.Active).OrderBy(o => o.Description).ToArray();
+
+                if (type == "article")
+                    foreach (var item in _articles)
+                        array.Add(new SelectListItem { Text = $"{item.Id}-{item.Description}", Value = item.Id.ToString() });
+
+                if (type == "model")
+                {
+                    var models = _articles.Select(s => s.Model).Distinct().OrderBy(o => o);
+                    foreach (var item in models)
+                        array.Add(new SelectListItem { Text = item, Value = item });
+                }
+
+                if (type == "mark")
+                {
+                    var marks = db.Marks.OrderBy(o => o.Description).ToArray();
+                    foreach (var mark in marks)
+                        array.Add(new SelectListItem { Text = mark.Description, Value = mark.Id.ToString() });
+                }
+            }
+            catch (Exception ex)
+            {
+                HelperUtility.SendException(ex);
+            }
+
+            return array;
+        }
     }
 }

@@ -215,13 +215,11 @@
         $("#btnSearchOrder").removeClass("disabled");
         $("#btnToggleContainers").hide();
 
-        const url = window.location.pathname
-        const id = url.substring(url.lastIndexOf('/') + 1);
-        const orderId = $("#orderId").val();
+        const orderId = new URLSearchParams(window.location.search).get('id');
 
-        if (parseInt(orderId) > 0 && (!id || id == "Formulario")) {
-            await getEmployeeDetail(orderId)
-            $("#btnSearchOrder").addClass("disabled")
+        if (orderId) {
+            $("#orderId").val(orderId);
+            await getPurchaseOrderDetail(orderId);
         }
 
         $(".datepicker").datepicker(

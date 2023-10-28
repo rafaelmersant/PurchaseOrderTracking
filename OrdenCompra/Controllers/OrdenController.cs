@@ -40,7 +40,7 @@ namespace OrdenCompra.Controllers
             return View();
         }
 
-        public ActionResult Listado()
+        public ActionResult Listado(int? articulo, string modelo, int? marca)
         {
             if (Session["role"] == null) return RedirectToAction("Index", "Home");
             if (Session["role"].ToString() != "Admin") return RedirectToAction("Index", "Home");
@@ -48,10 +48,68 @@ namespace OrdenCompra.Controllers
             try
             {
                 var db = new OrdenCompraRCEntities();
+                var viewModel = new OrderPurchaseQueryViewModel();
 
                 var ordenes = db.OrderPurchases.OrderBy(o => o.CreatedDate).ToList();
-                return View(ordenes);
 
+                if (articulo != null && articulo > 0)
+                {
+                    var articlesContainer = db.OrderPurchaseArticlesContainers.Where(a => a.ArticleId == articulo);
+                    ordenes = ordenes.Where(o => o.StatusId != 6 &&  articlesContainer.Any(a => a.OrderPurchaseId == o.OrderPurchaseId)).ToList();
+
+                    viewModel.Articles = articlesContainer
+                                           .GroupBy(a => a.ArticleId)
+                                           .Select(group => new ArticleSumarized
+                                           {
+                                               Id = group.Key,
+                                               Description = group.Select(d => d.Article.Description).FirstOrDefault(),
+                                               TotalRequested = group.Sum(a => a.QuantityRequested),
+                                               TotalFactory = group.Sum(a => a.QuantityFactory),
+                                               TotalTraffic = group.Sum(a => a.QuantityTraffic)
+                                           }).OrderBy(o => o.Description).ToList();
+                }
+
+                if (!string.IsNullOrEmpty(modelo))
+                {
+                    var articlesContainer = db.OrderPurchaseArticlesContainers.Where(a => a.Article.Model == modelo);
+                    ordenes = ordenes.Where(o => o.StatusId != 6 && articlesContainer.Any(a => a.OrderPurchaseId == o.OrderPurchaseId)).ToList();
+
+                    viewModel.Articles = articlesContainer
+                                           .GroupBy(a => a.ArticleId)
+                                           .Select(group => new ArticleSumarized
+                                           {
+                                               Id = group.Key,
+                                               Description = group.Select(d => d.Article.Description).FirstOrDefault(),
+                                               TotalRequested = group.Sum(a => a.QuantityRequested),
+                                               TotalFactory = group.Sum(a => a.QuantityFactory),
+                                               TotalTraffic = group.Sum(a => a.QuantityTraffic)
+                                           }).OrderBy(o => o.Description).ToList();
+                }
+
+                if (marca != null && marca > 0)
+                {
+                    var articlesContainer = db.OrderPurchaseArticlesContainers.Where(a => a.Article.MarkId == marca);
+                    ordenes = ordenes.Where(o => o.StatusId != 6 && articlesContainer.Any(a => a.OrderPurchaseId == o.OrderPurchaseId)).ToList();
+
+                    viewModel.Articles = articlesContainer
+                                           .GroupBy(a => a.ArticleId)
+                                           .Select(group => new ArticleSumarized
+                                           {
+                                               Id = group.Key,
+                                               Description = group.Select(d => d.Article.Description).FirstOrDefault(),
+                                               TotalRequested = group.Sum(a => a.QuantityRequested),
+                                               TotalFactory = group.Sum(a => a.QuantityFactory),
+                                               TotalTraffic = group.Sum(a => a.QuantityTraffic)
+                                           }).OrderBy(o => o.Description).ToList();
+                }
+
+                ViewBag.Articles = new ArticleController().GetArticles();
+                ViewBag.Models = new ArticleController().GetArticles("model");
+                ViewBag.Marks = new ArticleController().GetArticles("mark");
+
+                viewModel.Orders = ordenes;
+
+                return View(viewModel);
             }
             catch (Exception ex)
             {
