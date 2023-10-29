@@ -119,23 +119,32 @@
         </div>
         <div class="form-row">
             <div class="form-group mt-1 ml-2 col-lg-2 col-md-2 col-sm-12">
-                <label class="font-weight-bold">Seleccionar por:</label>
-                <select id="selectBy" class="form-control form-control-sm small-box">
+                <label class="font-weight-bold">Filtrar por:</label>
+                @*<select id="selectBy" class="form-control form-control-sm small-box">
                     <option value="Articulo">Articulos</option>
                     <option value="Contenedor">Contenedores</option>
-                </select>
+                </select>*@
             </div>
         </div>
         <div class="form-row">
-            <div class="form-group ml-2 col-lg-12 col-md-12 col-sm-12">
+            <div class="form-group ml-2 col-lg-5 col-md-5 col-sm-12">
                 <div id="articles-massive"></div>
             </div>
+
+            <div class="form-group ml-2 col-lg-3 col-md-3 col-sm-12">
+                <div id="containersMassive" class="containers-massive-style"></div>
+            </div>
+
+            <div class="form-group ml-2 col-lg-2 col-md-2 col-sm-12" id="dueDateFilterDiv" style="display: none">
+                <label for="dueDateFilter">Fecha Entrega:</label>
+                <input type="text" id="dueDateFilter" name="dueDateFilter" value="" class="form-control form-control-sm datepicker" autocomplete="off" />
+            </div>
         </div>
-        <div class="form-row">
+        @*<div class="form-row">
             <div class="form-group ml-2 col-lg-12 col-md-12 col-sm-12">
                 <div id="containersMassive"></div>
             </div>
-        </div>
+        </div>*@
         <div class="form-row mt-2">
             <div class="form-group ml-2 col-lg-6 col-md-6 col-sm-12">
                 <button class="btn btn-danger btn-sm" id="ApplyChanges">Aplicar cambios masivos</button>
@@ -406,7 +415,7 @@
         });
 
         $("#fileUploadOrder").change(function (evt) {
-            const selectedFile = this.files[0]; // Get the selected file
+            const selectedFile = this.files[0];
             console.log('selected file:', selectedFile)
             if (selectedFile) {
                 $("#FileNameOrderText").val(selectedFile.name);
@@ -460,7 +469,6 @@
                 toastr.error("No ha seleccionado ningun archivo.");
             }
         });
-
     });
 
     function deleteFile(id, fileName) {
@@ -488,8 +496,6 @@
             "type": "POST",
             "success": async function (response) {
                 if (response.result === "200") {
-                    console.log('Uploaded files:', response.message);
-
                     let docs = [];
                     for (const doc of response.message) {
                         docs.push(`<a href="/Documentos/${doc.Url}" class="text-custom">${doc.FileName}</a> 
@@ -567,6 +573,33 @@
                         $("#massive-update").fadeIn();
                         $("#upload-files").fadeIn();
 
+                        $(".article-massive-value").click(function (evt) {
+                            const articlesGroup = $(".article-massive-value");
+                            let selectedArticles = [];
+                            for (const _article of articlesGroup) {
+                                if (_article.checked)
+                                    selectedArticles.push(parseInt(_article.id.split("-")[1]));
+                            }
+
+                            console.log('selectedArticles:', selectedArticles);
+                            if (selectedArticles.length > 0) {
+                                $("#containersMassive").show();
+                                $("#dueDateFilterDiv").show();
+
+                                const filteredContainers = orderDetails.message.Containers.filter(function (container) {
+                                    return container.Details.some(function (detail) {
+                                        return selectedArticles.includes(detail.ArticleId);
+                                    })
+                                });
+
+                                console.log('filteredContainers:', filteredContainers);
+                                renderArticleContainer(filteredContainers);
+                            } else {
+                                $("#containersMassive").hide();
+                                $("#dueDateFilterDiv").hide();
+                            }
+                        });
+
                         //Navieras
                         let _navieras = @Html.Raw(Json.Encode(ViewBag.Navieras));
                         let navieras = [];
@@ -580,14 +613,7 @@
                                                                   </select>`);
 
                         //Containers
-                        let containers = [];
-                        for (const container of response.message.Containers) {
-                            containers.push(`<option value="${container.container.Id}">Contenedor ${container.container.SortIndex}</option>`)
-                        }
-                        $("#containersMassive").html(`<select name="containers-massive" id="containers-massive" class="form-control form-control-sm" multiple>
-                                                       ${containers}
-                                                      </select>`);
-
+                        //renderArticleContainer(response.message.Containers);
 
                         //Container Status
                         let _containerStatus = @Html.Raw(Json.Encode(ViewBag.ContainerStatus));
@@ -1135,6 +1161,19 @@
         </panel>`
 
         return view;
+    }
+
+    function renderArticleContainer(_containers) {
+        let containers = [];
+        for (const container of _containers) {
+            containers.push(`<option value="${container.container.Id}">Contenedor ${container.container.SortIndex}</option>`)
+        }
+        $("#containersMassive").html(`<select name="containers-massive" id="containers-massive" class="form-control form-control-sm containers-massive-style" multiple>
+                                                       ${containers}
+                                      </select>`);
+
+        const articlesDivHeight = $('#articles-massive').height();
+        $(".containers-massive-style").attr("style", `min-height: ${articlesDivHeight}px`);
     }
 
     function toggleContainer(containerIndex) {
