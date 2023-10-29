@@ -688,17 +688,26 @@ namespace OrdenCompra.Controllers
         }
 
         [HttpPost]
-        public JsonResult UpdateContainerFieldByArticle(int orderId, int articleId, string containers, string type, string value)
+        public JsonResult UpdateContainerFieldByArticle(int orderId, int articleId, string containers, string dueDate, string type, string value)
         {
             try
             {
                 if (Session["userID"] == null) throw new Exception("505: Por favor intente logearse de nuevo en el sistema. (La Sesión expiró)");
 
                 List<OrderPurchaseContainer> _containers = new List<OrderPurchaseContainer>(); 
-
+                
                 using (var db = new OrdenCompraRCEntities())
                 {
-                    if (articleId == 0)
+                    if (articleId == 0 && (string.IsNullOrEmpty(containers) || containers == "undefined") && !string.IsNullOrEmpty(dueDate))
+                    {
+                        int year = int.Parse(dueDate.Substring(6, 4));
+                        int month = int.Parse(dueDate.Substring(3, 2));
+                        int day = int.Parse(dueDate.Substring(0, 2));
+                        var dueDateFilter = new DateTime(year, month, day);
+
+                        _containers = db.OrderPurchaseContainers.Where(c => c.OrderPurchaseId == orderId && c.DueDate == dueDateFilter).ToList();
+                    }
+                    else if (articleId == 0 || !string.IsNullOrEmpty(containers))
                     {
                         List<int> containersId = new List<int>();
                         foreach (var c in containers.Split(','))
@@ -708,11 +717,31 @@ namespace OrdenCompra.Controllers
                         }
 
                         _containers = db.OrderPurchaseContainers.Where(c => containersId.Any(a => a == c.Id)).ToList();
+
+                        if (!string.IsNullOrEmpty(dueDate))
+                        {
+                            int year = int.Parse(dueDate.Substring(6, 4));
+                            int month = int.Parse(dueDate.Substring(3, 2));
+                            int day = int.Parse(dueDate.Substring(0, 2));
+                            var dueDateFilter = new DateTime(year, month, day);
+
+                            _containers = _containers.Where(c => c.DueDate == dueDateFilter).ToList();
+                        }
                     } 
                     else
                     {
                         var articlesContainers = db.OrderPurchaseArticlesContainers.Where(c => c.OrderPurchaseId == orderId && c.ArticleId == articleId);
                         _containers = db.OrderPurchaseContainers.Where(c => articlesContainers.Any(a => a.ContainerId == c.Id)).ToList();
+
+                        if (!string.IsNullOrEmpty(dueDate))
+                        {
+                            int year = int.Parse(dueDate.Substring(6, 4));
+                            int month = int.Parse(dueDate.Substring(3, 2));
+                            int day = int.Parse(dueDate.Substring(0, 2));
+                            var dueDateFilter = new DateTime(year, month, day);
+
+                            _containers = _containers.Where(c => c.DueDate == dueDateFilter).ToList();
+                        }
                     }
 
                     foreach (var container in _containers)

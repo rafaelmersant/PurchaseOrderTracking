@@ -97,6 +97,39 @@
 
         <div class="form-row">
             <div class="form-group mt-1 ml-2 col-lg-2 col-md-2 col-sm-12">
+                <label class="font-weight-bold">Filtrar por</label>
+                <select id="selectBy" class="form-control form-control-sm small-box">
+                    <option value="Articulo">Articulos</option>
+                    <option value="Contenedor">Contenedores</option>
+                    <option value="FechaEntrega">Fecha de Entrega</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group ml-2 col-lg-5 col-md-5 col-sm-12" id="articles-massive-div">
+                <label for="articles-massive">Articulos</label>
+                <div id="articles-massive"></div>
+            </div>
+
+            <div class="form-group ml-2 col-lg-3 col-md-3 col-sm-12" id="container-massive-div">
+                <label for="containersMassive">Contenedores</label>
+                <div id="containersMassive" class="containers-massive-style"></div>
+            </div>
+
+            <div class="form-group ml-2 col-lg-2 col-md-2 col-sm-12" id="due-date-filter-div" style="display: none">
+                <label for="dueDateFilter">Fecha Entrega</label>
+                <input type="text" id="dueDateFilter" name="dueDateFilter" value="" class="form-control form-control-sm datepicker" autocomplete="off" />
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="mt-1 ml-2 col-lg-12 col-md-12 col-sm-12">
+                <label class="font-weight-bold">Campos disponibles para actualizar</label>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group mt-1 ml-2 col-lg-2 col-md-2 col-sm-12">
                 <label for="manufacturingDateMassive">Fecha Fabricación:</label>
                 <input type="text" id="manufacturingDateMassive" name="manufacturingDateMassive" value="" class="form-control form-control-sm datepicker" autocomplete="off" />
             </div>
@@ -117,38 +150,11 @@
                 <div id="container-estatus-massive-div"></div>
             </div>
         </div>
-        <div class="form-row">
-            <div class="form-group mt-1 ml-2 col-lg-2 col-md-2 col-sm-12">
-                <label class="font-weight-bold">Filtrar por:</label>
-                @*<select id="selectBy" class="form-control form-control-sm small-box">
-                    <option value="Articulo">Articulos</option>
-                    <option value="Contenedor">Contenedores</option>
-                </select>*@
-            </div>
-        </div>
-        <div class="form-row">
-            <div class="form-group ml-2 col-lg-5 col-md-5 col-sm-12">
-                <div id="articles-massive"></div>
-            </div>
 
-            <div class="form-group ml-2 col-lg-3 col-md-3 col-sm-12">
-                <div id="containersMassive" class="containers-massive-style"></div>
-            </div>
-
-            <div class="form-group ml-2 col-lg-2 col-md-2 col-sm-12" id="dueDateFilterDiv" style="display: none">
-                <label for="dueDateFilter">Fecha Entrega:</label>
-                <input type="text" id="dueDateFilter" name="dueDateFilter" value="" class="form-control form-control-sm datepicker" autocomplete="off" />
-            </div>
-        </div>
-        @*<div class="form-row">
-            <div class="form-group ml-2 col-lg-12 col-md-12 col-sm-12">
-                <div id="containersMassive"></div>
-            </div>
-        </div>*@
         <div class="form-row mt-2">
-            <div class="form-group ml-2 col-lg-6 col-md-6 col-sm-12">
+            <div class="form-group ml-2 col-3" style="max-width: 230px">
                 <button class="btn btn-danger btn-sm" id="ApplyChanges">Aplicar cambios masivos</button>
-                <span id="waitingIndicatorMassive" class="spinner-border text-danger float-left" style="margin-right: 5px; display: none"></span>
+                <span id="waitingIndicatorMassive" class="spinner-border text-danger float-right" style="margin-right: 5px; display: none"></span>
             </div>
         </div>
     </section>
@@ -160,7 +166,6 @@
 
         <div class="form-row">
             <div class="form-group mt-1 ml-2 col-lg-2 col-md-2 col-sm-12">
-                @*<label for="fileUpload">Buscar archivo</label>*@
                 <input type="file" class="form-control-file" id="fileUploadOrder" name="file" style="display: none">
             </div>
         </div>
@@ -212,9 +217,10 @@
 }
 
 <script type="text/javascript">
+    var orderDetails;
 
     $(document).ready(async function () {
-        $("#containersMassive").hide();
+        $("#container-massive-div").hide();
         $("#massive-update").hide();
         $("#upload-files").hide();
         $("#massive-update .form-row").fadeOut();
@@ -259,6 +265,11 @@
         $("#btnSearchOrder").click(async function (e) {
             e.preventDefault();
 
+            //var currentURL = window.location.href;
+            //var url = new URL(currentURL);
+            //url.searchParams.delete('id');
+            //window.history.replaceState({}, '', url);
+
             const orderId = $("#orderId").val();
 
             if (orderId) {
@@ -273,6 +284,7 @@
             const dueDateMassive = $("#dueDateMassive").val();
             const manufacturingDateMassive = $("#manufacturingDateMassive").val();
             const BLMassive = $("#BLMassive").val();
+            const dueDateFilter = $("#dueDateFilter").val();
             const navieraMassive = $("#navieraMassive").val();
             const statusMassive = $("#statusMassive").val();
             const containers = $("#containers-massive").val();
@@ -287,20 +299,20 @@
             if (await confirm(`Esta seguro que desea aplicar los cambios masivos?`)) {
                 $("#waitingIndicatorMassive").show();
 
-                const data = $("#selectBy").val() === "Articulo" ? $(".article-massive-value") : [{ id: 0, checked: true }];
+                const data = $("#selectBy").val() === "Articulo" && !containers? $(".article-massive-value") : [{ id: 0, checked: true }];
 
                 for (const item of data) {
                     let articleId = 0;
                     const orderId = $("#orderId").val();
 
-                    if ($("#selectBy").val() === "Articulo")
+                    if ($("#selectBy").val() === "Articulo" && !containers)
                         articleId = item.id.split("-")[1];
 
                     if (item.checked) {
 
                         if (dueDateMassive) {
                             await $.ajax({
-                                "url": `/Orden/UpdateContainerFieldByArticle?orderId=${orderId}&articleId=${articleId}&containers=${containers}&type=DueDate&value=${dueDateMassive}`,
+                                "url": `/Orden/UpdateContainerFieldByArticle?orderId=${orderId}&articleId=${articleId}&containers=${containers}&dueDate=${dueDateFilter}&type=DueDate&value=${dueDateMassive}`,
                                 "type": "POST",
                                 "success": async function (response) {
                                     console.log('response:', response);
@@ -311,7 +323,7 @@
 
                         if (manufacturingDateMassive) {
                             await $.ajax({
-                                "url": `/Orden/UpdateContainerFieldByArticle?orderId=${orderId}&articleId=${articleId}&containers=${containers}&type=ManufacturingDate&value=${manufacturingDateMassive}`,
+                                "url": `/Orden/UpdateContainerFieldByArticle?orderId=${orderId}&articleId=${articleId}&containers=${containers}&dueDate=${dueDateFilter}&type=ManufacturingDate&value=${manufacturingDateMassive}`,
                                 "type": "POST",
                                 "success": async function (response) {
                                     console.log('response:', response);
@@ -322,7 +334,7 @@
 
                         if (BLMassive) {
                             await $.ajax({
-                                "url": `/Orden/UpdateContainerFieldByArticle?orderId=${orderId}&articleId=${articleId}&containers=${containers}&type=BL&value=${BLMassive}`,
+                                "url": `/Orden/UpdateContainerFieldByArticle?orderId=${orderId}&articleId=${articleId}&containers=${containers}&dueDate=${dueDateFilter}&type=BL&value=${BLMassive}`,
                                 "type": "POST",
                                 "success": async function (response) {
                                     console.log('response:', response);
@@ -333,7 +345,7 @@
 
                         if (navieraMassive) {
                             await $.ajax({
-                                "url": `/Orden/UpdateContainerFieldByArticle?orderId=${orderId}&articleId=${articleId}&containers=${containers}&type=Naviera&value=${navieraMassive}`,
+                                "url": `/Orden/UpdateContainerFieldByArticle?orderId=${orderId}&articleId=${articleId}&containers=${containers}&dueDate=${dueDateFilter}&type=Naviera&value=${navieraMassive}`,
                                 "type": "POST",
                                 "success": async function (response) {
                                     console.log('response:', response);
@@ -344,7 +356,7 @@
 
                         if (statusMassive) {
                             await $.ajax({
-                                "url": `/Orden/UpdateContainerFieldByArticle?orderId=${orderId}&articleId=${articleId}&containers=${containers}&type=Status&value=${statusMassive}`,
+                                "url": `/Orden/UpdateContainerFieldByArticle?orderId=${orderId}&articleId=${articleId}&containers=${containers}&dueDate=${dueDateFilter}&type=Status&value=${statusMassive}`,
                                 "type": "POST",
                                 "success": async function (response) {
                                     console.log('response:', response);
@@ -354,6 +366,14 @@
                         }
                     }
                 }
+
+                //clean fields
+                $("#dueDateMassive").val('');
+                $("#manufacturingDateMassive").val('');
+                $("#BLMassive").val('');
+                $("#dueDateFilter").val('');
+                $("#navieraMassive").val('');
+                $("#statusMassive").val('');
             }
 
             if (!updated) {
@@ -365,7 +385,7 @@
                     $("#waitingIndicatorMassive").hide();
                     toastr.success("Cambios aplicados con exito!");
                     $("#btnSearchOrder").click();
-                },4000)
+                },3000)
             }
         })
 
@@ -405,12 +425,24 @@
         });
 
         $("#selectBy").on("change", function (evt) {
+            $("#articles-massive-div").hide();
+            $("#container-massive-div").hide();
+            $("#due-date-filter-div").hide();
+
             if (this.value === "Articulo") {
-                $("#articles-massive").show();
-                $("#containersMassive").hide();
-            } else {
-                $("#articles-massive").hide();
-                $("#containersMassive").show();
+                $("#articles-massive-div").show();
+            }
+
+            if (this.value === "Contenedor") {
+                renderArticleContainer(orderDetails.message.Containers);
+                $("#container-massive-div").show();
+
+                for (let item of $(".article-massive-value"))
+                    item.checked = false;
+            }
+
+            if (this.value === "FechaEntrega") {
+                $("#due-date-filter-div").show();
             }
         });
 
@@ -498,15 +530,15 @@
                 if (response.result === "200") {
                     let docs = [];
                     for (const doc of response.message) {
-                        docs.push(`<a href="/Documentos/${doc.Url}" class="text-custom">${doc.FileName}</a> 
+                        docs.push(`<a href="/Documentos/${doc.Url}" class="text-custom">${doc.FileName}</a>
                                    <span class='fa fa-trash text-custom h6' style='cursor: pointer;' onclick="deleteFile(${doc.Id}, '${doc.FileName}')" title="Eliminar"> </span> <br/>`);
                     }
 
                     $("#uploaded-files").html(`<span class="mt-2"> <strong>Archivos adjuntos:</strong> </span><br/>`);
                     $("#uploaded-files").append(docs);
 
-                    if (!docs.length) 
-                        $("#uploaded-files").html("");    
+                    if (!docs.length)
+                        $("#uploaded-files").html("");
                 }
             }
         });
@@ -514,7 +546,6 @@
 
     function getPurchaseOrderDetail(orderId) {
         console.log('SEARCH ORDER ID:', orderId);
-        var orderDetails;
 
         $("#provider").val("");
         $("#requestedDate").html("");
@@ -583,8 +614,8 @@
 
                             console.log('selectedArticles:', selectedArticles);
                             if (selectedArticles.length > 0) {
-                                $("#containersMassive").show();
-                                $("#dueDateFilterDiv").show();
+                                $("#container-massive-div").show();
+                                $("#due-date-filter-div").show();
 
                                 const filteredContainers = orderDetails.message.Containers.filter(function (container) {
                                     return container.Details.some(function (detail) {
@@ -592,11 +623,10 @@
                                     })
                                 });
 
-                                console.log('filteredContainers:', filteredContainers);
                                 renderArticleContainer(filteredContainers);
                             } else {
-                                $("#containersMassive").hide();
-                                $("#dueDateFilterDiv").hide();
+                                $("#container-massive-div").hide();
+                                $("#due-date-filter-div").hide();
                             }
                         });
 

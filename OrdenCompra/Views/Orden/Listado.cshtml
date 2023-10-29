@@ -145,6 +145,7 @@
                             Estatus
                         </th>
                         <th></th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -152,8 +153,8 @@
                     {
                         var redirectURL = System.Web.HttpContext.Current.Request.Url.GetLeftPart(UriPartial.Authority) + $"/Orden/Index?id={item.OrderPurchaseId}";
 
-                        <tr onclick="window.open('@redirectURL', '_blank');" style="cursor: pointer;" title="Click para ver detalle" onmouseover="this.style.opacity = 0.8; this.style.fontSize = '14px';" onmouseout="this.style.opacity = 1; this.style.fontSize='13px';">
-                            <td>@item.OrderPurchaseId</td>
+                        <tr>
+                            <td onclick="window.open('@redirectURL', '_blank');" style="cursor: pointer;" title="Click para ver detalle" onmouseover="this.style.opacity = 0.8; this.style.fontSize = '14px';" onmouseout="this.style.opacity = 1; this.style.fontSize='13px';">@item.OrderPurchaseId</td>
                             <td>@item.Provider.ProviderName</td>
                             <td class="articles-details" style="display: none">
                                 @foreach (var article in item.OrderPurchaseArticlesContainers.Select(s => new { s.ArticleId, s.Article.Description }).Distinct().OrderBy(o => o.Description).ToList())
@@ -166,6 +167,11 @@
                             <td align="center">
                                 <a class="btn btn-sm btn-danger" href="javascript:void(0)" onclick="deleteOrder(@item.OrderPurchaseId)" title="Eliminar">
                                     <i class="fa fa-remove"></i>
+                                </a>
+                            </td>
+                            <td align="center">
+                                <a class="btn btn-sm btn-danger" href="javascript:void(0)" onclick="window.open('@redirectURL', '_blank');" style="cursor: pointer;" title="Click para ver detalle">
+                                    <i class="fa fa-search"></i>
                                 </a>
                             </td>
                         </tr>
