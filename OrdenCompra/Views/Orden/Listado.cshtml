@@ -46,22 +46,21 @@
             </h6>
         </div>
 
-        <section id="massive-update" class="bg-light pb-2 mb-3">
+        <section class="bg-light pb-2 mb-1">
             <div class="bg-light-gray text-secondary panel-custom border">
-                <h6 id="title-massive" class="panel-title" style="cursor: pointer;">+ Filtro avanzado</h6>
+                <h6 class="panel-title">Filtro avanzado</h6>
             </div>
 
-            <div class="form-row">
+            <div class="form-row filter-container">
                 <div class="form-group mt-1 ml-2 col-lg-4 col-md-4 col-sm-12">
                     <label for="orderDate">Articulos</label><br />
-                    @*<input type="text" id="article-type" name="article-type" value="" class="form-control form-control-sm" />*@
                     @Html.DropDownList("articleId", new SelectList(ViewBag.Articles, "Value", "Text"), new
                      {
                          @class = "form-control form-control-sm small-box searchable-dropdown",
                          @style = "border: 1px solid lightgray; color: gray;"
                      })
                 </div>
-                <div class="form-group mt-1 col-lg-3 col-md-3 col-sm-12">
+                <div class="form-group mt-1 ml-2 col-lg-3 col-md-3 col-sm-12">
                     <label for="orderDate">Modelos</label>
                     @Html.DropDownList("modelId", new SelectList(ViewBag.Models, "Value", "Text"), new
                      {
@@ -69,7 +68,7 @@
                          @style = "border: 1px solid lightgray; color: gray;"
                      })
                 </div>
-                <div class="form-group mt-1 col-lg-3 col-md-3 col-sm-12">
+                <div class="form-group mt-1 ml-2 col-lg-3 col-md-3 col-sm-12">
                     <label for="orderDate">Marcas</label>
                     @Html.DropDownList("markId", new SelectList(ViewBag.Marks, "Value", "Text"), new
                      {
@@ -79,7 +78,7 @@
                 </div>
             </div>
 
-            <span class="mt-2 ml-2 mb-2 text-custom" id="show-articles" onclick="toggleArticles();" style="cursor: pointer;">Mostrar columna de articulos</span>
+            <span class="mt-2 ml-2 mb-1 text-custom" id="show-articles" onclick="toggleArticles();" style="cursor: pointer;">Mostrar columna de articulos</span>
         </section>
 
         @if (Model.Articles != null)
@@ -204,8 +203,6 @@
     }
 
     $(document).ready(function () {
-        console.log('sumarized:', @ViewBag.ArticlesSumarized);
-
         const articleId = new URLSearchParams(window.location.search).get('articulo');
         if (articleId)
             $("#articleId").val(articleId);
@@ -217,7 +214,7 @@
         const markId = new URLSearchParams(window.location.search).get('marca');
         if (markId)
             $("#markId").val(markId);
-
+            
         $("#articleId").select2();
         $("#modelId").select2();
         $("#markId").select2();
