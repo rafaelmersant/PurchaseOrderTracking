@@ -141,6 +141,8 @@ namespace OrdenCompra.Controllers
                         {
                             try
                             {
+                                if (__article.ItemArray[0].ToString().Substring(0, 1) == "3") continue; //Ignore this kind of article
+
                                 int articleCode = int.Parse(__article.ItemArray[0].ToString());
                                 int markId = int.Parse(__article.ItemArray[2].ToString());
                                 decimal stockMinimum = string.IsNullOrEmpty(__article.ItemArray[4].ToString()) ? 0M : decimal.Parse(__article.ItemArray[4].ToString());
@@ -155,9 +157,9 @@ namespace OrdenCompra.Controllers
                                     db.Articles.Add(new Article
                                     {
                                         Id = articleCode,
-                                        Description = __article.ItemArray[1].ToString(),
+                                        Description = __article.ItemArray[1].ToString().Trim(),
                                         MarkId = markId,
-                                        Model = __article.ItemArray[3].ToString(),
+                                        Model = __article.ItemArray[3].ToString().Trim(),
                                         QuantityMinStock = stockMinimum,
                                         QuantityMaxPerContainer = maxPerContainer,
                                         QuantityTraffic = 0,

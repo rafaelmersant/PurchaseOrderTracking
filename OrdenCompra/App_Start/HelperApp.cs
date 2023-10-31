@@ -28,13 +28,14 @@ namespace OrdenCompra.App_Start
                     db.Articles.Add(new Article()
                     {
                         Id = int.Parse(article.ItemArray[0].ToString()),
-                        Description = article.ItemArray[1].ToString(),
+                        Description = article.ItemArray[1].ToString().Trim(),
                         MarkId = int.Parse(article.ItemArray[3].ToString()),
-                        Model = article.ItemArray[4].ToString(),
+                        Model = article.ItemArray[4].ToString().Trim(),
                         InventoryStock = _inventoryStock,
                         QuantityMaxPerContainer = _maxPerContainer,
                         AddedBy = 1,
-                        AddedDate = DateTime.Now
+                        AddedDate = DateTime.Now,
+                        Active = true
                     });
                     db.SaveChanges();
                 }
@@ -43,6 +44,34 @@ namespace OrdenCompra.App_Start
             {
                HelperUtility.SendException(ex);
             }
+        }
+
+        public static Article AddMissingArticle(int articleId)
+        {
+            Article _article = null;
+
+            try
+            {
+                using (var db = new OrdenCompraRCEntities())
+                {
+                    _article = db.Articles.FirstOrDefault(a => a.Id == articleId);
+                    if (_article == null)
+                    {
+                        var __article = GetArticleById(articleId);
+                        if (__article != null && __article.Tables.Count > 0 && __article.Tables[0].Rows.Count > 0)
+                        {
+                            AddNewArticle(__article.Tables[0].Rows[0]);
+                            _article = db.Articles.FirstOrDefault(a => a.Id == articleId);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                HelperUtility.SendException(ex, $"ArticleId: {articleId}");
+            }
+
+            return _article;
         }
 
         public static void SaveTimeLineOrder(int orderId, string source, string comment, int userLogged)

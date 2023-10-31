@@ -230,6 +230,8 @@ namespace OrdenCompra.Controllers
 
         private void PopulateOrderPurchaseDetailRequest(DataSet orderDetail, int orderId)
         {
+            int articleId = 0;
+
             try
             {
                 if (orderDetail.Tables.Count == 0) return;
@@ -247,10 +249,11 @@ namespace OrdenCompra.Controllers
                     var _container = db.OrderPurchaseContainers.Add(orderPurchaseContainer);
                     db.SaveChanges();
 
-                    List<OrderPurchaseArticlesContainer> articles = new List<OrderPurchaseArticlesContainer>();
+                    //List<OrderPurchaseArticlesContainer> articles = new List<OrderPurchaseArticlesContainer>();
 
                     foreach (DataRow item in orderDetail.Tables[0].Rows)
                     {
+                        articleId = int.Parse(item.ItemArray[1].ToString());
                         DateTime? orderDate = GetDateFromAS400Field(item.ItemArray[2].ToString());
 
                         decimal quantityRequested = string.IsNullOrEmpty(item.ItemArray[4].ToString()) ? 0M : decimal.Parse(item.ItemArray[4].ToString());
@@ -259,31 +262,37 @@ namespace OrdenCompra.Controllers
                         decimal quantityLeft = string.IsNullOrEmpty(item.ItemArray[7].ToString()) ? 0M : decimal.Parse(item.ItemArray[7].ToString());
                         decimal quantityAduana = string.IsNullOrEmpty(item.ItemArray[8].ToString()) ? 0M : decimal.Parse(item.ItemArray[8].ToString());
 
-                        articles.Add(new OrderPurchaseArticlesContainer
+                        var _article = HelperApp.AddMissingArticle(articleId);
+                        if (_article != null)
                         {
-                            ContainerId = _container.Id,
-                            AddedDate = DateTime.Now,
-                            OrderPurchaseId = int.Parse(item.ItemArray[0].ToString()),
-                            ArticleId = int.Parse(item.ItemArray[1].ToString()),
-                            QuantityRequested = quantityRequested,
-                            QuantityFactory = quantityFactory,
-                            QuantityTraffic = quantityTraffic, 
-                            QuantityLeft = quantityLeft,
-                            QuantityAduana = quantityAduana,
-                            Price = decimal.Parse(item.ItemArray[9].ToString())
-                        });
+                            db.OrderPurchaseArticlesContainers.Add(new OrderPurchaseArticlesContainer
+                            {
+                                ContainerId = _container.Id,
+                                AddedDate = DateTime.Now,
+                                OrderPurchaseId = int.Parse(item.ItemArray[0].ToString()),
+                                ArticleId = articleId,
+                                QuantityRequested = quantityRequested,
+                                QuantityFactory = quantityFactory,
+                                QuantityTraffic = quantityTraffic,
+                                QuantityLeft = quantityLeft,
+                                QuantityAduana = quantityAduana,
+                                Price = decimal.Parse(item.ItemArray[9].ToString())
+                            });
+
+                            db.SaveChanges();
+                        }
                     }
 
-                    if (articles.Count > 0)
-                    {
-                        db.OrderPurchaseArticlesContainers.AddRange(articles);
-                        db.SaveChanges();
-                    }
+                    //if (articles.Count > 0)
+                    //{
+                    //    db.OrderPurchaseArticlesContainers.AddRange(articles);
+                    //    db.SaveChanges();
+                    //}
                 }
             }
             catch (Exception ex)
             {
-                HelperUtility.SendException(ex, $"OrderID: {orderId}");
+                HelperUtility.SendException(ex, $"OrderID: {orderId} | articleId: {articleId}");
             }
         }
 
@@ -450,16 +459,7 @@ namespace OrdenCompra.Controllers
                     var __orderArticles = db.OrderPurchaseArticlesContainerTmps.Where(o => o.OrderPurchaseId == orderId);
                     foreach (var article in __orderArticles)
                     {
-                        var _article = articles.FirstOrDefault(a => a.Id == article.ArticleId);
-                        if (_article == null)
-                        {
-                            var __article = HelperApp.GetArticleById(article.ArticleId);
-                            if (__article != null && __article.Tables.Count > 0 && __article.Tables[0].Rows.Count > 0)
-                            {
-                                HelperApp.AddNewArticle(__article.Tables[0].Rows[0]);
-                                _article = db.Articles.FirstOrDefault(a => a.Id == article.ArticleId);
-                            }
-                        }
+                        var _article = HelperApp.AddMissingArticle(article.ArticleId);
 
                         if (_article != null)
                         {
