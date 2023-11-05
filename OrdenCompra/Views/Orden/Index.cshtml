@@ -201,6 +201,38 @@
 
     </form>
 
+    <section id="articles-sumarized" class="bg-light-gray pb-2 mb-3">
+        <div class="bg-secondary text-light panel-custom border">
+            <h6 id="title-article-sumarized" class="panel-title" style="cursor: pointer;">+ Articulos consolidados</h6>
+        </div>
+
+        <div class="mt-3 ml-2 mr-2 articles-sumarized" style="display: none">
+            <table id="articlesTable" class="table table-striped table-bordered table-condensed table-sm">
+                <thead>
+                    <tr class="bg-danger text-light">
+                        <th>
+                            Código
+                        </th>
+                        <th>
+                            Articulo
+                        </th>
+                        <th class="text-right">
+                            Cantidad Solicitada
+                        </th>
+                        <th class="text-right">
+                            Cantidad en Fabrica
+                        </th>
+                        <th class="text-right">
+                            Cantidad en Transito
+                        </th>
+                    </tr>
+                </thead>
+                <tbody id="articles-sumarized-body">
+                </tbody>
+            </table>
+        </div>
+    </section>
+
     <a href="javascript:void(0);" id="btnToggleContainers" onclick="toggleContainers()" class="text-info" style="display:none;">Reducir todos los contenedores</a>
     <section id="containers-section" style="overflow-y:scroll; overflow-x: hidden; max-height:500px; display:none;">
         <div id="containers"></div>
@@ -424,6 +456,21 @@
             }
         });
 
+        $("#title-article-sumarized").click(function (evt) {
+            evt.preventDefault();
+            evt.stopPropagation();
+
+            if ($("#title-article-sumarized").html() === "+ Articulos consolidados") {
+                $("#title-article-sumarized").html("- Articulos consolidados");
+
+                $(".articles-sumarized").fadeIn();
+            }
+            else {
+                $("#title-article-sumarized").html("+ Articulos consolidados");
+                $(".articles-sumarized").fadeOut();
+            }
+        });
+
         $("#selectBy").on("change", function (evt) {
             $("#articles-massive-div").hide();
             $("#container-massive-div").hide();
@@ -544,6 +591,24 @@
         });
     }
 
+    function renderArticlesSumarized(articles) {
+        let articlesSumarized = "";
+        for (const article of articles) {
+            const fullTraffic = article.TotalRequested === article.TotalTraffic ? "font-weight-bold" : "";
+
+            articlesSumarized += `
+                            <tr class="${fullTraffic}">
+                                <td>${article.Id}</td>
+                                <td>${article.Description}</td>
+                                <td class="text-right">${article.TotalRequested}</td>
+                                <td class="text-right">${article.TotalFactory}</td>
+                                <td class="text-right">${article.TotalTraffic}</td>
+                            </tr>`
+        }
+
+        $("#articles-sumarized-body").html(articlesSumarized);
+    }
+
     function getPurchaseOrderDetail(orderId) {
         console.log('SEARCH ORDER ID:', orderId);
 
@@ -568,6 +633,7 @@
                     $("#containers-section").show();
 
                     getUploadedFiles(orderId);
+                    renderArticlesSumarized(response.message.Articles);
 
                     console.log('ORDER CREATED!')
                     console.log(response);

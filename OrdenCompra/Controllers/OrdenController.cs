@@ -580,6 +580,7 @@ namespace OrdenCompra.Controllers
 
                     order.Header = _orderHeader;
                     order.Containers = containers;
+                    order.Articles = GetArticlesSumarized(orderId); //Articles Sumarized
 
                     return Json(new { result = "200", message = order });
                 }
@@ -590,6 +591,33 @@ namespace OrdenCompra.Controllers
 
                 return Json(new { result = "500", message = ex.Message });
             }
+        }
+
+        private List<ArticleSumarized> GetArticlesSumarized(int orderId)
+        {
+            try
+            {
+                using (var db = new OrdenCompraRCEntities())
+                {
+                    var articlesContainer = db.OrderPurchaseArticlesContainers.Where(a => a.OrderPurchaseId == orderId);
+                    return articlesContainer
+                                .GroupBy(a => a.ArticleId)
+                                .Select(group => new ArticleSumarized
+                                {
+                                    Id = group.Key,
+                                    Description = group.Select(d => d.Article.Description).FirstOrDefault(),
+                                    TotalRequested = group.Sum(a => a.QuantityRequested),
+                                    TotalFactory = group.Sum(a => a.QuantityFactory),
+                                    TotalTraffic = group.Sum(a => a.QuantityTraffic)
+                                }).OrderBy(o => o.Description).ToList();
+                }
+            }
+            catch (Exception ex)
+            {
+                HelperUtility.SendException(ex);
+            }
+
+            return new List<ArticleSumarized>();
         }
 
         [HttpPost]

@@ -16,6 +16,7 @@ namespace OrdenCompra.ViewModels
     {
         public GetPurchaseOrderHeader_Result Header { get; set; }
         public List<OrderPurchaseContainerViewModel> Containers { get; set; }
+        public List<ArticleSumarized> Articles { get; set; }
     }
 
     public class OrderPurchaseQueryViewModel
