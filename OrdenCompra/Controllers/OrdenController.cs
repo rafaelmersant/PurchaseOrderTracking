@@ -699,6 +699,8 @@ namespace OrdenCompra.Controllers
 
                             container.BL = value;
                             db.SaveChanges();
+
+                            UpdateContainerField(container.Id, "Status", "2");
                         }
                     }
 
@@ -716,24 +718,32 @@ namespace OrdenCompra.Controllers
         }
 
         [HttpPost]
-        public JsonResult UpdateContainerFieldByArticle(int orderId, int articleId, string containers, string dueDate, string type, string value)
+        public JsonResult UpdateContainerFieldByArticle(int orderId, int articleId, string containers, string dueDate, string bl, string type, string value)
         {
             try
             {
                 if (Session["userID"] == null) throw new Exception("505: Por favor intente logearse de nuevo en el sistema. (La Sesión expiró)");
+                bool updated = false;
 
                 List<OrderPurchaseContainer> _containers = new List<OrderPurchaseContainer>(); 
                 
                 using (var db = new OrdenCompraRCEntities())
                 {
-                    if (articleId == 0 && (string.IsNullOrEmpty(containers) || containers == "undefined") && !string.IsNullOrEmpty(dueDate))
+                    if (articleId == 0 && (string.IsNullOrEmpty(containers) || containers == "undefined") && (!string.IsNullOrEmpty(dueDate) || !string.IsNullOrEmpty(bl)))
                     {
-                        int year = int.Parse(dueDate.Substring(6, 4));
-                        int month = int.Parse(dueDate.Substring(3, 2));
-                        int day = int.Parse(dueDate.Substring(0, 2));
-                        var dueDateFilter = new DateTime(year, month, day);
+                        if (string.IsNullOrEmpty(bl))
+                        {
+                            int year = int.Parse(dueDate.Substring(6, 4));
+                            int month = int.Parse(dueDate.Substring(3, 2));
+                            int day = int.Parse(dueDate.Substring(0, 2));
+                            var dueDateFilter = new DateTime(year, month, day);
 
-                        _containers = db.OrderPurchaseContainers.Where(c => c.OrderPurchaseId == orderId && c.DueDate == dueDateFilter).ToList();
+                            _containers = db.OrderPurchaseContainers.Where(c => c.OrderPurchaseId == orderId && c.DueDate == dueDateFilter).ToList();
+                        } 
+                        else
+                        {
+                            _containers = db.OrderPurchaseContainers.Where(c => c.OrderPurchaseId == orderId && c.BL == bl).ToList();
+                        }
                     }
                     else if (articleId == 0 || !string.IsNullOrEmpty(containers))
                     {
@@ -775,10 +785,12 @@ namespace OrdenCompra.Controllers
                     foreach (var container in _containers)
                     {
                         UpdateContainerField(container.Id, type, value);
+                        updated = true;
                     }
                 }
 
-                return Json(new { result = "200", message = "success" });
+                if (updated)
+                    return Json(new { result = "200", message = "success" });
             }
             catch (Exception ex)
             {
@@ -786,6 +798,8 @@ namespace OrdenCompra.Controllers
 
                 return Json(new { result = "500", message = ex.Message });
             }
+
+            return Json(new { result = "404", message = "notFound" });
         }
 
         [HttpPost]

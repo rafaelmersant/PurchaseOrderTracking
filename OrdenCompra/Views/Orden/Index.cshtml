@@ -102,6 +102,7 @@
                     <option value="Articulo">Articulos</option>
                     <option value="Contenedor">Contenedores</option>
                     <option value="FechaEntrega">Fecha de Entrega</option>
+                    <option value="BL">BL</option>
                 </select>
             </div>
         </div>
@@ -119,6 +120,11 @@
             <div class="form-group ml-2 col-lg-2 col-md-2 col-sm-12" id="due-date-filter-div" style="display: none">
                 <label for="dueDateFilter">Fecha Entrega</label>
                 <input type="text" id="dueDateFilter" name="dueDateFilter" value="" class="form-control form-control-sm datepicker" autocomplete="off" />
+            </div>
+
+            <div class="form-group ml-2 col-lg-2 col-md-2 col-sm-12" id="bl-filter-div" style="display: none">
+                <label for="blFilter">Entrar el BL</label>
+                <input type="text" id="blFilter" name="blFilter" value="" class="form-control form-control-sm" autocomplete="off" />
             </div>
         </div>
 
@@ -201,7 +207,7 @@
 
     </form>
 
-    <section id="articles-sumarized" class="bg-light-gray pb-2 mb-3">
+    <section id="articles-sumarized" class="bg-light-gray pb-2 mb-3" style="display: none">
         <div class="bg-secondary text-light panel-custom border">
             <h6 id="title-article-sumarized" class="panel-title" style="cursor: pointer;">+ Articulos consolidados</h6>
         </div>
@@ -317,16 +323,18 @@
             const manufacturingDateMassive = $("#manufacturingDateMassive").val();
             const BLMassive = $("#BLMassive").val();
             const dueDateFilter = $("#dueDateFilter").val();
+            const blFilter = $("#blFilter").val();
             const navieraMassive = $("#navieraMassive").val();
             const statusMassive = $("#statusMassive").val();
             const containers = $("#containers-massive").val();
 
-            if (!dueDateMassive && !manufacturingDateMassive && !BLMassive && !navieraMassive && !statusMassive) {
+            if (!dueDateMassive && !manufacturingDateMassive && !BLMassive && !navieraMassive && !statusMassive && !blFilter) {
                 toastr.error("Debe digitar un valor para aplicar cambios masivos.");
                 return false;
             }
 
             let updated = false;
+            let attempt = false;
 
             if (await confirm(`Esta seguro que desea aplicar los cambios masivos?`)) {
                 $("#waitingIndicatorMassive").show();
@@ -344,55 +352,70 @@
 
                         if (dueDateMassive) {
                             await $.ajax({
-                                "url": `/Orden/UpdateContainerFieldByArticle?orderId=${orderId}&articleId=${articleId}&containers=${containers}&dueDate=${dueDateFilter}&type=DueDate&value=${dueDateMassive}`,
+                                "url": `/Orden/UpdateContainerFieldByArticle?orderId=${orderId}&articleId=${articleId}&containers=${containers}&dueDate=${dueDateFilter}&bl=${blFilter}&type=DueDate&value=${dueDateMassive}`,
                                 "type": "POST",
                                 "success": async function (response) {
                                     console.log('response:', response);
-                                    updated = true;
+                                    if (response.result === "200")
+                                        updated = true;
+
+                                    attempt = true;
                                 }
                             });
                         }
 
                         if (manufacturingDateMassive) {
                             await $.ajax({
-                                "url": `/Orden/UpdateContainerFieldByArticle?orderId=${orderId}&articleId=${articleId}&containers=${containers}&dueDate=${dueDateFilter}&type=ManufacturingDate&value=${manufacturingDateMassive}`,
+                                "url": `/Orden/UpdateContainerFieldByArticle?orderId=${orderId}&articleId=${articleId}&containers=${containers}&dueDate=${dueDateFilter}&bl=${blFilter}&type=ManufacturingDate&value=${manufacturingDateMassive}`,
                                 "type": "POST",
                                 "success": async function (response) {
                                     console.log('response:', response);
-                                    updated = true;
+                                    if (response.result === "200")
+                                        updated = true;
+
+                                    attempt = true;
                                 }
                             });
                         }
 
                         if (BLMassive) {
                             await $.ajax({
-                                "url": `/Orden/UpdateContainerFieldByArticle?orderId=${orderId}&articleId=${articleId}&containers=${containers}&dueDate=${dueDateFilter}&type=BL&value=${BLMassive}`,
+                                "url": `/Orden/UpdateContainerFieldByArticle?orderId=${orderId}&articleId=${articleId}&containers=${containers}&dueDate=${dueDateFilter}&bl=${blFilter}&type=BL&value=${BLMassive}`,
                                 "type": "POST",
                                 "success": async function (response) {
                                     console.log('response:', response);
-                                    updated = true;
+                                    if (response.result === "200")
+                                        updated = true;
+
+                                    attempt = true;
                                 }
                             });
                         }
 
                         if (navieraMassive) {
                             await $.ajax({
-                                "url": `/Orden/UpdateContainerFieldByArticle?orderId=${orderId}&articleId=${articleId}&containers=${containers}&dueDate=${dueDateFilter}&type=Naviera&value=${navieraMassive}`,
+                                "url": `/Orden/UpdateContainerFieldByArticle?orderId=${orderId}&articleId=${articleId}&containers=${containers}&dueDate=${dueDateFilter}&bl=${blFilter}&type=Naviera&value=${navieraMassive}`,
                                 "type": "POST",
                                 "success": async function (response) {
                                     console.log('response:', response);
-                                    updated = true;
+                                    if (response.result === "200")
+                                        updated = true;
+
+                                    attempt = true;
                                 }
                             });
                         }
 
                         if (statusMassive) {
                             await $.ajax({
-                                "url": `/Orden/UpdateContainerFieldByArticle?orderId=${orderId}&articleId=${articleId}&containers=${containers}&dueDate=${dueDateFilter}&type=Status&value=${statusMassive}`,
+                                "url": `/Orden/UpdateContainerFieldByArticle?orderId=${orderId}&articleId=${articleId}&containers=${containers}&dueDate=${dueDateFilter}&bl=${blFilter}&type=Status&value=${statusMassive}`,
                                 "type": "POST",
                                 "success": async function (response) {
                                     console.log('response:', response);
-                                    updated = true;
+                                    if (response.result === "200")
+                                        updated = true;
+
+                                    attempt = true;
                                 }
                             });
                         }
@@ -407,16 +430,21 @@
                 $("#navieraMassive").val('');
                 $("#statusMassive").val('');
             }
-
-            if (!updated) {
-                toastr.error("Debe seleccionar al menos un articulo para aplicar los cambios.");
+            console.log('updated:', updated, "|attempt:", attempt)
+            if (!updated && !attempt) {
+                toastr.error("Debe seleccionar al menos un articulo o especificar un valor para aplicar cambios.");
                 $("#waitingIndicatorMassive").hide();
             }
             else {
                 setTimeout(() => {
                     $("#waitingIndicatorMassive").hide();
-                    toastr.success("Cambios aplicados con exito!");
-                    $("#btnSearchOrder").click();
+
+                    if (updated) {
+                        toastr.success("Cambios aplicados con exito!");
+                        $("#btnSearchOrder").click();
+                    } else {
+                        toastr.error("Ningún dato fue actualizado favor verifique el filtro que esta aplicando.");
+                    }
                 },3000)
             }
         })
@@ -475,6 +503,7 @@
             $("#articles-massive-div").hide();
             $("#container-massive-div").hide();
             $("#due-date-filter-div").hide();
+            $("#bl-filter-div").hide();
 
             if (this.value === "Articulo") {
                 $("#articles-massive-div").show();
@@ -490,6 +519,10 @@
 
             if (this.value === "FechaEntrega") {
                 $("#due-date-filter-div").show();
+            }
+
+            if (this.value === "BL") {
+                $("#bl-filter-div").show();
             }
         });
 
@@ -624,6 +657,10 @@
         $("#btnSearchOrder").hide();
         $("#btnToggleContainers").hide();
 
+        $("#massive-update").hide();
+        $("#upload-files").hide();
+        $("#articles-sumarized").hide();
+
          $.ajax({
             "url": `/Orden/GetPurchaseOrder?orderId=${orderId}`,
             "type": "POST",
@@ -631,7 +668,7 @@
                 if (response.result === "200") {
                     $("#btn-detail").show();
                     $("#containers-section").show();
-
+                    
                     getUploadedFiles(orderId);
                     renderArticlesSumarized(response.message.Articles);
 
@@ -669,6 +706,7 @@
 
                         $("#massive-update").fadeIn();
                         $("#upload-files").fadeIn();
+                        $("#articles-sumarized").fadeIn();
 
                         $(".article-massive-value").click(function (evt) {
                             const articlesGroup = $(".article-massive-value");
@@ -1262,14 +1300,26 @@
     function renderArticleContainer(_containers) {
         let containers = [];
         for (const container of _containers) {
-            containers.push(`<option value="${container.container.Id}">Contenedor ${container.container.SortIndex}</option>`)
+            let articles = "";
+
+            if ($("#selectBy").val() === "Contenedor") {
+                for (const article of container.Details) {
+                    articles += ` | ${article.Model}`;
+                }
+            }
+
+            containers.push(`<option value="${container.container.Id}">Contenedor ${container.container.SortIndex} ${articles}</option>`)
         }
         $("#containersMassive").html(`<select name="containers-massive" id="containers-massive" class="form-control form-control-sm containers-massive-style" multiple>
                                                        ${containers}
                                       </select>`);
 
         const articlesDivHeight = $('#articles-massive').height();
-        $(".containers-massive-style").attr("style", `min-height: ${articlesDivHeight}px`);
+        $(".containers-massive-style").attr("style", `min-height: ${articlesDivHeight}px;`);
+
+        if ($("#selectBy").val() === "Contenedor")
+            $(".containers-massive-style").attr("style", `min-width: 800px !important;`);
+
     }
 
     function toggleContainer(containerIndex) {
