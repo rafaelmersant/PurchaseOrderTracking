@@ -55,7 +55,7 @@ namespace OrdenCompra.Controllers
                 if (articulo != null && articulo > 0)
                 {
                     var articlesContainer = db.OrderPurchaseArticlesContainers.Where(a => a.ArticleId == articulo);
-                    ordenes = ordenes.Where(o => o.StatusId != 6 &&  articlesContainer.Any(a => a.OrderPurchaseId == o.OrderPurchaseId)).ToList();
+                    ordenes = ordenes.Where(o => o.StatusId != 6 && articlesContainer.Any(a => a.OrderPurchaseId == o.OrderPurchaseId)).ToList();
 
                     viewModel.Articles = articlesContainer
                                            .GroupBy(a => a.ArticleId)
@@ -65,7 +65,8 @@ namespace OrdenCompra.Controllers
                                                Description = group.Select(d => d.Article.Description).FirstOrDefault(),
                                                TotalRequested = group.Sum(a => a.QuantityRequested),
                                                TotalFactory = group.Sum(a => a.QuantityFactory),
-                                               TotalTraffic = group.Sum(a => a.QuantityTraffic)
+                                               TotalTraffic = group.Sum(a => a.QuantityTraffic),
+                                               TotalReceived = group.Sum(a => a.QuantityReceived)
                                            }).OrderBy(o => o.Description).ToList();
                 }
 
@@ -82,7 +83,8 @@ namespace OrdenCompra.Controllers
                                                Description = group.Select(d => d.Article.Description).FirstOrDefault(),
                                                TotalRequested = group.Sum(a => a.QuantityRequested),
                                                TotalFactory = group.Sum(a => a.QuantityFactory),
-                                               TotalTraffic = group.Sum(a => a.QuantityTraffic)
+                                               TotalTraffic = group.Sum(a => a.QuantityTraffic),
+                                               TotalReceived = group.Sum(a => a.QuantityReceived)
                                            }).OrderBy(o => o.Description).ToList();
                 }
 
@@ -99,7 +101,8 @@ namespace OrdenCompra.Controllers
                                                Description = group.Select(d => d.Article.Description).FirstOrDefault(),
                                                TotalRequested = group.Sum(a => a.QuantityRequested),
                                                TotalFactory = group.Sum(a => a.QuantityFactory),
-                                               TotalTraffic = group.Sum(a => a.QuantityTraffic)
+                                               TotalTraffic = group.Sum(a => a.QuantityTraffic),
+                                               TotalReceived = group.Sum(a => a.QuantityReceived)
                                            }).OrderBy(o => o.Description).ToList();
                 }
 
@@ -123,7 +126,7 @@ namespace OrdenCompra.Controllers
         {
             var db = new OrdenCompraRCEntities();
             var changes = db.TimeLineOrders.Where(o => o.OrderId == id).OrderByDescending(o => o.CreatedDate).ToList();
-            
+
             return View(changes);
         }
 
@@ -205,14 +208,14 @@ namespace OrdenCompra.Controllers
                 {
                     DateTime? dateDMA = GetDateFromAS400Field(_orderHeader.ItemArray[1].ToString());
                     DateTime? dateRequest = GetDateFromAS400Field(_orderHeader.ItemArray[4].ToString());
-                    
+
                     OrderPurchase orderPurchase = new OrderPurchase()
                     {
                         CreatedBy = int.Parse(Session["userID"].ToString()),
                         CreatedDate = DateTime.Now,
                         DateDMA = dateDMA,
                         DateRequest = dateRequest,
-                        ProviderId = int.Parse(_orderHeader.ItemArray[2].ToString().Substring(4,5)),
+                        ProviderId = int.Parse(_orderHeader.ItemArray[2].ToString().Substring(4, 5)),
                         Observation = _orderHeader.ItemArray[3].ToString(),
                         OrderPurchaseId = int.Parse(_orderHeader.ItemArray[0].ToString()),
                         StatusId = 1
@@ -245,11 +248,9 @@ namespace OrdenCompra.Controllers
                         StatusId = 1,
                         SortIndex = 1
                     };
-                    
+
                     var _container = db.OrderPurchaseContainers.Add(orderPurchaseContainer);
                     db.SaveChanges();
-
-                    //List<OrderPurchaseArticlesContainer> articles = new List<OrderPurchaseArticlesContainer>();
 
                     foreach (DataRow item in orderDetail.Tables[0].Rows)
                     {
@@ -274,7 +275,7 @@ namespace OrdenCompra.Controllers
                                 QuantityRequested = quantityRequested,
                                 QuantityFactory = quantityFactory,
                                 QuantityTraffic = quantityTraffic,
-                                QuantityLeft = quantityLeft,
+                                QuantityReceived = quantityLeft,
                                 QuantityAduana = quantityAduana,
                                 Price = decimal.Parse(item.ItemArray[9].ToString())
                             });
@@ -282,12 +283,6 @@ namespace OrdenCompra.Controllers
                             db.SaveChanges();
                         }
                     }
-
-                    //if (articles.Count > 0)
-                    //{
-                    //    db.OrderPurchaseArticlesContainers.AddRange(articles);
-                    //    db.SaveChanges();
-                    //}
                 }
             }
             catch (Exception ex)
@@ -298,43 +293,50 @@ namespace OrdenCompra.Controllers
 
         private void PopulateOrderPurchaseDetailReceived(DataSet orderDetail)
         {
+            int orderId = 0;
+            int sequenceId = 0;
+            int articleId = 0;
+
             try
             {
                 if (orderDetail.Tables.Count == 0) return;
 
                 using (var db = new OrdenCompraRCEntities())
                 {
-                    List<OrderPurchaseDeliver> items = new List<OrderPurchaseDeliver>();
-                    var orderId = int.Parse(orderDetail.Tables[0].Rows[0].ItemArray[0].ToString());
+                    orderId = int.Parse(orderDetail.Tables[0].Rows[0].ItemArray[1].ToString());
 
                     var _container = db.OrderPurchaseContainers.FirstOrDefault(o => o.OrderPurchaseId == orderId);
 
                     foreach (DataRow item in orderDetail.Tables[0].Rows)
                     {
-                        DateTime? receivedDate = GetDateFromAS400Field(item.ItemArray[3].ToString());
+                        sequenceId = int.Parse(item.ItemArray[0].ToString());
+                        articleId = int.Parse(item.ItemArray[2].ToString());
+                        DateTime? receivedDate = GetDateFromAS400Field(item.ItemArray[4].ToString());
 
-                        decimal quantityReceived = string.IsNullOrEmpty(item.ItemArray[4].ToString()) ? 0M : decimal.Parse(item.ItemArray[4].ToString());
-                        
-                        items.Add(new OrderPurchaseDeliver
+                        decimal quantityReceived = string.IsNullOrEmpty(item.ItemArray[5].ToString()) ? 0M : decimal.Parse(item.ItemArray[5].ToString());
+
+                        var existingRecord = db.OrderPurchaseDelivers
+                                               .FirstOrDefault(r => r.OrderPurchaseId == orderId && r.SequenceId == sequenceId && r.ArticleId == articleId);
+                        if (existingRecord == null)
                         {
-                            ContainerId = _container != null ? _container.Id : 0,
-                            OrderPurchaseId = orderId,
-                            ArticleId = int.Parse(item.ItemArray[1].ToString()),
-                            QuantityDelivered = quantityReceived,
-                            ReceivedDate = receivedDate
-                        });
-                    }
+                            db.OrderPurchaseDelivers.Add(new OrderPurchaseDeliver
+                            {
+                                ContainerId = _container != null ? _container.Id : 0,
+                                SequenceId = int.Parse(item.ItemArray[0].ToString()),
+                                OrderPurchaseId = orderId,
+                                ArticleId = articleId,
+                                QuantityDelivered = quantityReceived,
+                                ReceivedDate = receivedDate
+                            });
 
-                    if (items.Count > 0)
-                    {
-                        db.OrderPurchaseDelivers.AddRange(items);
-                        db.SaveChanges();
+                            db.SaveChanges();
+                        }
                     }
                 }
             }
             catch (Exception ex)
             {
-                HelperUtility.SendException(ex);
+                HelperUtility.SendException(ex, $"OrderID: {orderId} | SequenceId: {sequenceId}");
             }
         }
 
@@ -357,7 +359,7 @@ namespace OrdenCompra.Controllers
                             OrderPurchaseId = __article__.OrderPurchaseId,
                             Price = __article__.Price,
                             QuantityRequested = __article__.QuantityRequested,
-                            QuantityLeft = __article__.QuantityLeft,
+                            QuantityReceived = __article__.QuantityReceived,
                             QuantityTraffic = __article__.QuantityTraffic,
                             QuantityFactory = __article__.QuantityFactory,
                             QuantityAduana = __article__.QuantityAduana,
@@ -388,7 +390,7 @@ namespace OrdenCompra.Controllers
 
                         if (_article.Mix)
                             _container = db.OrderPurchaseContainers.Where(c => c.OrderPurchaseId == orderId).OrderByDescending(o => o.SortIndex).FirstOrDefault();
-                        
+
                         if (_container == null || !_article.Mix)
                         {
                             _container = db.OrderPurchaseContainers.Add(new OrderPurchaseContainer
@@ -419,7 +421,7 @@ namespace OrdenCompra.Controllers
                                 QuantityRequested = quantityToDeduct,
                                 QuantityFactory = orderArticle.QuantityFactory,
                                 QuantityTraffic = orderArticle.QuantityTraffic,
-                                QuantityLeft = orderArticle.QuantityLeft,
+                                QuantityReceived = orderArticle.QuantityReceived,
                                 QuantityAduana = orderArticle.QuantityAduana,
                                 Price = orderArticle.Price
                             });
@@ -507,7 +509,7 @@ namespace OrdenCompra.Controllers
                             QuantityRequested = remainQuantity,
                             QuantityFactory = remainQuantity,
                             QuantityTraffic = 0,
-                            QuantityLeft = 0,
+                            QuantityReceived = 0,
                             QuantityAduana = 0,
                             Price = detail.Price
                         });
@@ -548,11 +550,18 @@ namespace OrdenCompra.Controllers
 
                     //Create other containers if apply
                     CreateRequiredContainersForOrder(orderId);
+                }
 
-                    //Take order detail received from AS400
-                    //var __orderDetailReceived = Helper.GetOrderPurchaseDetailReceived(orderId);
-                    //PopulateOrderPurchaseDetailReceived(__orderDetailReceived);
-
+                //Take order detail received from AS400
+                try
+                {
+                    var __orderDetailReceived = HelperApp.GetOrderPurchaseDetailReceived(orderId);
+                    PopulateOrderPurchaseDetailReceived(__orderDetailReceived);
+                    UpdateArticlesReceived(orderId);
+                }
+                catch (Exception ex)
+                {
+                    HelperUtility.SendException(ex);
                 }
 
                 OrderPurchaseViewModel order = new OrderPurchaseViewModel();
@@ -620,6 +629,59 @@ namespace OrdenCompra.Controllers
             return new List<ArticleSumarized>();
         }
 
+        private void UpdateArticlesReceived(int orderId)
+        {
+            try
+            {
+                using (var db = new OrdenCompraRCEntities())
+                {
+                    var articlesReceived = db.OrderPurchaseDelivers.Where(d => d.OrderPurchaseId == orderId);
+                    var result = articlesReceived
+                                .GroupBy(a => a.ArticleId)
+                                .Select(group => new
+                                {
+                                    Id = group.Key,
+                                    TotalReceived = group.Sum(a => a.QuantityDelivered)
+                                }).ToList();
+
+                    foreach (var article in result)
+                    {
+                        var QuantityReceivedTotal = article.TotalReceived;
+                        var _articleContainer = db.OrderPurchaseArticlesContainers.Where(c => c.ArticleId == article.Id && c.OrderPurchaseId == orderId)
+                                                                                  .OrderBy(o => o.OrderPurchaseContainer.SortIndex)
+                                                                                  .ToList();
+                        foreach (var item in _articleContainer)
+                        {
+                            decimal quantityToDeliver = QuantityReceivedTotal >= item.QuantityRequested ? item.QuantityRequested : QuantityReceivedTotal;
+
+                            if (quantityToDeliver > 0)
+                            {
+                                item.QuantityReceived = quantityToDeliver;
+
+                                if (item.QuantityRequested == item.QuantityReceived)
+                                {
+                                    item.QuantityTraffic = 0;
+                                    item.QuantityFactory = 0;
+
+                                    if (item.OrderPurchaseContainer.OrderPurchaseArticlesContainers.Count() == 1)
+                                        item.OrderPurchaseContainer.StatusId = 3;
+                                }
+
+                                db.SaveChanges();
+                                QuantityReceivedTotal -= quantityToDeliver;
+                            }
+                            else
+                                break;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                HelperUtility.SendException(ex);
+            }
+        }
+
         [HttpPost]
         public JsonResult UpdateContainerField(int containerId, string type, string value)
         {
@@ -630,8 +692,8 @@ namespace OrdenCompra.Controllers
                 using (var db = new OrdenCompraRCEntities())
                 {
                     var container = db.OrderPurchaseContainers.FirstOrDefault(c => c.Id == containerId);
-                    if (container == null) return Json(new { result = "404", message = "Contenedor no encontrado." });
-                    if (string.IsNullOrEmpty(value)) return Json(new { result = "404", message = "Valor no encontrado." });
+                    if (container == null) return Json(new { result = "500", message = "Contenedor no encontrado." });
+                    if (string.IsNullOrEmpty(value)) return Json(new { result = "500", message = "Valor no encontrado." });
 
                     if (type == "ManufacturingDate")
                     {
@@ -640,7 +702,7 @@ namespace OrdenCompra.Controllers
                         int day = int.Parse(value.Substring(0, 2));
                         var newDate = new DateTime(year, month, day);
 
-                        HelperApp.SaveTimeLineOrder(container.OrderPurchaseId, "Fecha de Fabricación", 
+                        HelperApp.SaveTimeLineOrder(container.OrderPurchaseId, "Fecha de Fabricación",
                                                     $"Fue cambiada la fecha de fabricación {container.ManufacturingDate} por {newDate} para el contenedor No. {container.SortIndex}",
                                                     int.Parse(Session["userID"].ToString()));
 
@@ -669,17 +731,17 @@ namespace OrdenCompra.Controllers
                         var newStatus = db.StatusContainers.FirstOrDefault(s => s.Id == _newStatus).Description;
 
                         container.StatusId = _newStatus;
-                        
+
                         HelperApp.SaveTimeLineOrder(container.OrderPurchaseId, "Estatus de Contenedor",
                                                     $"Fue cambiado el estatus {oldStatus} por {newStatus} para el contenedor No. {container.SortIndex}",
                                                     int.Parse(Session["userID"].ToString()));
                     }
-                        
+
                     if (type == "Naviera")
                     {
                         var _newNaviera = int.Parse(value);
-                        
-                        var oldNaviera = container.ShippingCompanyId != null? db.ShippingCompanies.FirstOrDefault(s => s.Id == container.ShippingCompanyId).Description : "";
+
+                        var oldNaviera = container.ShippingCompanyId != null ? db.ShippingCompanies.FirstOrDefault(s => s.Id == container.ShippingCompanyId).Description : "";
                         var newNaviera = db.ShippingCompanies.FirstOrDefault(s => s.Id == _newNaviera).Description;
 
                         container.ShippingCompanyId = _newNaviera;
@@ -725,8 +787,8 @@ namespace OrdenCompra.Controllers
                 if (Session["userID"] == null) throw new Exception("505: Por favor intente logearse de nuevo en el sistema. (La Sesión expiró)");
                 bool updated = false;
 
-                List<OrderPurchaseContainer> _containers = new List<OrderPurchaseContainer>(); 
-                
+                List<OrderPurchaseContainer> _containers = new List<OrderPurchaseContainer>();
+
                 using (var db = new OrdenCompraRCEntities())
                 {
                     if (articleId == 0 && (string.IsNullOrEmpty(containers) || containers == "undefined") && (!string.IsNullOrEmpty(dueDate) || !string.IsNullOrEmpty(bl)))
@@ -739,7 +801,7 @@ namespace OrdenCompra.Controllers
                             var dueDateFilter = new DateTime(year, month, day);
 
                             _containers = db.OrderPurchaseContainers.Where(c => c.OrderPurchaseId == orderId && c.DueDate == dueDateFilter).ToList();
-                        } 
+                        }
                         else
                         {
                             _containers = db.OrderPurchaseContainers.Where(c => c.OrderPurchaseId == orderId && c.BL == bl).ToList();
@@ -765,7 +827,7 @@ namespace OrdenCompra.Controllers
 
                             _containers = _containers.Where(c => c.DueDate == dueDateFilter).ToList();
                         }
-                    } 
+                    }
                     else
                     {
                         var articlesContainers = db.OrderPurchaseArticlesContainers.Where(c => c.OrderPurchaseId == orderId && c.ArticleId == articleId);
@@ -812,8 +874,8 @@ namespace OrdenCompra.Controllers
                 using (var db = new OrdenCompraRCEntities())
                 {
                     var order = db.OrderPurchases.FirstOrDefault(o => o.OrderPurchaseId == orderId);
-                    if (order== null) return Json(new { result = "404", message = "Orden no encontrada." });
-                    
+                    if (order == null) return Json(new { result = "500", message = "Orden no encontrada." });
+
                     if (type == "orderDate")
                     {
                         int year = int.Parse(value.Substring(6, 4));
@@ -841,7 +903,7 @@ namespace OrdenCompra.Controllers
                                                     $"Fue cambiado el estatus {oldStatus} por {newStatus} para la orden No. {orderId}",
                                                     int.Parse(Session["userID"].ToString()));
                     }
-                        
+
                     db.SaveChanges();
                 }
 
@@ -878,7 +940,7 @@ namespace OrdenCompra.Controllers
                         string comment = $"Fue actualizada la cantidad para el articulo {article.Id}-{article.Description}";
 
                         if (detail.QuantityRequested != newQuantity)
-                            comment += $" cantidad anterior: { detail.QuantityRequested} | nueva cantidad: { newQuantity}";
+                            comment += $" cantidad anterior: {detail.QuantityRequested} | nueva cantidad: {newQuantity}";
 
                         if (detail.QuantityTraffic != traffic)
                         {
@@ -909,10 +971,10 @@ namespace OrdenCompra.Controllers
 
                         var newContainer = db.OrderPurchaseContainers.Where(c => c.OrderPurchaseId == detail.OrderPurchaseId).OrderByDescending(o => o.SortIndex).FirstOrDefault();
                         HelperApp.SaveTimeLineOrder(detail.OrderPurchaseId, "Nuevo contenedor",
-                                                    $"Fue creado un nuevo contenedor el No. {newContainer.SortIndex}", 
+                                                    $"Fue creado un nuevo contenedor el No. {newContainer.SortIndex}",
                                                     int.Parse(Session["userID"].ToString()));
                     }
-                        
+
                     if (!string.IsNullOrEmpty(BL))
                     {
                         var container = db.OrderPurchaseContainers.FirstOrDefault(o => o.Id == detail.ContainerId);
@@ -951,10 +1013,10 @@ namespace OrdenCompra.Controllers
                 using (var db = new OrdenCompraRCEntities())
                 {
                     var container = db.OrderPurchaseContainers.FirstOrDefault(c => c.Id == containerId);
-                    if (container == null) return Json(new { result = "404", message = "Contenedor no encontrado." });
+                    if (container == null) return Json(new { result = "500", message = "Contenedor no encontrado." });
 
                     var article = db.OrderPurchaseArticlesContainers.FirstOrDefault(a => a.ArticleId == articleId);
-                    if (article == null) return Json(new { result = "404", message = "Articulo no encontrado." });
+                    if (article == null) return Json(new { result = "500", message = "Articulo no encontrado." });
 
                     db.OrderPurchaseArticlesContainers.Add(new OrderPurchaseArticlesContainer
                     {
@@ -965,7 +1027,7 @@ namespace OrdenCompra.Controllers
                         QuantityRequested = quantity,
                         QuantityFactory = 0,
                         QuantityTraffic = 0,
-                        QuantityLeft = 0,
+                        QuantityReceived = 0,
                         QuantityAduana = 0,
                         Price = article != null ? article.Price : 0,
                     });
@@ -1063,7 +1125,7 @@ namespace OrdenCompra.Controllers
             {
                 HelperUtility.SendException(ex, $"orderID: {orderId}");
 
-                return Json(new { result = "500", message = ex.Message});
+                return Json(new { result = "500", message = ex.Message });
             }
         }
 
@@ -1106,5 +1168,32 @@ namespace OrdenCompra.Controllers
             return Json(new { result = "404", message = "El archivo no fue encontrado." });
         }
 
+        [HttpPost]
+        public JsonResult UpdateOrders()
+        {
+            try
+            {
+                if (Session["userID"] == null) throw new Exception("505: Por favor intente logearse de nuevo en el sistema. (La Sesión expiró)");
+
+                using (var db = new OrdenCompraRCEntities())
+                {
+                    var orders = db.OrderPurchases.Where(o => o.StatusId != 5 && o.StatusId != 6).ToList();
+
+                    foreach (var order in orders)
+                    {
+                        UpdateArticlesReceived(order.OrderPurchaseId);
+                    }
+                }
+
+                return Json(new { result = "200", message = "Ordenes actualizadas con exito!" });
+            }
+            catch (Exception ex)
+            {
+                HelperUtility.SendException(ex);
+
+                return Json(new { result = "500", message = ex.Message });
+            }
+
+        }
     }
 }

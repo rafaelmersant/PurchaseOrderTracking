@@ -90,7 +90,7 @@
         </form>
     </section>
 
-    <section id="massive-update" class="bg-light-gray pb-2 mb-3" style="display:none;">
+    <section id="massive-update" class="bg-light pb-2 mb-3" style="display:none;">
         <div class="bg-secondary text-light panel-custom border">
             <h6 id="title-massive" class="panel-title" style="cursor: pointer;">+ Actualización masiva de datos en contenedores</h6>
         </div>
@@ -165,7 +165,7 @@
         </div>
     </section>
 
-    <form id="upload-files" class="bg-light-gray pb-2 mb-3" enctype="multipart/form-data" style="display:none;">
+    <form id="upload-files" class="bg-light pb-2 mb-3" enctype="multipart/form-data" style="display:none;">
         <div class="bg-secondary text-light panel-custom border">
             <h6 id="title-upload" class="panel-title" style="cursor: pointer;">+ Subir documentos (archivos)</h6>
         </div>
@@ -207,7 +207,7 @@
 
     </form>
 
-    <section id="articles-sumarized" class="bg-light-gray pb-2 mb-3" style="display: none">
+    <section id="articles-sumarized" class="bg-light pb-2 mb-3" style="display: none">
         <div class="bg-secondary text-light panel-custom border">
             <h6 id="title-article-sumarized" class="panel-title" style="cursor: pointer;">+ Articulos consolidados</h6>
         </div>
@@ -230,6 +230,9 @@
                         </th>
                         <th class="text-right">
                             Cantidad en Transito
+                        </th>
+                        <th class="text-right">
+                            Cantidad Recibida
                         </th>
                     </tr>
                 </thead>
@@ -636,6 +639,7 @@
                                 <td class="text-right">${article.TotalRequested}</td>
                                 <td class="text-right">${article.TotalFactory}</td>
                                 <td class="text-right">${article.TotalTraffic}</td>
+                                <td class="text-right">${article.TotalReceived}</td>
                             </tr>`
         }
 
@@ -1193,10 +1197,13 @@
                                 Inventario
                             </th>
                             <th class='text-center'>
+                                Fabrica
+                            </th>
+                            <th class='text-center'>
                                 Transito
                             </th>
                             <th class='text-center'>
-                                Fabrica
+                                Recibida
                             </th>
                         </tr>
                     </thead>
@@ -1235,10 +1242,13 @@
                     ${item.InventoryStock}
                 </td>
                 <td class="text-center" style='width:80px;'>
+                    <input type="text" id="article-factory-${item.Id}" name="article-factory-${item.Id}" value="${item.QuantityFactory}" class="form-control form-control-sm numericOnly quantityField" style="max-width: 100px" autocomplete="off" />
+                </td>
+                <td class="text-center" style='width:80px;'>
                     <input type="text" id="article-traffic-${item.Id}" name="article-traffic-${item.Id}" value="${item.QuantityTraffic}" class="form-control form-control-sm numericOnly quantityField" style="max-width: 100px" autocomplete="off" />
                 </td>
                 <td class="text-center" style='width:80px;'>
-                    <input type="text" id="article-factory-${item.Id}" name="article-factory-${item.Id}" value="${item.QuantityFactory}" class="form-control form-control-sm numericOnly quantityField" style="max-width: 100px" autocomplete="off" />
+                    <input type="text" id="article-received-${item.Id}" name="article-received-${item.Id}" value="${item.QuantityReceived}" class="form-control form-control-sm numericOnly quantityField" style="max-width: 100px" autocomplete="off" readonly/>
                 </td>
             </tr>`
         }
@@ -1283,7 +1293,7 @@
             </tr>`;
 
         view +=     `<tr class="bg-light">
-                        <td colspan="9">
+                        <td colspan="10">
                             <a href="javascript:void(0);" id="container-save-${container.container.Id}" class="btn btn-danger btn-sm container-save">Guardar cambios para Contener #${container.container.SortIndex}</a>
                             <a href="javascript:void(0);" id="add-article-${container.container.Id}" class="btn btn-info btn-sm add-article">Agregar articulo al contenedor #${container.container.SortIndex}</a>
                         </td>

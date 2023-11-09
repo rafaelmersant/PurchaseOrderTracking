@@ -209,7 +209,6 @@ namespace OrdenCompra.Controllers
 
                 return Json(new { result = "500", message = ex.Message });
             }
-
         }
 
         public List<SelectListItem> GetArticles(string type = "article")

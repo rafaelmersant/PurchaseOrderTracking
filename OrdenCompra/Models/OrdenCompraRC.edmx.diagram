@@ -11,9 +11,7 @@
         <EntityTypeShape EntityType="OrdenCompraRCModel.NotificationCenter" Width="1.5" PointX="8.25" PointY="7" IsExpanded="true" />
         <EntityTypeShape EntityType="OrdenCompraRCModel.NotificationGroup" Width="1.5" PointX="8.75" PointY="3.75" IsExpanded="true" />
         <EntityTypeShape EntityType="OrdenCompraRCModel.OrderPurchase" Width="1.5" PointX="3" PointY="6.5" IsExpanded="true" />
-        <EntityTypeShape EntityType="OrdenCompraRCModel.OrderPurchaseArticlesContainerTmp" Width="1.5" PointX="10.75" PointY="0.75" IsExpanded="true" />
         <EntityTypeShape EntityType="OrdenCompraRCModel.OrderPurchaseContainer" Width="1.5" PointX="5.25" PointY="7.75" IsExpanded="true" />
-        <EntityTypeShape EntityType="OrdenCompraRCModel.OrderPurchaseDeliver" Width="1.5" PointX="5.25" PointY="11.875" IsExpanded="true" />
         <EntityTypeShape EntityType="OrdenCompraRCModel.OrderPurchaseDoc" Width="1.5" PointX="0.75" PointY="11.75" IsExpanded="true" />
         <EntityTypeShape EntityType="OrdenCompraRCModel.OrderPurchaseHistory" Width="1.5" PointX="5.25" PointY="15.125" IsExpanded="true" />
         <EntityTypeShape EntityType="OrdenCompraRCModel.Provider" Width="1.5" PointX="0.75" PointY="7.75" IsExpanded="true" />
@@ -22,7 +20,6 @@
         <EntityTypeShape EntityType="OrdenCompraRCModel.StatusOrderPurchase" Width="1.5" PointX="0.75" PointY="4.75" IsExpanded="true" />
         <AssociationConnector Association="OrdenCompraRCModel.FK_OrderID_OPC" ManuallyRouted="false" />
         <AssociationConnector Association="OrdenCompraRCModel.FK_OrderPurchase" ManuallyRouted="false" />
-        <AssociationConnector Association="OrdenCompraRCModel.FK_OrderPurchase_D" ManuallyRouted="false" />
         <AssociationConnector Association="OrdenCompraRCModel.FK_OrderPurchase_H" ManuallyRouted="false" />
         <AssociationConnector Association="OrdenCompraRCModel.FK_Provider_OC" ManuallyRouted="false" />
         <AssociationConnector Association="OrdenCompraRCModel.FK_Status_OC" ManuallyRouted="false" />
@@ -32,11 +29,14 @@
         <EntityTypeShape EntityType="OrdenCompraRCModel.TimeLineOrder" Width="1.5" PointX="14.625" PointY="12" />
         <EntityTypeShape EntityType="OrdenCompraRCModel.User" Width="1.5" PointX="12.375" PointY="12" />
         <AssociationConnector Association="OrdenCompraRCModel.FK_TimeLineOrder_User" />
-        <EntityTypeShape EntityType="OrdenCompraRCModel.OrderPurchaseArticlesContainer" Width="1.5" PointX="11.25" PointY="5.25" />
+        <EntityTypeShape EntityType="OrdenCompraRCModel.OrderPurchaseArticlesContainer" Width="1.5" PointX="11.25" PointY="4.25" />
+        <EntityTypeShape EntityType="OrdenCompraRCModel.OrderPurchaseArticlesContainerTmp" Width="1.5" PointX="13.375" PointY="0.75" />
         <AssociationConnector Association="OrdenCompraRCModel.FK_Article_OPAC" />
         <AssociationConnector Association="OrdenCompraRCModel.FK_OrderPurchase_AC" />
         <AssociationConnector Association="OrdenCompraRCModel.FK_OrderPurchase_C" />
-      </Diagram>
+        <EntityTypeShape EntityType="OrdenCompraRCModel.OrderPurchaseDeliver" Width="1.5" PointX="5.25" PointY="18.125" />
+        <AssociationConnector Association="OrdenCompraRCModel.FK_OrderPurchase_D" />
+        </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>
 </edmx:Edmx>

@@ -43,6 +43,10 @@
         <div class="bg-secondary text-light panel-custom border">
             <h6 class="panel-title">
                 Listado de Ordenes
+                <span class="btn-group pull-right">
+                    <a href="javascript:void(0);" class="btn btn-danger btn-sm update-orders" style="margin-top: -7px">Actualizar Ordenes</a>
+                    <span id="waitingIndicator" class="spinner-border text-white ml-2" style="margin-top: -10px; display:none"></span>
+                </span>
             </h6>
         </div>
 
@@ -105,6 +109,9 @@
                             <th class="text-right">
                                 Cantidad en Transito
                             </th>
+                            <th class="text-right">
+                                Cantidad Recibida
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
@@ -118,6 +125,7 @@
                                 <td class="text-right">@item.TotalRequested</td>
                                 <td class="text-right">@item.TotalFactory</td>
                                 <td class="text-right">@item.TotalTraffic</td>
+                                <td class="text-right">@item.TotalReceived</td>
                             </tr>
                         }
                     </tbody>
@@ -295,6 +303,43 @@
                 window.location = '/Orden/Listado';
 
             window.location = `/Orden/Listado?marca=${evt.currentTarget.value}`;
+        });
+
+        $(".update-orders").on('click', function (evt) {
+            evt.preventDefault();
+            evt.stopPropagation();
+
+            $("#waitingIndicator").show();
+            $(".update-orders").text('Actualizando órdenes...');
+            $(".update-orders").addClass('disabled-button');
+
+            $.ajax({
+                "url": `/Orden/UpdateOrders`,
+                "type": "POST",
+                "success": async function (response) {
+                    if (response.result === "200") {
+                        console.log(response);
+                        toastr.success(`${response.message}`);
+
+                        setTimeout(() => {
+                            window.location.reload(true);
+                        }, 3000)
+                    }
+                    else {
+                        console.log(response.message);
+                        toastr.error(response.message);
+
+                        setTimeout(() => {
+                            if (response.message.includes("505"))
+                                window.location.reload(true);
+                        }, 2000);
+                    }
+
+                    $("#waitingIndicator").hide();
+                    $(".update-articles").text('Actualizar Ordenes');
+                    $(".update-articles").removeClass('disabled-button');
+                }
+            });
         });
     });
 

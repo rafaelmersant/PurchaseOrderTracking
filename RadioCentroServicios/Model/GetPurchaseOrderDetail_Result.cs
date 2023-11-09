@@ -28,7 +28,7 @@ namespace RadioCentroServicios.Model
         public string Mark { get; set; }
         public Nullable<int> MarkId { get; set; }
         public decimal QuantityRequested { get; set; }
-        public decimal QuantityLeft { get; set; }
+        public decimal QuantityReceived { get; set; }
         public decimal QuantityFactory { get; set; }
         public decimal QuantityTraffic { get; set; }
         public decimal QuantityAduana { get; set; }

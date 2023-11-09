@@ -32,5 +32,6 @@ namespace OrdenCompra.ViewModels
         public decimal TotalRequested { get; set; }
         public decimal TotalFactory { get; set; }
         public decimal TotalTraffic { get; set; }
+        public decimal TotalReceived { get; set; }
     }
 }

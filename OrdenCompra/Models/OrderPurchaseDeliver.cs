@@ -15,9 +15,10 @@ namespace OrdenCompra.Models
     public partial class OrderPurchaseDeliver
     {
         public int Id { get; set; }
+        public int SequenceId { get; set; }
         public int OrderPurchaseId { get; set; }
         public int ArticleId { get; set; }
-        public Nullable<decimal> QuantityDelivered { get; set; }
+        public decimal QuantityDelivered { get; set; }
         public Nullable<System.DateTime> ReceivedDate { get; set; }
         public int ContainerId { get; set; }
         public string BL { get; set; }

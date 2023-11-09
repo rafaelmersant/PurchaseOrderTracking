@@ -18,6 +18,7 @@ namespace RadioCentroServicios.Model
         public Article()
         {
             this.NotificationCenters = new HashSet<NotificationCenter>();
+            this.OrderPurchaseArticlesContainers = new HashSet<OrderPurchaseArticlesContainer>();
         }
     
         public int Id { get; set; }
@@ -39,5 +40,7 @@ namespace RadioCentroServicios.Model
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<NotificationCenter> NotificationCenters { get; set; }
         public virtual Mark Mark { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<OrderPurchaseArticlesContainer> OrderPurchaseArticlesContainers { get; set; }
     }
 }
