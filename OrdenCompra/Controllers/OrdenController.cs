@@ -63,6 +63,7 @@ namespace OrdenCompra.Controllers
                                            {
                                                Id = group.Key,
                                                Description = group.Select(d => d.Article.Description).FirstOrDefault(),
+                                               InventoryStock = group.Select(d => d.Article.InventoryStock).FirstOrDefault(),
                                                TotalRequested = group.Sum(a => a.QuantityRequested),
                                                TotalFactory = group.Sum(a => a.QuantityFactory),
                                                TotalTraffic = group.Sum(a => a.QuantityTraffic),
@@ -81,6 +82,7 @@ namespace OrdenCompra.Controllers
                                            {
                                                Id = group.Key,
                                                Description = group.Select(d => d.Article.Description).FirstOrDefault(),
+                                               InventoryStock = group.Select(d => d.Article.InventoryStock).FirstOrDefault(),
                                                TotalRequested = group.Sum(a => a.QuantityRequested),
                                                TotalFactory = group.Sum(a => a.QuantityFactory),
                                                TotalTraffic = group.Sum(a => a.QuantityTraffic),
@@ -99,6 +101,7 @@ namespace OrdenCompra.Controllers
                                            {
                                                Id = group.Key,
                                                Description = group.Select(d => d.Article.Description).FirstOrDefault(),
+                                               InventoryStock = group.Select(d => d.Article.InventoryStock).FirstOrDefault(),
                                                TotalRequested = group.Sum(a => a.QuantityRequested),
                                                TotalFactory = group.Sum(a => a.QuantityFactory),
                                                TotalTraffic = group.Sum(a => a.QuantityTraffic),
@@ -149,6 +152,9 @@ namespace OrdenCompra.Controllers
 
                     var ordenContainers = db.OrderPurchaseContainers.Where(o => o.OrderPurchaseId == id);
                     db.OrderPurchaseContainers.RemoveRange(ordenContainers);
+
+                    var ordenDelivery = db.OrderPurchaseDelivers.Where(o => o.OrderPurchaseId == id);
+                    db.OrderPurchaseDelivers.RemoveRange(ordenDelivery);
 
                     var ordenPurchase = db.OrderPurchases.FirstOrDefault(o => o.OrderPurchaseId == id);
                     db.OrderPurchases.Remove(ordenPurchase);
@@ -299,36 +305,39 @@ namespace OrdenCompra.Controllers
 
             try
             {
-                if (orderDetail.Tables.Count == 0) return;
+                if (orderDetail == null || orderDetail.Tables.Count == 0) return;
 
                 using (var db = new OrdenCompraRCEntities())
                 {
-                    orderId = int.Parse(orderDetail.Tables[0].Rows[0].ItemArray[1].ToString());
+                    orderId = int.Parse(orderDetail.Tables[0].Rows[0].ItemArray[0].ToString());
 
                     var _container = db.OrderPurchaseContainers.FirstOrDefault(o => o.OrderPurchaseId == orderId);
 
                     foreach (DataRow item in orderDetail.Tables[0].Rows)
                     {
-                        sequenceId = int.Parse(item.ItemArray[0].ToString());
-                        articleId = int.Parse(item.ItemArray[2].ToString());
-                        DateTime? receivedDate = GetDateFromAS400Field(item.ItemArray[4].ToString());
+                        sequenceId = 1; //int.Parse(item.ItemArray[0].ToString());
+                        articleId = int.Parse(item.ItemArray[1].ToString());
+                        //DateTime? receivedDate = GetDateFromAS400Field(item.ItemArray[4].ToString());
 
-                        decimal quantityReceived = string.IsNullOrEmpty(item.ItemArray[5].ToString()) ? 0M : decimal.Parse(item.ItemArray[5].ToString());
+                        decimal quantityReceived = string.IsNullOrEmpty(item.ItemArray[2].ToString()) ? 0M : decimal.Parse(item.ItemArray[2].ToString());
 
                         var existingRecord = db.OrderPurchaseDelivers
-                                               .FirstOrDefault(r => r.OrderPurchaseId == orderId && r.SequenceId == sequenceId && r.ArticleId == articleId);
+                                               .FirstOrDefault(r => r.OrderPurchaseId == orderId && r.ArticleId == articleId);
                         if (existingRecord == null)
                         {
                             db.OrderPurchaseDelivers.Add(new OrderPurchaseDeliver
                             {
                                 ContainerId = _container != null ? _container.Id : 0,
-                                SequenceId = int.Parse(item.ItemArray[0].ToString()),
+                                SequenceId = sequenceId,
                                 OrderPurchaseId = orderId,
                                 ArticleId = articleId,
-                                QuantityDelivered = quantityReceived,
-                                ReceivedDate = receivedDate
+                                QuantityDelivered = quantityReceived
                             });
-
+                            db.SaveChanges();
+                        } 
+                        else
+                        {
+                            existingRecord.QuantityDelivered = quantityReceived;
                             db.SaveChanges();
                         }
                     }
@@ -419,7 +428,7 @@ namespace OrdenCompra.Controllers
                                 OrderPurchaseId = orderId,
                                 ArticleId = orderArticle.ArticleId,
                                 QuantityRequested = quantityToDeduct,
-                                QuantityFactory = orderArticle.QuantityFactory,
+                                QuantityFactory = quantityToDeduct,
                                 QuantityTraffic = orderArticle.QuantityTraffic,
                                 QuantityReceived = orderArticle.QuantityReceived,
                                 QuantityAduana = orderArticle.QuantityAduana,
@@ -615,9 +624,11 @@ namespace OrdenCompra.Controllers
                                 {
                                     Id = group.Key,
                                     Description = group.Select(d => d.Article.Description).FirstOrDefault(),
+                                    InventoryStock = group.Select(d => d.Article.InventoryStock).FirstOrDefault(),
                                     TotalRequested = group.Sum(a => a.QuantityRequested),
                                     TotalFactory = group.Sum(a => a.QuantityFactory),
-                                    TotalTraffic = group.Sum(a => a.QuantityTraffic)
+                                    TotalTraffic = group.Sum(a => a.QuantityTraffic),
+                                    TotalReceived = group.Sum(a => a.QuantityReceived),
                                 }).OrderBy(o => o.Description).ToList();
                 }
             }
@@ -763,6 +774,13 @@ namespace OrdenCompra.Controllers
                             db.SaveChanges();
 
                             UpdateContainerField(container.Id, "Status", "2");
+
+                            //Update articles to Traffic quantity
+                            var articles = db.OrderPurchaseArticlesContainers.Where(c => c.ContainerId == container.Id).ToList();
+                            foreach(var item in articles)
+                            {
+                                UpdateQuantityField(item.Id, item.QuantityRequested, item.QuantityRequested, 0, "");
+                            }
                         }
                     }
 

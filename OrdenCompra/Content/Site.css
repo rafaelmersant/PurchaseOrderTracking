@@ -43,10 +43,19 @@ p {
 }
 
 .panel-custom {
-    height: 37px;
+    height: 28px;
     border: 1px solid #ededed;
     border-radius: 3px 3px 0 0;
     padding: 10px 10px;
+}
+
+.panel-custom h6 {
+    margin-top: -6px !important;
+}
+
+.panel-custom .btn {
+    height: 26px !important;
+    font-size: 0.8rem;
 }
 
 .btn-custom {
@@ -72,7 +81,13 @@ p {
 }
 
 .orden-compra input[type=text] {
-    max-height: 26px;
+    max-height: 22px;
+}
+
+.orden-compra .btn {
+    height: 26px !important;
+    font-size: 0.8rem;
+    margin-bottom: 0px !important;
 }
 
 a,
