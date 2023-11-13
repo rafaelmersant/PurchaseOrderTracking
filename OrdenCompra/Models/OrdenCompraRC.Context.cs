@@ -73,5 +73,10 @@ namespace OrdenCompra.Models
     
             return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<GetPurchaseOrderDetail_Result>("GetPurchaseOrderDetail", orderIDParameter);
         }
+    
+        public virtual ObjectResult<ReportAduana_Result> ReportAduana()
+        {
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<ReportAduana_Result>("ReportAduana");
+        }
     }
 }

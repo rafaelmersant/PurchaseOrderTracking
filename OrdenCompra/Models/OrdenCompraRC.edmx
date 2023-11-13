@@ -389,6 +389,7 @@
         <Function Name="GetPurchaseOrderHeader" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
           <Parameter Name="orderID" Type="int" Mode="In" />
         </Function>
+        <Function Name="ReportAduana" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo" />
         <EntityContainer Name="OrdenCompraRCModelStoreContainer">
           <EntitySet Name="Article" EntityType="Self.Article" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="InventoryHistory" EntityType="Self.InventoryHistory" Schema="dbo" store:Type="Tables" />
@@ -748,6 +749,7 @@
             <End Role="OrderPurchase" EntitySet="OrderPurchases" />
             <End Role="OrderPurchaseDeliver" EntitySet="OrderPurchaseDelivers" />
           </AssociationSet>
+          <FunctionImport Name="ReportAduana" ReturnType="Collection(OrdenCompraRCModel.ReportAduana_Result)" />
           </EntityContainer>
         <ComplexType Name="GetPurchaseOrderContainer_Result">
           <Property Type="Int32" Name="Id" Nullable="false" />
@@ -986,6 +988,17 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <ComplexType Name="ReportAduana_Result">
+          <Property Type="String" Name="ProviderName" Nullable="false" MaxLength="50" />
+          <Property Type="Decimal" Name="QuantityTraffic" Nullable="false" Precision="18" Scale="2" />
+          <Property Type="String" Name="ArticleDescription" Nullable="false" MaxLength="100" />
+          <Property Type="String" Name="Model" Nullable="true" MaxLength="20" />
+          <Property Type="String" Name="BL" Nullable="true" MaxLength="25" />
+          <Property Type="Int32" Name="Contenedores" Nullable="true" />
+          <Property Type="DateTime" Name="DueDate" Nullable="true" />
+          <Property Type="DateTime" Name="VenceEF" Nullable="true" />
+          <Property Type="String" Name="Naviera" Nullable="false" MaxLength="100" />
+        </ComplexType>
         </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -1294,6 +1307,21 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
+          <FunctionImportMapping FunctionImportName="ReportAduana" FunctionName="OrdenCompraRCModel.Store.ReportAduana">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="OrdenCompraRCModel.ReportAduana_Result">
+                <ScalarProperty Name="ProviderName" ColumnName="ProviderName" />
+                <ScalarProperty Name="QuantityTraffic" ColumnName="QuantityTraffic" />
+                <ScalarProperty Name="ArticleDescription" ColumnName="ArticleDescription" />
+                <ScalarProperty Name="Model" ColumnName="Model" />
+                <ScalarProperty Name="BL" ColumnName="BL" />
+                <ScalarProperty Name="Contenedores" ColumnName="Contenedores" />
+                <ScalarProperty Name="DueDate" ColumnName="DueDate" />
+                <ScalarProperty Name="VenceEF" ColumnName="VenceEF" />
+                <ScalarProperty Name="Naviera" ColumnName="Naviera" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
         </EntityContainerMapping>
       </Mapping>
     </edmx:Mappings>

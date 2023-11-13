@@ -254,6 +254,9 @@
     <Compile Include="Models\Provider.cs">
       <DependentUpon>OrdenCompraRC.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\ReportAduana_Result.cs">
+      <DependentUpon>OrdenCompraRC.tt</DependentUpon>
+    </Compile>
     <Compile Include="Models\ShippingCompany.cs">
       <DependentUpon>OrdenCompraRC.tt</DependentUpon>
     </Compile>
