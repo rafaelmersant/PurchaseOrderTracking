@@ -38,6 +38,8 @@ namespace RadioCentroServicios
                     var inventory = HelperService.GetArticlesInventory();
                     if (inventory.Tables.Count > 0 && inventory.Tables[0].Rows.Count > 0)
                     {
+                        Console.WriteLine($"Articulos a procesar: {inventory.Tables[0].Rows.Count}");
+
                         foreach (DataRow item in inventory.Tables[0].Rows)
                         {
                             try
@@ -50,6 +52,8 @@ namespace RadioCentroServicios
                                 {
                                     article.InventoryStock = quantity;
                                     db.SaveChanges();
+
+                                    Console.WriteLine($"Actualiza articulo: {article.Id} con inventario: {article.InventoryStock}");
                                 }
 
                                 db.InventoryHistories.Add(new InventoryHistory

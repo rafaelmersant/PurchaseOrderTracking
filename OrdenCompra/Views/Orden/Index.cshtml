@@ -634,7 +634,7 @@
         let articlesSumarized = "";
         for (const article of articles) {
             const fullTraffic = article.TotalRequested === article.TotalTraffic ? "font-weight-bold" : "";
-            console.log('SUMARRIZED:', article)
+            
             articlesSumarized += `
                             <tr class="${fullTraffic}">
                                 <td>${article.Id}</td>

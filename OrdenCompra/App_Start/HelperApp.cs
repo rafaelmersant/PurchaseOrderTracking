@@ -165,9 +165,10 @@ namespace OrdenCompra.App_Start
             {
                 //string sQuery = $"SELECT DPADNUMREC, DPADNUMPED, DPADNUMART, DPADFECPED, DPADFECREC, DPCANTIDAD, DPCANTFABR, " +
                 //                $"DPCANTTRAN, DPCANTPEND, DPCANTADUA, DPADPRECV1 FROM [QS36F.RCADDP10] WHERE DPADTIPTRA='R' AND DPADNUMPED = {purchaseOrderId}";
+                //string sQuery = $"SELECT H0TASACAMB, H0NUMARTIC, SUM(H0CANTPROC) H0CANTPROC FROM [QS36F.QRYRAFAEL] WHERE H0TASACAMB = {purchaseOrderId} GROUP BY H0TASACAMB, H0NUMARTIC";
 
-                string sQuery = $"SELECT H0TASACAMB, H0NUMARTIC, SUM(H0CANTPROC) H0CANTPROC FROM [QS36F.QRYRAFAEL] WHERE H0TASACAMB = {purchaseOrderId} GROUP BY H0TASACAMB, H0NUMARTIC";
-
+                string sQuery = $"SELECT H0NUMPED, H0NUMARTIC, SUM(H0CANTPROC) H0CANTPROC FROM [QS36F.QRYRAFAEL1] WHERE H0NUMPED = {purchaseOrderId} GROUP BY H0NUMPED, H0NUMARTIC";
+                
                 if (ConfigurationManager.AppSettings["EnvironmentOrdenCompra"] != "DEV")
                     sQuery = sQuery.Replace("[", "").Replace("]", "");
 

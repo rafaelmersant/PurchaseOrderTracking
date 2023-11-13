@@ -25,8 +25,10 @@ namespace OrdenCompra.Controllers
                 var db = new OrdenCompraRCEntities();
 
                 var articles = db.Articles.OrderBy(o => o.Description).ToList();
-                return View(articles);
 
+                var lastUpdateInventory = db.InventoryHistories.OrderByDescending(o => o.Date).FirstOrDefault();
+                ViewBag.LastInventoryUpdate = lastUpdateInventory != null ? lastUpdateInventory.Date.ToString("dd/MM/yyyy hh:mm tt") : "";
+                return View(articles);
             }
             catch (Exception ex)
             {

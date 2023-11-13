@@ -362,7 +362,7 @@ namespace OrdenCompra.Controllers
 
                 using (var db = new OrdenCompraRCEntities())
                 {
-                    orderId = int.Parse(orderDetail.Tables[0].Rows[0].ItemArray[0].ToString());
+                    orderId = int.Parse(orderDetail.Tables[0].Rows[0].ItemArray[0].ToString().Replace(".00", ""));
 
                     var _container = db.OrderPurchaseContainers.FirstOrDefault(o => o.OrderPurchaseId == orderId);
 

@@ -66,10 +66,10 @@
                             <td>@item.Model</td>
                             <td>@item.Size</td>
                             <td class="text-center">@(item.Mix ? "Si" : "No")</td>
-                            <td>@item.InventoryStock</td>
-                            <td>@item.QuantityMinStock</td>
-                            <td>@item.QuantityMaxPerContainer</td>
-
+                            <td>@string.Format("{0:###,##0.00}", item.InventoryStock)</td>
+                            <td>@string.Format("{0:###,##0.00}", item.QuantityMinStock)</td>
+                            <td>@string.Format("{0:###,##0.00}", item.QuantityMaxPerContainer)</td>
+                            
                             <td align="center">
                                 <a class="btn btn-sm btn-success" href="@Url.Action("Edit",new { id = @item.Id })" title="Editar">
                                     <i class="fa fa-edit"></i>
@@ -81,6 +81,10 @@
             </table>
         </div>
     </section>
+
+    <p class="mt-3">
+        <span class="text-dark">Última actualización de cantidad en Inventario para los articulos: </span> <span class="font-weight-bold text-dark">@ViewBag.LastInventoryUpdate</span>
+    </p>
 </div>
 
 @section scripts {

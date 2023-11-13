@@ -86,9 +86,9 @@
                          @style = "border: 1px solid lightgray; color: gray;"
                      })
                 </div>
-                <div class="form-group mt-1 ml-2 col-lg-1 col-md-1 col-sm-12">
+                <div class="form-group mt-1 ml-2 col-lg-2 col-md-2 col-sm-12">
                     <label for="clearFilters"></label>
-                    <button class="btn btn-danger btn-sm" id="clearFilters" style="margin-top: 6px">Limpiar filtros</button>
+                    <button class="btn btn-danger btn-sm" id="clearFilters" style="margin-top: 24px">Limpiar filtros</button>
                 </div>
             </div>
 
@@ -135,11 +135,11 @@
                             <tr class="@(fullTraffic ? "font-weight-bold" : "")">
                                 <td>@item.Id</td>
                                 <td>@item.Description</td>
-                                <td class="text-right">@item.InventoryStock</td>
-                                <td class="text-right">@item.TotalRequested</td>
-                                <td class="text-right">@item.TotalFactory</td>
-                                <td class="text-right">@item.TotalTraffic</td>
-                                <td class="text-right">@item.TotalReceived</td>
+                                <td class="text-right">@string.Format("{0:###,##0.00}", item.InventoryStock)</td>
+                                <td class="text-right">@string.Format("{0:###,##0.00}", item.TotalRequested)</td>
+                                <td class="text-right">@string.Format("{0:###,##0.00}", item.TotalFactory)</td>
+                                <td class="text-right">@string.Format("{0:###,##0.00}", item.TotalTraffic)</td>
+                                <td class="text-right">@string.Format("{0:###,##0.00}", item.TotalReceived)</td>
                             </tr>
                         }
                     </tbody>
@@ -181,7 +181,7 @@
                             <td class="articles-details" style="display: none">
                                 @foreach (var article in item.OrderPurchaseArticlesContainers.Select(s => new { s.ArticleId, s.Article.Description, s.QuantityRequested }).Distinct().OrderBy(o => o.Description).ToList())
                                 {
-                                    <span>@article.Description - (Solicitado: @string.Format("{0:###,#00.00}", article.QuantityRequested))</span><br />
+                                    <span>@article.Description - (Solicitado: @string.Format("{0:###,##0.00}", article.QuantityRequested))</span><br />
                                 }
                             </td>
                             <td class="text-center">@string.Format("{0:dd/MM/yyyy}", item.DateDMA)</td>

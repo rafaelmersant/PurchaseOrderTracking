@@ -203,7 +203,7 @@ namespace RadioCentroServicios
         {
             try
             {
-                string sQuery = $"SELECT EANUMARTIC, SUM(EAEXACTUAL) EAEXACTUAL FROM [QS36F.RCFAEA10] WHERE EASTATUS != 9 GROUP BY EANUMARTIC";
+                string sQuery = $"SELECT EANUMARTIC, SUM(EAEXACTUAL) EAEXACTUAL FROM [QS36F.RCFAEA10] WHERE EASTATUS != 9 AND SUBSTRING(EANUMARTIC,1,2) = '10' GROUP BY EANUMARTIC HAVING SUM(EAEXACTUAL) > 0";
 
                 if (ConfigurationManager.AppSettings["EnvironmentOrdenCompra"] != "DEV")
                     sQuery = sQuery.Replace("[", "").Replace("]", "");
