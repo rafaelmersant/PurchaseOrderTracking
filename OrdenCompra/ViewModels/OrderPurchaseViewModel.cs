@@ -29,6 +29,8 @@ namespace OrdenCompra.ViewModels
     {
         public int Id {get; set; }
         public string Description { get; set; }
+        public string Model { get; set; }
+        public int? Mark { get; set; }
         public decimal? InventoryStock { get; set; }
         public decimal TotalRequested { get; set; }
         public decimal TotalFactory { get; set; }

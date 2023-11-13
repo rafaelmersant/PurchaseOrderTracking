@@ -227,7 +227,8 @@ namespace OrdenCompra.Controllers
 
                 if (type == "model")
                 {
-                    var models = _articles.Select(s => s.Model).Distinct().OrderBy(o => o);
+                    var models = db.Articles.Select(s => s.Model).Distinct().OrderBy(o => o);
+                    
                     foreach (var item in models)
                         array.Add(new SelectListItem { Text = item, Value = item });
                 }
@@ -235,6 +236,7 @@ namespace OrdenCompra.Controllers
                 if (type == "mark")
                 {
                     var marks = db.Marks.OrderBy(o => o.Description).ToArray();
+
                     foreach (var mark in marks)
                         array.Add(new SelectListItem { Text = mark.Description, Value = mark.Id.ToString() });
                 }

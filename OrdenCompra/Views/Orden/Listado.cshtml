@@ -56,14 +56,20 @@
             </div>
 
             <div class="form-row filter-container">
-                <div class="form-group mt-1 ml-2 col-lg-4 col-md-4 col-sm-12">
-                    <label for="orderDate">Articulos</label><br />
-                    @Html.DropDownList("articleId", new SelectList(ViewBag.Articles, "Value", "Text"), new
-                     {
-                         @class = "form-control form-control-sm small-box searchable-dropdown",
-                         @style = "border: 1px solid lightgray; color: gray;"
-                     })
+                @*<div class="form-group mt-1 ml-2 col-lg-4 col-md-4 col-sm-12">
+            <label for="orderDate">Articulos</label><br />
+            @Html.DropDownList("articleId", new SelectList(ViewBag.Articles, "Value", "Text"), new
+             {
+                 @class = "form-control form-control-sm small-box searchable-dropdown",
+                 @style = "border: 1px solid lightgray; color: gray;"
+             })
+        </div>*@
+
+                <div class="form-group mt-1 ml-2 col-lg-3 col-md-3 col-sm-12">
+                    <label for="articulo">Articulo</label>
+                    <input type="text" id="articulo" name="articulo" value="" class="form-control" />
                 </div>
+
                 <div class="form-group mt-1 ml-2 col-lg-3 col-md-3 col-sm-12">
                     <label for="orderDate">Modelos</label>
                     @Html.DropDownList("modelId", new SelectList(ViewBag.Models, "Value", "Text"), new
@@ -79,6 +85,10 @@
                          @class = "form-control form-control-sm small-box",
                          @style = "border: 1px solid lightgray; color: gray;"
                      })
+                </div>
+                <div class="form-group mt-1 ml-2 col-lg-1 col-md-1 col-sm-12">
+                    <label for="clearFilters"></label>
+                    <button class="btn btn-danger btn-sm" id="clearFilters" style="margin-top: 6px">Limpiar filtros</button>
                 </div>
             </div>
 
@@ -221,9 +231,9 @@
     }
 
     $(document).ready(function () {
-        const articleId = new URLSearchParams(window.location.search).get('articulo');
-        if (articleId)
-            $("#articleId").val(articleId);
+        const articleParam = new URLSearchParams(window.location.search).get('articulo');
+        if (articleParam)
+            $("#articulo").val(articleParam);
 
         const modelId = new URLSearchParams(window.location.search).get('modelo');
         if (modelId)
@@ -291,22 +301,26 @@
             return this.nodeValue.replace('No data available in table', 'No existen registros para mostrar');
         });
 
-        $("#articleId").on('change', function (evt) {
-            if (evt.currentTarget.value === 0)
-                window.location = '/Orden/Listado';
-
-                window.location = `/Orden/Listado?articulo=${ evt.currentTarget.value }`;
-        });
-
         $("#modelId").on('change', function (evt) {
-            window.location = `/Orden/Listado?modelo=${evt.currentTarget.value}`;
+            const markId = new URLSearchParams(window.location.search).get('marca');
+            advancedFilter(evt.currentTarget.value, markId);
         });
 
         $("#markId").on('change', function (evt) {
-            if (evt.currentTarget.value === 0)
-                window.location = '/Orden/Listado';
+            const modelId = new URLSearchParams(window.location.search).get('modelo');
+            advancedFilter(modelId, evt.currentTarget.value);
+        });
 
-            window.location = `/Orden/Listado?marca=${evt.currentTarget.value}`;
+        $("#articulo").keyup(function (evt) {
+            if (evt.keyCode === 13)
+                advancedFilter($("#modeloId").val(), $("#markId").val());
+        });
+
+        $("#clearFilters").on('click', function (evt) {
+            evt.preventDefault();
+            evt.stopPropagation();
+
+            window.location = '/Orden/Listado';
         });
 
         $(".update-orders").on('click', function (evt) {
@@ -346,6 +360,26 @@
             });
         });
     });
+
+    function advancedFilter(modelo, marca) {
+        let url = "/Orden/Listado";
+
+        //Modelo
+        if (modelo && modelo !== 0)
+            url += `?modelo=${modelo}`;
+
+        //Marca
+        if (marca && marca !== 0)
+            url += modelo? `&marca=${marca}` : `?marca=${marca}`;
+
+        //Articulo
+        const articulo = $("#articulo").val();
+
+        if (articulo)
+            url += modelo || marca ? `&articulo=${articulo}` : `?articulo=${articulo}`;
+        
+        window.location = url;
+    }
 
     function toggleArticles() {
         if ($("#show-articles").html() === "Mostrar columna de articulos") {
