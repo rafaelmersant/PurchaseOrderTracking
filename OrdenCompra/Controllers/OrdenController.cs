@@ -677,6 +677,8 @@ namespace OrdenCompra.Controllers
                                 {
                                     Id = group.Key,
                                     Description = group.Select(d => d.Article.Description).FirstOrDefault(),
+                                    Model = group.Select(d => d.Article.Model).FirstOrDefault(),
+                                    Mark = group.Select(d => d.Article.MarkId).FirstOrDefault(),
                                     InventoryStock = group.Select(d => d.Article.InventoryStock).FirstOrDefault(),
                                     TotalRequested = group.Sum(a => a.QuantityRequested),
                                     TotalFactory = group.Sum(a => a.QuantityFactory),

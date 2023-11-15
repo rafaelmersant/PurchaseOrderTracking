@@ -3,10 +3,12 @@ using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
+using System.Data.Entity.Validation;
 using System.Data.Odbc;
 using System.Linq;
 using System.Net;
 using System.Net.Mail;
+using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Web;
 using System.Web.Mvc;
@@ -90,6 +92,20 @@ namespace OrdenCompra.App_Start
                     });
                     db.SaveChanges();
                 }
+            }
+            catch (DbEntityValidationException e)
+            {
+                string validErrors = "";
+                foreach (var eve in e.EntityValidationErrors)
+                {
+                    foreach (var ve in eve.ValidationErrors)
+                    {
+                        validErrors += string.Format("- Property: \"{0}\", Error: \"{1}\" <br/>", ve.PropertyName, ve.ErrorMessage);
+                    }
+                }
+                HelperUtility.SendException(e, "details:" + validErrors);
+
+                HelperUtility.SendRawEmail("rafaelmersant@sagaracorp.com", "SaveTimeLineOrder Error", "ValidErrors:" + validErrors + "| Details:" + e.ToString());
             }
             catch (Exception ex)
             {

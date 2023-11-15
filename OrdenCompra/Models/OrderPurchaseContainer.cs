@@ -30,6 +30,7 @@ namespace OrdenCompra.Models
         public string BL { get; set; }
         public Nullable<System.DateTime> DueDate { get; set; }
         public int SortIndex { get; set; }
+        public string Situation { get; set; }
     
         public virtual OrderPurchase OrderPurchase { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]

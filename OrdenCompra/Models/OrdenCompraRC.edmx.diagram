@@ -11,7 +11,6 @@
         <EntityTypeShape EntityType="OrdenCompraRCModel.NotificationCenter" Width="1.5" PointX="8.25" PointY="7" IsExpanded="true" />
         <EntityTypeShape EntityType="OrdenCompraRCModel.NotificationGroup" Width="1.5" PointX="8.75" PointY="3.75" IsExpanded="true" />
         <EntityTypeShape EntityType="OrdenCompraRCModel.OrderPurchase" Width="1.5" PointX="3" PointY="6.5" IsExpanded="true" />
-        <EntityTypeShape EntityType="OrdenCompraRCModel.OrderPurchaseContainer" Width="1.5" PointX="5.25" PointY="7.75" IsExpanded="true" />
         <EntityTypeShape EntityType="OrdenCompraRCModel.OrderPurchaseDoc" Width="1.5" PointX="0.75" PointY="11.75" IsExpanded="true" />
         <EntityTypeShape EntityType="OrdenCompraRCModel.OrderPurchaseHistory" Width="1.5" PointX="5.25" PointY="15.125" IsExpanded="true" />
         <EntityTypeShape EntityType="OrdenCompraRCModel.Provider" Width="1.5" PointX="0.75" PointY="7.75" IsExpanded="true" />
@@ -19,7 +18,6 @@
         <EntityTypeShape EntityType="OrdenCompraRCModel.StatusContainer" Width="1.5" PointX="9.75" PointY="11.75" IsExpanded="true" />
         <EntityTypeShape EntityType="OrdenCompraRCModel.StatusOrderPurchase" Width="1.5" PointX="0.75" PointY="4.75" IsExpanded="true" />
         <AssociationConnector Association="OrdenCompraRCModel.FK_OrderID_OPC" ManuallyRouted="false" />
-        <AssociationConnector Association="OrdenCompraRCModel.FK_OrderPurchase" ManuallyRouted="false" />
         <AssociationConnector Association="OrdenCompraRCModel.FK_OrderPurchase_H" ManuallyRouted="false" />
         <AssociationConnector Association="OrdenCompraRCModel.FK_Provider_OC" ManuallyRouted="false" />
         <AssociationConnector Association="OrdenCompraRCModel.FK_Status_OC" ManuallyRouted="false" />
@@ -33,9 +31,11 @@
         <EntityTypeShape EntityType="OrdenCompraRCModel.OrderPurchaseArticlesContainerTmp" Width="1.5" PointX="13.375" PointY="0.75" />
         <AssociationConnector Association="OrdenCompraRCModel.FK_Article_OPAC" />
         <AssociationConnector Association="OrdenCompraRCModel.FK_OrderPurchase_AC" />
-        <AssociationConnector Association="OrdenCompraRCModel.FK_OrderPurchase_C" />
         <EntityTypeShape EntityType="OrdenCompraRCModel.OrderPurchaseDeliver" Width="1.5" PointX="5.25" PointY="18.125" />
         <AssociationConnector Association="OrdenCompraRCModel.FK_OrderPurchase_D" />
+        <EntityTypeShape EntityType="OrdenCompraRCModel.OrderPurchaseContainer" Width="1.5" PointX="5.25" PointY="7.75" />
+        <AssociationConnector Association="OrdenCompraRCModel.FK_OrderPurchase" />
+        <AssociationConnector Association="OrdenCompraRCModel.FK_OrderPurchase_C" />
         </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

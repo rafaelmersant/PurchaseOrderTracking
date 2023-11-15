@@ -14,7 +14,9 @@ namespace OrdenCompra.Models
     public partial class ReportAduana_Result
     {
         public string ProviderName { get; set; }
+        public decimal QuantityRequested { get; set; }
         public decimal QuantityTraffic { get; set; }
+        public int ArticleId { get; set; }
         public string ArticleDescription { get; set; }
         public string Model { get; set; }
         public string BL { get; set; }
@@ -22,5 +24,6 @@ namespace OrdenCompra.Models
         public Nullable<System.DateTime> DueDate { get; set; }
         public Nullable<System.DateTime> VenceEF { get; set; }
         public string Naviera { get; set; }
+        public string Situation { get; set; }
     }
 }

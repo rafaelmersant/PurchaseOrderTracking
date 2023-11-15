@@ -33,7 +33,6 @@ namespace OrdenCompra.Models
         public virtual DbSet<NotificationCenter> NotificationCenters { get; set; }
         public virtual DbSet<NotificationGroup> NotificationGroups { get; set; }
         public virtual DbSet<OrderPurchase> OrderPurchases { get; set; }
-        public virtual DbSet<OrderPurchaseContainer> OrderPurchaseContainers { get; set; }
         public virtual DbSet<OrderPurchaseDoc> OrderPurchaseDocs { get; set; }
         public virtual DbSet<OrderPurchaseHistory> OrderPurchaseHistories { get; set; }
         public virtual DbSet<Provider> Providers { get; set; }
@@ -46,6 +45,7 @@ namespace OrdenCompra.Models
         public virtual DbSet<OrderPurchaseArticlesContainer> OrderPurchaseArticlesContainers { get; set; }
         public virtual DbSet<OrderPurchaseArticlesContainerTmp> OrderPurchaseArticlesContainerTmps { get; set; }
         public virtual DbSet<OrderPurchaseDeliver> OrderPurchaseDelivers { get; set; }
+        public virtual DbSet<OrderPurchaseContainer> OrderPurchaseContainers { get; set; }
     
         public virtual ObjectResult<GetPurchaseOrderContainer_Result> GetPurchaseOrderContainer(Nullable<int> containerId)
         {
