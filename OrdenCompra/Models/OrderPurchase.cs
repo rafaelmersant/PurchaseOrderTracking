@@ -38,7 +38,6 @@ namespace OrdenCompra.Models
         public virtual ICollection<NotificationCenter> NotificationCenters { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<OrderPurchaseHistory> OrderPurchaseHistories { get; set; }
-        public virtual Provider Provider { get; set; }
         public virtual StatusOrderPurchase StatusOrderPurchase { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<OrderPurchaseArticlesContainer> OrderPurchaseArticlesContainers { get; set; }
@@ -46,5 +45,6 @@ namespace OrdenCompra.Models
         public virtual ICollection<OrderPurchaseDeliver> OrderPurchaseDelivers { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<OrderPurchaseContainer> OrderPurchaseContainers { get; set; }
+        public virtual Provider Provider { get; set; }
     }
 }

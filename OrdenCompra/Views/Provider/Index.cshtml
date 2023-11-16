@@ -39,10 +39,19 @@
                                 Nombre
                             </th>
                             <th class="text-center">
-                                Ordenes en Fabrica
+                                Ordenes Abiertas
                             </th>
                             <th class="text-center">
-                                Ordenes en Agua
+                                Ordenes en Producción
+                            </th>
+                            <th class="text-center">
+                                Ordenes en Transito
+                            </th>
+                            <th class="text-center">
+                                Ordenes en Puerto
+                            </th>
+                            <th class="text-center">
+                                Ordenes Cerradas
                             </th>
                         </tr>
                     </thead>
@@ -52,8 +61,11 @@
                             <tr>
                                 <td>@item.ProviderCode</td>
                                 <td>@item.ProviderName</td>
-                                <td class="text-center">0</td>
-                                <td class="text-center">0</td>
+                                <td class="text-center">@item.OrdersOpened</td>
+                                <td class="text-center">@item.OrdersProduction</td>
+                                <td class="text-center">@item.OrdersTransit</td>
+                                <td class="text-center">@item.OrdersOnPort</td>
+                                <td class="text-center">@item.OrdersClosed</td>
                             </tr>
                         }
                     </tbody>

@@ -23,6 +23,11 @@ namespace OrdenCompra.Models
         public int ProviderCode { get; set; }
         public string ProviderName { get; set; }
         public System.DateTime CreatedDate { get; set; }
+        public Nullable<int> OrdersOpened { get; set; }
+        public Nullable<int> OrdersProduction { get; set; }
+        public Nullable<int> OrdersTransit { get; set; }
+        public Nullable<int> OrdersOnPort { get; set; }
+        public Nullable<int> OrdersClosed { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<OrderPurchase> OrderPurchases { get; set; }

@@ -184,6 +184,11 @@
           <Property Name="ProviderCode" Type="int" Nullable="false" />
           <Property Name="ProviderName" Type="varchar" MaxLength="50" Nullable="false" />
           <Property Name="CreatedDate" Type="datetime" Nullable="false" />
+          <Property Name="OrdersOpened" Type="int" />
+          <Property Name="OrdersProduction" Type="int" />
+          <Property Name="OrdersTransit" Type="int" />
+          <Property Name="OrdersOnPort" Type="int" />
+          <Property Name="OrdersClosed" Type="int" />
         </EntityType>
         <EntityType Name="ShippingCompany">
           <Key>
@@ -530,11 +535,11 @@
           <Property Name="CreatedBy" Type="Int32" Nullable="false" />
           <NavigationProperty Name="NotificationCenters" Relationship="Self.FK_OrderID_OPC" FromRole="OrderPurchase" ToRole="NotificationCenter" />
           <NavigationProperty Name="OrderPurchaseHistories" Relationship="Self.FK_OrderPurchase_H" FromRole="OrderPurchase" ToRole="OrderPurchaseHistory" />
-          <NavigationProperty Name="Provider" Relationship="Self.FK_Provider_OC" FromRole="OrderPurchase" ToRole="Provider" />
           <NavigationProperty Name="StatusOrderPurchase" Relationship="Self.FK_Status_OC" FromRole="OrderPurchase" ToRole="StatusOrderPurchase" />
           <NavigationProperty Name="OrderPurchaseArticlesContainers" Relationship="OrdenCompraRCModel.FK_OrderPurchase_AC" FromRole="OrderPurchase" ToRole="OrderPurchaseArticlesContainer" />
           <NavigationProperty Name="OrderPurchaseDelivers" Relationship="OrdenCompraRCModel.FK_OrderPurchase_D" FromRole="OrderPurchase" ToRole="OrderPurchaseDeliver" />
           <NavigationProperty Name="OrderPurchaseContainers" Relationship="OrdenCompraRCModel.FK_OrderPurchase" FromRole="OrderPurchase" ToRole="OrderPurchaseContainer" />
+          <NavigationProperty Name="Provider" Relationship="OrdenCompraRCModel.FK_Provider_OC" FromRole="OrderPurchase" ToRole="Provider" />
         </EntityType>
         <EntityType Name="OrderPurchaseDoc">
           <Key>
@@ -558,15 +563,6 @@
           <Property Name="Quantity" Type="Decimal" Precision="18" Scale="2" Nullable="false" />
           <Property Name="Status" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
           <NavigationProperty Name="OrderPurchase" Relationship="Self.FK_OrderPurchase_H" FromRole="OrderPurchaseHistory" ToRole="OrderPurchase" />
-        </EntityType>
-        <EntityType Name="Provider">
-          <Key>
-            <PropertyRef Name="ProviderCode" />
-          </Key>
-          <Property Name="ProviderCode" Type="Int32" Nullable="false" />
-          <Property Name="ProviderName" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="CreatedDate" Type="DateTime" Nullable="false" Precision="3" />
-          <NavigationProperty Name="OrderPurchases" Relationship="Self.FK_Provider_OC" FromRole="Provider" ToRole="OrderPurchase" />
         </EntityType>
         <EntityType Name="ShippingCompany">
           <Key>
@@ -618,18 +614,6 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK_Provider_OC">
-          <End Role="Provider" Type="Self.Provider" Multiplicity="1" />
-          <End Role="OrderPurchase" Type="Self.OrderPurchase" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Provider">
-              <PropertyRef Name="ProviderCode" />
-            </Principal>
-            <Dependent Role="OrderPurchase">
-              <PropertyRef Name="ProviderId" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <Association Name="FK_Status_OC">
           <End Role="StatusOrderPurchase" Type="Self.StatusOrderPurchase" Multiplicity="0..1" />
           <End Role="OrderPurchase" Type="Self.OrderPurchase" Multiplicity="*" />
@@ -651,7 +635,6 @@
           <EntitySet Name="OrderPurchases" EntityType="Self.OrderPurchase" />
           <EntitySet Name="OrderPurchaseDocs" EntityType="Self.OrderPurchaseDoc" />
           <EntitySet Name="OrderPurchaseHistories" EntityType="Self.OrderPurchaseHistory" />
-          <EntitySet Name="Providers" EntityType="Self.Provider" />
           <EntitySet Name="ShippingCompanies" EntityType="Self.ShippingCompany" />
           <EntitySet Name="StatusContainers" EntityType="Self.StatusContainer" />
           <EntitySet Name="StatusOrderPurchases" EntityType="Self.StatusOrderPurchase" />
@@ -662,10 +645,6 @@
           <AssociationSet Name="FK_OrderPurchase_H" Association="Self.FK_OrderPurchase_H">
             <End Role="OrderPurchase" EntitySet="OrderPurchases" />
             <End Role="OrderPurchaseHistory" EntitySet="OrderPurchaseHistories" />
-          </AssociationSet>
-          <AssociationSet Name="FK_Provider_OC" Association="Self.FK_Provider_OC">
-            <End Role="Provider" EntitySet="Providers" />
-            <End Role="OrderPurchase" EntitySet="OrderPurchases" />
           </AssociationSet>
           <AssociationSet Name="FK_Status_OC" Association="Self.FK_Status_OC">
             <End Role="StatusOrderPurchase" EntitySet="StatusOrderPurchases" />
@@ -720,6 +699,11 @@
             <End Role="OrderPurchaseArticlesContainer" EntitySet="OrderPurchaseArticlesContainers" />
           </AssociationSet>
           <FunctionImport Name="ReportAduana" ReturnType="Collection(OrdenCompraRCModel.ReportAduana_Result)" />
+          <EntitySet Name="Providers" EntityType="OrdenCompraRCModel.Provider" />
+          <AssociationSet Name="FK_Provider_OC" Association="OrdenCompraRCModel.FK_Provider_OC">
+            <End Role="Provider" EntitySet="Providers" />
+            <End Role="OrderPurchase" EntitySet="OrderPurchases" />
+          </AssociationSet>
           </EntityContainer>
         <ComplexType Name="GetPurchaseOrderContainer_Result">
           <Property Type="Int32" Name="Id" Nullable="false" />
@@ -1004,6 +988,32 @@
           <Property Type="String" Name="Naviera" Nullable="false" MaxLength="100" />
           <Property Type="String" Name="Situation" Nullable="true" MaxLength="50" />
         </ComplexType>
+        <EntityType Name="Provider">
+          <Key>
+            <PropertyRef Name="ProviderCode" />
+          </Key>
+          <Property Name="ProviderCode" Type="Int32" Nullable="false" />
+          <Property Name="ProviderName" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="CreatedDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="OrdersOpened" Type="Int32" />
+          <Property Name="OrdersProduction" Type="Int32" />
+          <Property Name="OrdersTransit" Type="Int32" />
+          <Property Name="OrdersOnPort" Type="Int32" />
+          <Property Name="OrdersClosed" Type="Int32" />
+          <NavigationProperty Name="OrderPurchases" Relationship="OrdenCompraRCModel.FK_Provider_OC" FromRole="Provider" ToRole="OrderPurchase" />
+        </EntityType>
+        <Association Name="FK_Provider_OC">
+          <End Type="OrdenCompraRCModel.Provider" Role="Provider" Multiplicity="1" />
+          <End Type="OrdenCompraRCModel.OrderPurchase" Role="OrderPurchase" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Provider">
+              <PropertyRef Name="ProviderCode" />
+            </Principal>
+            <Dependent Role="OrderPurchase">
+              <PropertyRef Name="ProviderId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -1098,15 +1108,6 @@
                 <ScalarProperty Name="OrderPurchaseId" ColumnName="OrderPurchaseId" />
                 <ScalarProperty Name="Quantity" ColumnName="Quantity" />
                 <ScalarProperty Name="Status" ColumnName="Status" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="Providers">
-            <EntityTypeMapping TypeName="OrdenCompraRCModel.Provider">
-              <MappingFragment StoreEntitySet="Provider">
-                <ScalarProperty Name="ProviderCode" ColumnName="ProviderCode" />
-                <ScalarProperty Name="ProviderName" ColumnName="ProviderName" />
-                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
@@ -1331,6 +1332,20 @@
               </ComplexTypeMapping>
             </ResultMapping>
           </FunctionImportMapping>
+          <EntitySetMapping Name="Providers">
+            <EntityTypeMapping TypeName="OrdenCompraRCModel.Provider">
+              <MappingFragment StoreEntitySet="Provider">
+                <ScalarProperty Name="OrdersClosed" ColumnName="OrdersClosed" />
+                <ScalarProperty Name="OrdersOnPort" ColumnName="OrdersOnPort" />
+                <ScalarProperty Name="OrdersTransit" ColumnName="OrdersTransit" />
+                <ScalarProperty Name="OrdersProduction" ColumnName="OrdersProduction" />
+                <ScalarProperty Name="OrdersOpened" ColumnName="OrdersOpened" />
+                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
+                <ScalarProperty Name="ProviderName" ColumnName="ProviderName" />
+                <ScalarProperty Name="ProviderCode" ColumnName="ProviderCode" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
         </EntityContainerMapping>
       </Mapping>
     </edmx:Mappings>

@@ -23,9 +23,26 @@ namespace OrdenCompra.Controllers
             {
                 var db = new OrdenCompraRCEntities();
 
-                var providers = db.Providers.OrderBy(o => o.ProviderName).ToList();
-                return View(providers);
+                var ordersOpened = db.OrderPurchases.Where(o => o.StatusId == 1);
+                var ordersProduction = db.OrderPurchases.Where(o => o.StatusId == 2);
+                var ordersTransit = db.OrderPurchases.Where(o => o.StatusId == 3);
+                var ordersOnPort = db.OrderPurchases.Where(o => o.StatusId == 4);
+                var ordersClosed = db.OrderPurchases.Where(o => o.StatusId == 6);
 
+                var providers = db.Providers.OrderBy(o => o.ProviderName).ToList();
+
+                foreach (var provider in providers)
+                {
+                    provider.OrdersOpened = ordersOpened.Where(o => o.ProviderId == provider.ProviderCode).Count();
+                    provider.OrdersProduction = ordersProduction.Where(o => o.ProviderId == provider.ProviderCode).Count();
+                    provider.OrdersTransit = ordersTransit.Where(o => o.ProviderId == provider.ProviderCode).Count();
+                    provider.OrdersOnPort = ordersOnPort.Where(o => o.ProviderId == provider.ProviderCode).Count();
+                    provider.OrdersClosed = ordersClosed.Where(o => o.ProviderId == provider.ProviderCode).Count();
+                    db.SaveChanges();
+                }
+
+                providers = db.Providers.OrderBy(o => o.ProviderName).ToList();
+                return View(providers);
             }
             catch (Exception ex)
             {
