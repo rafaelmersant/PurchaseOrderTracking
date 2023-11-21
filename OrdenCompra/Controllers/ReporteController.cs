@@ -26,8 +26,7 @@ namespace OrdenCompra.Controllers
             try
             {
                 if (Session["role"] == null) return RedirectToAction("Index", "Home");
-                if (Session["role"].ToString() != "Admin") return RedirectToAction("Index", "Home");
-
+                
                 var db = new OrdenCompraRCEntities();
 
                 var result = db.ReportAduana();

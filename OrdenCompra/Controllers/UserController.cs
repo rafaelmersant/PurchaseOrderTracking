@@ -20,23 +20,6 @@ namespace OrdenCompra.Controllers
 
         public ActionResult Login()
         {
-            try
-            {
-                ViewBag.EmployeeId = "1111";
-
-                //if (Session["employeeId"] != null)
-                //{
-                //    if (Request.QueryString["form"] != null)
-                //    {
-                //        return RedirectToAction("Formulario", "Vacation", new { id = Request.QueryString["form"] });
-                //    }
-                //}
-            }
-            catch (Exception ex)
-            {
-                HelperUtility.SendException(ex);
-            }
-
             return View();
         }
 
@@ -131,8 +114,8 @@ namespace OrdenCompra.Controllers
 
         public ActionResult RegisterUser()
         {
-            if (Session["role"] == null) return RedirectToAction("Login", "User");
-
+            if (Session["role"] != null && Session["role"].ToString() != "Admin") return RedirectToAction("Index", "Home");
+            
             ViewBag.Roles = GetRoles();
 
             return View();
@@ -147,7 +130,7 @@ namespace OrdenCompra.Controllers
                     Email = email,
                     EmployeeID = employeeID,
                     PasswordHash = pass,
-                    Role = "Consulta"
+                    Role = "Registro"
                 };
 
                 RegisterUser(user);
@@ -208,7 +191,7 @@ namespace OrdenCompra.Controllers
 
         public ActionResult Edit(Guid? IdHash)
         {
-            if (Session["role"] != null && Session["role"].ToString() != "Admin") return RedirectToAction("Index", "Home");
+            if (Session["role"] == null) return RedirectToAction("Index", "Home");
 
             try
             {
@@ -313,7 +296,7 @@ namespace OrdenCompra.Controllers
         {
             IList<SelectListItem> roles = new List<SelectListItem>
             {
-                new SelectListItem() {Text="Consulta", Value="Consulta"},
+                new SelectListItem() {Text="Registro", Value="Registro"},
                 new SelectListItem() { Text="Admin", Value="Admin"}
             };
             return roles;
@@ -394,6 +377,36 @@ namespace OrdenCompra.Controllers
 
                 return new JsonResult { Data = ex.Message, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
             }
+        }
+
+        public string GetEmailByEmployeeId(string employeeId)
+        {
+            try
+            {
+                using (var db = new OrdenCompraRCEntities())
+                {
+                    var employee = db.Users.FirstOrDefault(e => e.EmployeeID == employeeId);
+                    if (employee != null)
+                    {
+                        return employee.Email;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                try
+                {
+                    HelperUtility.SendRawEmail("rafaelmersant@sagaracorp.com", "Exception in GetEmailByEmployeeId", ex.ToString());
+                }
+                catch (Exception exq)
+                {
+                    Console.WriteLine(exq.ToString());
+                }
+
+                return ex.Message;
+            }
+
+            return string.Empty;
         }
     }
 }

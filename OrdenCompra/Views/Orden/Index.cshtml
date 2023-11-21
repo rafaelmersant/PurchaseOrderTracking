@@ -1316,13 +1316,14 @@
         for (const container of _containers) {
             let articles = "";
 
-            if ($("#selectBy").val() === "Contenedor") {
-                for (const article of container.Details) {
-                    articles += ` | ${article.Model}`;
-                }
+            for (const article of container.Details) {
+                articles += ` | ${article.Model}`;
             }
 
-            containers.push(`<option value="${container.container.Id}">Contenedor ${container.container.SortIndex} ${articles}</option>`)
+            const disabled = container.container.BL ? 'disabled' : '';
+            const received = container.container.BL ? '&#10003;' : '';
+
+            containers.push(`<option value="${container.container.Id}" ${disabled}>${received}Contenedor ${container.container.SortIndex} ${articles}</option>`)
         }
         $("#containersMassive").html(`<select name="containers-massive" id="containers-massive" class="form-control form-control-sm containers-massive-style" multiple>
                                                        ${containers}

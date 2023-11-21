@@ -384,6 +384,10 @@
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\RadioCentroServicios\RadioCentroServicios.csproj">
+      <Project>{17D61CCB-C329-4BE6-AE97-33AD56AD3EA7}</Project>
+      <Name>RadioCentroServicios</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Utility\Utility.csproj">
       <Project>{7253666f-5a7e-4f72-9d1e-0ba89696aa6b}</Project>
       <Name>Utility</Name>

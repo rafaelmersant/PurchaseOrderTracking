@@ -17,6 +17,8 @@ namespace Utility
         {
             try
             {
+                ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls11 | System.Net.SecurityProtocolType.Tls | System.Net.SecurityProtocolType.Tls12;
+
                 SmtpClient smtp = new SmtpClient
                 {
                     Host = ConfigurationManager.AppSettings["smtpClient"],
@@ -24,7 +26,7 @@ namespace Utility
                     UseDefaultCredentials = false,
                     DeliveryMethod = SmtpDeliveryMethod.Network,
                     Credentials = new NetworkCredential(ConfigurationManager.AppSettings["usrEmail"], ConfigurationManager.AppSettings["pwdEmail"]),
-                    EnableSsl = false,
+                    EnableSsl = true,
                 };
 
                 MailMessage message = new MailMessage();
@@ -44,6 +46,7 @@ namespace Utility
             catch (Exception ex)
             {
                 HelperUtility.SendException(ex);
+                Console.WriteLine(ex.ToString());
 
                 return false;
             }
@@ -107,6 +110,8 @@ namespace Utility
         {
             try
             {
+                ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls11 | System.Net.SecurityProtocolType.Tls | System.Net.SecurityProtocolType.Tls12;
+
                 string content = "Su nueva contraseña es: <b>" + newPassword + "</b>";
 
                 SmtpClient smtp = new SmtpClient
@@ -116,7 +121,7 @@ namespace Utility
                     UseDefaultCredentials = false,
                     DeliveryMethod = SmtpDeliveryMethod.Network,
                     Credentials = new NetworkCredential(ConfigurationManager.AppSettings["usrEmail"], ConfigurationManager.AppSettings["pwdEmail"]),
-                    EnableSsl = false,
+                    EnableSsl = true,
                 };
 
                 MailMessage message = new MailMessage();

@@ -69,7 +69,7 @@
                             <td>@string.Format("{0:###,##0.00}", item.InventoryStock)</td>
                             <td>@string.Format("{0:###,##0.00}", item.QuantityMinStock)</td>
                             <td>@string.Format("{0:###,##0.00}", item.QuantityMaxPerContainer)</td>
-                            
+
                             <td align="center">
                                 <a class="btn btn-sm btn-success" href="@Url.Action("Edit",new { id = @item.Id })" title="Editar">
                                     <i class="fa fa-edit"></i>
@@ -85,6 +85,10 @@
     <p class="mt-3">
         <span class="text-dark">Última actualización de cantidad en Inventario para los articulos: </span> <span class="font-weight-bold text-dark">@ViewBag.LastInventoryUpdate</span>
     </p>
+
+    <a href="javascript:void(0);" class="btn btn-danger btn-sm update-inventory">Actualizar Inventario</a>
+    <span id="waitingIndicatorInventory" class="spinner-border text-danger ml-2" style="display: none"></span>
+
 </div>
 
 @section scripts {
@@ -174,6 +178,43 @@
                     $("#waitingIndicator").hide();
                     $(".update-articles").text('Actualizar Articulos');
                     $(".update-articles").removeClass('disabled-button');
+                }
+            });
+        });
+
+        $(".update-inventory").on('click', function (evt) {
+            evt.preventDefault();
+            evt.stopPropagation();
+
+            $("#waitingIndicatorInventory").show();
+            $(".update-inventory").text('Actualizando inventario...');
+            $(".update-inventory").addClass('disabled-button');
+
+            $.ajax({
+                "url": `/Article/UpdateAllArticleWithCurrentInventory`,
+                "type": "POST",
+                "success": async function (response) {
+                    if (response.result === "200") {
+                        console.log(response);
+                        toastr.success(`${response.message}`);
+
+                        setTimeout(() => {
+                            window.location.reload(true);
+                        }, 3000)
+                    }
+                    else {
+                        console.log(response.message);
+                        toastr.error(response.message);
+
+                        setTimeout(() => {
+                            if (response.message.includes("505"))
+                                window.location.reload(true);
+                        }, 2000);
+                    }
+
+                    $("#waitingIndicatorInventory").hide();
+                    $(".update-inventory").text('Actualizar Inventario');
+                    $(".update-inventory").removeClass('disabled-button');
                 }
             });
         });

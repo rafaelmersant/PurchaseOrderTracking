@@ -16,7 +16,6 @@ namespace OrdenCompra.Controllers
         public ActionResult Index()
         {
             if (Session["role"] == null) return RedirectToAction("Index", "Home");
-            if (Session["role"].ToString() != "Admin") return RedirectToAction("Index", "Home");
 
             try
             {

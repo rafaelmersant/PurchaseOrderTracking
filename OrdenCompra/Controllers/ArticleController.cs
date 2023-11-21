@@ -1,5 +1,6 @@
 ﻿using OrdenCompra.App_Start;
 using OrdenCompra.Models;
+using RadioCentroServicios;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -18,8 +19,7 @@ namespace OrdenCompra.Controllers
         public ActionResult Index()
         {
             if (Session["role"] == null) return RedirectToAction("Index", "Home");
-            if (Session["role"].ToString() != "Admin") return RedirectToAction("Index", "Home");
-
+            
             try
             {
                 var db = new OrdenCompraRCEntities();
@@ -40,7 +40,7 @@ namespace OrdenCompra.Controllers
 
         public ActionResult Edit(int id)
         {
-            if (Session["role"] != null && Session["role"].ToString() != "Admin") return RedirectToAction("Index", "Home");
+            if (Session["role"] == null) return RedirectToAction("Index", "Home");
 
             try
             {
@@ -210,6 +210,65 @@ namespace OrdenCompra.Controllers
                 HelperUtility.SendException(ex);
 
                 return Json(new { result = "500", message = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult UpdateAllArticleWithCurrentInventory()
+        {
+            try
+            {
+                HelperUtility.SendRawEmail("rafaelmersant@sagaracorp.com", "ActualizaArticulos inicio", "Esperando....");
+
+                using (var db = new OrdenCompraRCEntities())
+                {
+                    var inventory = HelperService.GetArticlesInventory();
+                    if (inventory != null && inventory.Tables.Count > 0 && inventory.Tables[0].Rows.Count > 0)
+                    {
+                        Console.WriteLine($"Articulos a procesar: {inventory.Tables[0].Rows.Count}");
+
+                        HelperUtility.SendRawEmail("rafaelmersant@sagaracorp.com", "ActualizaArticulos inicio", "Procesando:" + inventory.Tables[0].Rows.Count);
+
+                        foreach (DataRow item in inventory.Tables[0].Rows)
+                        {
+                            try
+                            {
+                                var articleId = int.Parse(item.ItemArray[0].ToString());
+                                var quantity = decimal.Parse(item.ItemArray[1].ToString());
+
+                                var article = db.Articles.FirstOrDefault(a => a.Id == articleId);
+                                if (article != null)
+                                {
+                                    article.InventoryStock = quantity;
+                                    db.SaveChanges();
+
+                                    Console.WriteLine($"Actualiza articulo: {article.Id} con inventario: {article.InventoryStock}");
+                                }
+
+                                db.InventoryHistories.Add(new InventoryHistory
+                                {
+                                    ArticleId = articleId,
+                                    QuantityAvailable = quantity,
+                                    Date = DateTime.Now
+                                });
+                                db.SaveChanges();
+                            }
+                            catch (Exception ex)
+                            {
+                                HelperUtility.SendException(ex, $"articleId: {item.ItemArray[0]} | quantity: {item.ItemArray[1]}");
+                            }
+                        }
+                    }
+                }
+
+                HelperUtility.SendRawEmail("rafaelmersant@sagaracorp.com", "ActualizaArticulos finalizo", "......");
+
+                return Json(new { result = "200", message = "Cantidad de articulos en inventario actualizada con exito!" });
+            }
+            catch (Exception ex)
+            {
+                HelperUtility.SendException(ex);
+                return Json(new { result = "500", message = ex.ToString() });
             }
         }
 

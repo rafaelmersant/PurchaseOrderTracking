@@ -44,8 +44,7 @@ namespace OrdenCompra.Controllers
         public ActionResult Listado(string articulo, string modelo, int? marca)
         {
             if (Session["role"] == null) return RedirectToAction("Index", "Home");
-            if (Session["role"].ToString() != "Admin") return RedirectToAction("Index", "Home");
-
+            
             try
             {
                 var db = new OrdenCompraRCEntities();
@@ -193,9 +192,8 @@ namespace OrdenCompra.Controllers
             {
                 using (var db = new OrdenCompraRCEntities())
                 {
-                    //REMOVE THIS COMMENT FOR LIVE DEPLOYMENT
-                    //var timeLine = db.TimeLineOrders.FirstOrDefault(o => o.OrderId == id);
-                    //if (timeLine != null) return Json(new { result = "500", message = "No puede eliminar la orden porque ha sido modificada." });
+                    var timeLine = db.TimeLineOrders.FirstOrDefault(o => o.OrderId == id);
+                    if (timeLine != null) return Json(new { result = "500", message = "No puede eliminar la orden porque ha sido modificada." });
 
                     var ordenTmp = db.OrderPurchaseArticlesContainerTmps.Where(o => o.OrderPurchaseId == id);
                     db.OrderPurchaseArticlesContainerTmps.RemoveRange(ordenTmp);

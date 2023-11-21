@@ -17,8 +17,7 @@ namespace OrdenCompra.Controllers
         public ActionResult Index()
         {
             if (Session["role"] == null) return RedirectToAction("Index", "Home");
-            if (Session["role"].ToString() != "Admin") return RedirectToAction("Index", "Home");
-
+            
             try
             {
                 var db = new OrdenCompraRCEntities();
@@ -37,7 +36,7 @@ namespace OrdenCompra.Controllers
 
         public ActionResult New()
         {
-            if (Session["role"] != null && Session["role"].ToString() != "Admin") return RedirectToAction("Index", "Home");
+            if (Session["role"] == null) return RedirectToAction("Index", "Home");
 
             return View();
         }
@@ -85,7 +84,7 @@ namespace OrdenCompra.Controllers
 
         public ActionResult Edit(int id)
         {
-            if (Session["role"] != null && Session["role"].ToString() != "Admin") return RedirectToAction("Index", "Home");
+            if (Session["role"] == null) return RedirectToAction("Index", "Home");
 
             try
             {

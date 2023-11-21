@@ -698,12 +698,12 @@
             <End Role="OrderPurchaseContainer" EntitySet="OrderPurchaseContainers" />
             <End Role="OrderPurchaseArticlesContainer" EntitySet="OrderPurchaseArticlesContainers" />
           </AssociationSet>
-          <FunctionImport Name="ReportAduana" ReturnType="Collection(OrdenCompraRCModel.ReportAduana_Result)" />
           <EntitySet Name="Providers" EntityType="OrdenCompraRCModel.Provider" />
           <AssociationSet Name="FK_Provider_OC" Association="OrdenCompraRCModel.FK_Provider_OC">
             <End Role="Provider" EntitySet="Providers" />
             <End Role="OrderPurchase" EntitySet="OrderPurchases" />
           </AssociationSet>
+          <FunctionImport Name="ReportAduana" ReturnType="Collection(OrdenCompraRCModel.ReportAduana_Result)" />
           </EntityContainer>
         <ComplexType Name="GetPurchaseOrderContainer_Result">
           <Property Type="Int32" Name="Id" Nullable="false" />
@@ -974,20 +974,6 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <ComplexType Name="ReportAduana_Result">
-          <Property Type="String" Name="ProviderName" Nullable="false" MaxLength="50" />
-          <Property Type="Decimal" Name="QuantityRequested" Nullable="false" Precision="18" Scale="2" />
-          <Property Type="Decimal" Name="QuantityTraffic" Nullable="false" Precision="18" Scale="2" />
-          <Property Type="Int32" Name="ArticleId" Nullable="false" />
-          <Property Type="String" Name="ArticleDescription" Nullable="false" MaxLength="100" />
-          <Property Type="String" Name="Model" Nullable="true" MaxLength="20" />
-          <Property Type="String" Name="BL" Nullable="true" MaxLength="25" />
-          <Property Type="Int32" Name="Contenedores" Nullable="true" />
-          <Property Type="DateTime" Name="DueDate" Nullable="true" />
-          <Property Type="DateTime" Name="VenceEF" Nullable="true" />
-          <Property Type="String" Name="Naviera" Nullable="false" MaxLength="100" />
-          <Property Type="String" Name="Situation" Nullable="true" MaxLength="50" />
-        </ComplexType>
         <EntityType Name="Provider">
           <Key>
             <PropertyRef Name="ProviderCode" />
@@ -1014,6 +1000,19 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <ComplexType Name="ReportAduana_Result">
+          <Property Type="String" Name="ProviderName" Nullable="false" MaxLength="50" />
+          <Property Type="Decimal" Name="QuantityRequested" Nullable="true" Precision="38" Scale="2" />
+          <Property Type="Int32" Name="ArticleId" Nullable="false" />
+          <Property Type="String" Name="ArticleDescription" Nullable="false" MaxLength="100" />
+          <Property Type="String" Name="Model" Nullable="true" MaxLength="20" />
+          <Property Type="String" Name="BL" Nullable="true" MaxLength="25" />
+          <Property Type="Int32" Name="Contenedores" Nullable="true" />
+          <Property Type="DateTime" Name="DueDate" Nullable="true" />
+          <Property Type="DateTime" Name="VenceEF" Nullable="true" />
+          <Property Type="String" Name="Naviera" Nullable="false" MaxLength="100" />
+          <Property Type="String" Name="Situation" Nullable="true" MaxLength="50" />
+        </ComplexType>
         </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -1314,24 +1313,6 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <FunctionImportMapping FunctionImportName="ReportAduana" FunctionName="OrdenCompraRCModel.Store.ReportAduana">
-            <ResultMapping>
-              <ComplexTypeMapping TypeName="OrdenCompraRCModel.ReportAduana_Result">
-                <ScalarProperty Name="ProviderName" ColumnName="ProviderName" />
-                <ScalarProperty Name="QuantityRequested" ColumnName="QuantityRequested" />
-                <ScalarProperty Name="QuantityTraffic" ColumnName="QuantityTraffic" />
-                <ScalarProperty Name="ArticleId" ColumnName="ArticleId" />
-                <ScalarProperty Name="ArticleDescription" ColumnName="ArticleDescription" />
-                <ScalarProperty Name="Model" ColumnName="Model" />
-                <ScalarProperty Name="BL" ColumnName="BL" />
-                <ScalarProperty Name="Contenedores" ColumnName="Contenedores" />
-                <ScalarProperty Name="DueDate" ColumnName="DueDate" />
-                <ScalarProperty Name="VenceEF" ColumnName="VenceEF" />
-                <ScalarProperty Name="Naviera" ColumnName="Naviera" />
-                <ScalarProperty Name="Situation" ColumnName="Situation" />
-              </ComplexTypeMapping>
-            </ResultMapping>
-          </FunctionImportMapping>
           <EntitySetMapping Name="Providers">
             <EntityTypeMapping TypeName="OrdenCompraRCModel.Provider">
               <MappingFragment StoreEntitySet="Provider">
@@ -1346,6 +1327,23 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
+          <FunctionImportMapping FunctionImportName="ReportAduana" FunctionName="OrdenCompraRCModel.Store.ReportAduana">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="OrdenCompraRCModel.ReportAduana_Result">
+                <ScalarProperty Name="ProviderName" ColumnName="ProviderName" />
+                <ScalarProperty Name="QuantityRequested" ColumnName="QuantityRequested" />
+                <ScalarProperty Name="ArticleId" ColumnName="ArticleId" />
+                <ScalarProperty Name="ArticleDescription" ColumnName="ArticleDescription" />
+                <ScalarProperty Name="Model" ColumnName="Model" />
+                <ScalarProperty Name="BL" ColumnName="BL" />
+                <ScalarProperty Name="Contenedores" ColumnName="Contenedores" />
+                <ScalarProperty Name="DueDate" ColumnName="DueDate" />
+                <ScalarProperty Name="VenceEF" ColumnName="VenceEF" />
+                <ScalarProperty Name="Naviera" ColumnName="Naviera" />
+                <ScalarProperty Name="Situation" ColumnName="Situation" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
         </EntityContainerMapping>
       </Mapping>
     </edmx:Mappings>

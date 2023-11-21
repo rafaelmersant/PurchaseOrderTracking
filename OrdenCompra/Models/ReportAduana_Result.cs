@@ -14,8 +14,7 @@ namespace OrdenCompra.Models
     public partial class ReportAduana_Result
     {
         public string ProviderName { get; set; }
-        public decimal QuantityRequested { get; set; }
-        public decimal QuantityTraffic { get; set; }
+        public Nullable<decimal> QuantityRequested { get; set; }
         public int ArticleId { get; set; }
         public string ArticleDescription { get; set; }
         public string Model { get; set; }

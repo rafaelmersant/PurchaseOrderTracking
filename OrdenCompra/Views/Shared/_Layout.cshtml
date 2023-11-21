@@ -48,16 +48,15 @@
                     <li><a id="ContainerStatus" href="/ContenedorEstatus/"><i class="fa fa-comment"></i>Estatus de Contenedores</a></li>
                     <li><a id="OrderStatus" href="/OrdenEstatus/"><i class="fa fa-comment"></i>Estatus de Ordenes</a></li>
                     <li><a id="Notifications" href="/Notificacion/"><i class="fa fa-inbox"></i>Notificaciones</a></li>
-                    <li><a id="Users" href="/User/UsersList"><i class="fa fa-group"></i>Usuarios</a></li>
+                    if (Session["role"].ToString() == "Admin")
+                    {
+                        <li><a id="Users" href="/User/UsersList"><i class="fa fa-group"></i>Usuarios</a></li>
+                    }
+
                     <li><hr style="border: 1px solid #fff; opacity: 0.4"></li>
                     @*<li><a id="ReporteExistencia" href="/Reporte/Existencia"><i class="fa fa-newspaper-o"></i>Reporte de Existencia</a></li>*@
                     <li><a id="ReporteAduana" href="/Reporte/Aduana"><i class="fa fa-newspaper-o"></i>Reporte de Aduana</a></li>
                 }
-
-                @*@if (Session["role"] != null && Session["role"].ToString() == "Admin")
-        {
-            <li><a href="/Notification"><i class="fa fa-bars"></i>Menu Admin</a></li>
-        }*@
             </ul>
         </nav>
 
